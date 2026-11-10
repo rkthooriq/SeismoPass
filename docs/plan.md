@@ -8,7 +8,7 @@ SeismoPass membantu pemilik mencatat bangunan dan mengikuti proses pemeriksaan s
 
 Sumber kebutuhan adalah [SeismoPass App Flow](SeismoPass%20App%20Flow.md), bukan `docs/app-flow.md` yang belum tersedia. Esai asli yang dirujuk sumber belum tersedia di repositori. Ketentuan domain di sini mengikuti ringkasan tersebut, bukan verifikasi mandiri terhadap esai atau pedoman RVS.
 
-Saat ini tersedia dokumentasi dan kerangka folder, sedangkan inisialisasi Git lokal belum berhasil karena penulisan `.git` dibatasi lingkungan agen. Jalankan `git init -b main` dari terminal lokal. Belum ada aplikasi, backend, database, pengujian, atau deployment. Rencana sampai publikasi di bawah merupakan tahapan berikutnya, bukan izin untuk menjalankannya sekarang.
+Saat ini tersedia Git lokal, dokumentasi, kode landing page awal, dan konfigurasi Docker. Remote adalah `rkthooriq/SeismoPass`. Lockfile cocok dengan manifest; audit container menemukan 0 kerentanan dan lint/typecheck/build lulus pada 11 November 2026. Pengujian visual dan UAT belum dilakukan. Backend, database, dan deployment belum tersedia. Rencana sampai publikasi di bawah tetap memerlukan pemenuhan kriteria tiap tahap; implementasi awal tidak berarti semua tahap selesai.
 
 ## Alasan Stack
 
@@ -67,7 +67,7 @@ public/                 berkas statis publik, tanpa data pribadi
 tests/                  pengujian lintas fitur
 ```
 
-Kerangka folder di atas sudah tersedia; berkas aplikasi dan modul fitur belum dibuat. Tambahkan fitur dan folder lanjutan secara bertahap. Lokasi kode backend ditentukan setelah arsitekturnya dipilih.
+Kerangka folder di atas sudah tersedia; landing page ada di `src/App.tsx`, sedangkan modul fitur operasional belum dibuat. Tambahkan fitur dan folder lanjutan secara bertahap. Lokasi kode backend ditentukan setelah arsitekturnya dipilih.
 
 ## Urutan Pengerjaan sampai Publikasi
 
@@ -133,4 +133,11 @@ Sebelum tahap 9, semua skenario UAT wajib yang disepakati harus lulus, masalah p
 
 ## Pembaruan Persiapan Kolaborasi
 
-Pengguna mengizinkan penyiapan repositori daring GitHub. Owner dan visibilitas belum ditentukan; repositori belum dibuat dan integrasi belum terhubung. Panduan unggah awal, clone, branch, PR, review, serta container tersedia di `README.md`. Docker dimulai pada tahap 3, bukan pada tahap dokumentasi. Kode aplikasi dan publikasi website tetap menunggu instruksi lanjutan.
+Git lokal dan remote `https://github.com/rkthooriq/SeismoPass.git` telah tersedia; visibilitas serta keadaan daring belum diverifikasi. Panduan unggah awal, clone, branch, PR, review, serta container tersedia di `README.md`. Docker dimulai pada tahap 3; konfigurasinya telah ditulis bersama landing page sesuai permintaan berikutnya. Publikasi website belum diizinkan pada tahap ini.
+
+
+## Progres Tampilan Awal
+
+Pengguna meminta tampilan pertama terinspirasi `https://spline.design/` dengan layout otomatis untuk HP, tablet, dan laptop. Kode landing page kini tersedia: judul besar, warna lembut, ilustrasi bangunan SVG orisinal bergaya isometrik, Grid/Flexbox responsif, menu HP, pergantian ilustrasi/profil, dan FAQ. Tidak memakai embed Spline atau hasil RVS rekaan.
+
+Tahap 2–3 baru parsial: belum ada persetujuan desain final atau verifikasi tampilan browser. Lockfile tersedia dan pemeriksaan container (audit/lint/typecheck/build) lulus. Tahap 4 hanya mencakup halaman pengantar dan contoh profil, belum formulir registrasi. Panduan Docker di README sudah disesuaikan dengan konfigurasi aktual beserta batas verifikasinya. Lihat `docs/testing/landing-page.md` untuk pemeriksaan tertunda. Publikasi website belum dilakukan.

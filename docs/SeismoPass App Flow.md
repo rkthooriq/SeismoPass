@@ -106,9 +106,9 @@ Sumber: esai "SeismoPass" (IYEEA 2026), terutama Gambar 7, Tabel 1 dan 4, serta 
 Catatan ini merupakan penanda perencanaan, bukan tambahan isi laporan. Lihat [rencana pengembangan](plan.md).
 
 - **DIPUTUSKAN PENGGUNA:** frontend web menggunakan React, TypeScript, dan Vite.
-- **BATAS TAHAP SAAT INI:** hanya penjelasan dan dokumentasi; belum menulis kode aplikasi, push ke GitHub, atau publikasi.
+- **PEMBARUAN CAKUPAN:** pengguna kemudian meminta struktur folder, GitHub, dan tampilan awal terinspirasi Spline dengan layout responsif. Kode awal telah ditulis; publikasi website belum dilakukan.
 - **BELUM DIPUTUSKAN — DOMAIN:** rincian formulir/protokol RVS, rumus/skor, kategori dan ambang rujukan harus ditetapkan serta divalidasi ahli. Tidak boleh dibuat sendiri oleh pengembang.
-- **BELUM DIPUTUSKAN — PRODUK:** rancangan layar, pembagian akun/hak akses, informasi QR publik, tindak lanjut bangunan yang tidak dirujuk, serta kebutuhan offline.
+- **BELUM DIPUTUSKAN — PRODUK:** rincian layar lanjutan dan persetujuan desain final, pembagian akun/hak akses, informasi QR publik, tindak lanjut bangunan yang tidak dirujuk, serta kebutuhan offline. Arah tampilan pengantar telah dipilih pengguna: inspirasi Spline, responsif.
 - **BELUM DIPUTUSKAN — TEKNIS DAN OPERASIONAL:** backend, database, autentikasi, hosting/domain, tata kelola data, dan penanggung jawab operasional. Aktor pada laporan tidak otomatis berarti akun aplikasi.
 - **BERGANTUNG PERSETUJUAN PIHAK TERKAIT:** ketersediaan insentif fiskal dan dukungan mitra; bukan manfaat yang otomatis berlaku.
 
