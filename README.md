@@ -4,7 +4,6 @@ Web untuk pencatatan bangunan dan tindak lanjut penyaringan awal RVS. **RVS buka
 
 ## Status
 
-Landing page awal telah ditulis dengan React, TypeScript, dan Vite, dengan inspirasi visual Spline dan layout responsif menggunakan Grid/Flexbox. Ada menu mobile, pergantian ilustrasi/contoh profil, dan FAQ. Ini demo pengenalan tanpa registrasi, akun, atau penilaian RVS. Backend, database, dan hosting belum dipilih.
 
 
 ## Struktur Folder
