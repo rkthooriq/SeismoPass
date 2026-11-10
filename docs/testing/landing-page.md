@@ -60,3 +60,22 @@ docker compose run --rm web npm run build
 ```
 
 Hentikan urutan jika instalasi, lint, atau build gagal dan simpan laporan. Tidak perlu menghapus volume atau lockfile. `npm audit` dapat keluar dengan status nonnol karena temuan; pesan tambahan Compose tidak berarti konfigurasi Docker rusak. Setelah pemeriksaan lulus, jalankan `docker compose up --build` dan periksa fungsi halaman.
+
+## UI workspace — 11 November 2026
+
+- Empat tes validasi melalui Node.js di container lulus: draf, kelengkapan data, pilihan belum diketahui, serta input tahun/lantai tidak valid.
+- Lint, TypeScript dan build Vite lulus setelah penambahan UI workspace.
+- Server lokal merespons HTTP 200. Pratinjau browser otomatis tidak dapat dibuka karena browser access host tidak tersedia. HTTP 200 bukan verifikasi render/interaksi.
+- Belum dijalankan: tampilan mobile/desktop, navigasi keyboard nyata, simpan/ubah lewat browser, pencarian/filter, pembaca layar, serta UAT.
+- Skenario manual tambahan: tambah bangunan fiktif → tolak input tidak valid → simpan draf → ubah menjadi Data tercatat → temukan lewat pencarian/filter → buka profil dan disclaimer → periksa pratinjau publik tanpa detail pribadi → refresh dan pastikan catatan dipertahankan bila penyimpanan tersedia; kembali ke beranda dan buka dashboard lagi; unduh JSON; batalkan reset lalu konfirmasi reset dan pastikan kembali ke data contoh. Periksa juga Batal, hasil pencarian kosong, navigasi browser kembali/maju, dan menu mobile.
+- Tidak ada pengujian otorisasi server karena backend belum tersedia. QR publik belum aktif dan data tidak dikirim ke server.
+
+## Kelanjutan penyimpanan dan navigasi — 11 November 2026
+
+- `npm test`: 11 tes lulus, meliputi validasi formulir, muat/simpan sesi, penyimpanan ditolak atau penuh, sesi rusak/versi tidak sesuai/ID duplikat, ekspor/reset, dan URL tidak dikenal.
+- Lint, typecheck, dan build lulus. Tes ini memeriksa logika dengan storage simulasi; belum memverifikasi interaksi DOM, unduhan nyata, fokus konfirmasi, atau perilaku sessionStorage pada browser/perangkat tertentu.
+- Tambahan UAT: verifikasi persistensi saat refresh dan navigasi beranda, pesan kegagalan storage, unduh JSON berlabel demo, Batal pada reset, konfirmasi reset, serta URL profil yang tidak valid.
+
+## Simulasi masuk dan akses multiaktor — 11 November 2026
+
+`npm test` lulus 17 tes logika, termasuk enam tes matriks aktor: akses pemilik, pemisahan petugas/ahli, penyedia retrofit, pemerintah/mitra, serta penolakan peran/halaman tidak dikenal. Lint/typecheck/build juga lulus. Tes tersebut belum memverifikasi klik login, logout, fokus, menu mobile, atau tampilan browser. Skenario manual belum dijalankan; lihat `uat.md`. Tidak ada pengujian autentikasi atau otorisasi backend karena layanan tersebut belum tersedia.

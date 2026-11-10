@@ -10,11 +10,11 @@ RVS merupakan penyaringan awal, **bukan sertifikat aman**. Jangan menciptakan ru
 
 ## Struktur Proyek
 
-Saat ini tersedia landing page awal, dokumentasi, dan konfigurasi container yang sudah digunakan untuk audit/lint/build. Stack yang dipilih adalah React, TypeScript, dan Vite. Struktur yang tersedia: `src/components/` untuk UI bersama, `src/features/` untuk fitur, `src/pages/` untuk halaman, `src/types/` untuk tipe data, `src/lib/` untuk utilitas, `src/assets/` untuk aset, dan `tests/` untuk pengujian lintas fitur. Buat folder ketika diperlukan.
+Saat ini tersedia landing page, UI workspace demonstrasi (formulir, daftar, profil, dan kerangka alur lanjutan), dokumentasi, dan konfigurasi container yang sudah digunakan untuk audit/lint/build. Stack yang dipilih adalah React, TypeScript, dan Vite. Struktur yang tersedia: `src/components/` untuk UI bersama, `src/features/` untuk fitur, `src/pages/` untuk halaman, `src/types/` untuk tipe data, `src/lib/` untuk utilitas, `src/assets/` untuk aset, dan `tests/` untuk pengujian lintas fitur. Buat folder ketika diperlukan.
 
 ## Perintah Pengembangan
 
-Lihat README untuk bootstrap Docker dan lockfile. Script tersedia: `npm run dev`, `npm run typecheck`, `npm run build`, `npm run preview`, dan `npm run lint`. Lockfile sudah sinkron dengan manifest. Audit container pada 11 November 2026 menemukan 0 kerentanan; lint/typecheck/build lulus. Gunakan `npm ci` untuk mengikuti lockfile. `npm test` belum tersedia. Gunakan Node.js sesuai `.nvmrc`; commit manifest dan lockfile bersama setelah instalasi berhasil.
+Lihat README untuk bootstrap Docker dan lockfile. Script tersedia: `npm run dev`, `npm run typecheck`, `npm run build`, `npm run preview`, dan `npm run lint`. Lockfile sudah sinkron dengan manifest. Audit container pada 11 November 2026 menemukan 0 kerentanan; lint/typecheck/build lulus. Gunakan `npm ci` untuk mengikuti lockfile. `npm test` menjalankan 17 tes Node.js untuk validasi formulir, sesi demo, ekspor/reset, navigasi, dan batas halaman enam peran. UI masuk/keluar merupakan simulasi tanpa kredensial; lihat `docs/access-matrix.md`. Catatan UI tersimpan lokal di sessionStorage selama sesi tab jika tersedia; backend dan autentikasi belum tersedia. Gunakan Node.js sesuai `.nvmrc`; commit manifest dan lockfile bersama setelah instalasi berhasil.
 
 ## Gaya Kode dan Pengujian
 

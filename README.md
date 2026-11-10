@@ -4,7 +4,7 @@ Web untuk pencatatan bangunan dan tindak lanjut penyaringan awal RVS. **RVS buka
 
 ## Status
 
-Landing page awal telah ditulis dengan React, TypeScript, dan Vite, dengan inspirasi visual Spline dan layout responsif menggunakan Grid/Flexbox. Ada menu mobile, pergantian ilustrasi/contoh profil, dan FAQ. Ini demo pengenalan tanpa registrasi, akun, atau penilaian RVS. Backend, database, dan hosting belum dipilih.
+Frontend demonstrasi tersedia dengan landing page dan workspace: ringkasan, daftar/pencarian/filter bangunan, formulir tambah/ubah dan draf, profil digital, halaman screening, rujukan, retrofit, dukungan/evaluasi, panduan, serta pratinjau informasi publik. Buka `http://localhost:5173/#/login` setelah server berjalan, pilih salah satu dari enam peran demo dan konfirmasi simulasi. Registrasi hanya mencatat data fiktif pada sesi tab browser (`sessionStorage`); refresh dan kembali ke landing page mempertahankan catatan jika penyimpanan tersedia. Menu **Data demo** menyediakan unduhan JSON dan reset dengan konfirmasi. Data tidak disinkronkan ke server; penutupan tab biasanya mengakhiri sesi, namun browser dapat memulihkannya bersama tab. UI masuk/keluar dan dashboard enam peran tersedia sebagai simulasi; belum ada akun nyata, backend, database, QR aktif, atau penilaian RVS. Peran demo direset saat refresh. Lihat [matriks hak akses](docs/access-matrix.md). Halaman profesional menampilkan keadaan belum tersedia, bukan hasil rekaan.
 
 **Status verifikasi (11 November 2026):** instalasi pengguna menghasilkan lockfile yang cocok dengan manifest. Audit di container menemukan 0 kerentanan; lint, typecheck, dan build produksi lulus. Pengujian tampilan lintas perangkat dan UAT belum dilakukan. Halaman belum diterbitkan. Lihat [catatan verifikasi](docs/testing/landing-page.md).
 
@@ -217,7 +217,7 @@ Hanya penyusun lockfile pertama yang menggunakan `npm install` ketika lockfile b
 | `npm run preview` | Pratinjau build secara lokal; bukan server produksi |
 | `npm run format` | Memformat source/dokumentasi dengan Prettier |
 
-Script pengujian otomatis `npm test` belum disediakan; jangan mengklaim suite atau UAT sudah lulus. Prosedur pemeriksaan manual tersedia di [catatan pengujian landing page](docs/testing/landing-page.md) dan [panduan pengguna awal](docs/user-manual.md).
+Jalankan `docker compose run --rm web npm test` untuk tes validasi formulir, penyimpanan sesi, ekspor/reset, navigasi, dan batas halaman enam peran (17 tes lulus pada 11 November 2026). Pengujian interaksi browser dan UAT belum dilakukan. Prosedur pemeriksaan manual tersedia di [catatan pengujian landing page](docs/testing/landing-page.md) dan [panduan pengguna awal](docs/user-manual.md).
 
 ### Agar Lingkungan Tim Konsisten
 

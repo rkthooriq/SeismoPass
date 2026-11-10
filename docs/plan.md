@@ -86,7 +86,7 @@ Kerangka folder di atas sudah tersedia; landing page ada di `src/App.tsx`, sedan
 
 Demo publik dapat diterbitkan setelah tahap 4, 7, dan 8 yang relevan selesai, dengan penandaan demonstrasi yang jelas. Penggunaan nyata memerlukan backend, kontrol akses, tata kelola data, dan validasi ahli. Publikasi demo tidak berarti platform siap melakukan screening operasional.
 
-Perintah yang direncanakan setelah setup: `npm run dev` untuk pengembangan, `npm run build` untuk build, `npm run preview` untuk memeriksa build lokal, `npm run lint` untuk pemeriksaan kode, dan `npm test` untuk pengujian. Belum ada perintah tersebut saat ini. Usulan alat uji: Vitest dan React Testing Library; pengujian alur browser ditambahkan saat alur utama tersedia.
+Perintah yang tersedia: `npm run dev` untuk pengembangan, `npm run build` untuk build, `npm run preview` untuk memeriksa build lokal, `npm run lint` untuk pemeriksaan kode, dan `npm test` untuk pengujian. Tes dasar menggunakan Node.js test runner. Vitest dan React Testing Library tetap usulan untuk pengujian komponen; pengujian alur browser masih perlu ditambahkan.
 
 ## Pengujian Keamanan, UAT, dan Panduan Pengguna
 
@@ -141,3 +141,15 @@ Git lokal dan remote `https://github.com/rkthooriq/SeismoPass.git` telah tersedi
 Pengguna meminta tampilan pertama terinspirasi `https://spline.design/` dengan layout otomatis untuk HP, tablet, dan laptop. Kode landing page kini tersedia: judul besar, warna lembut, ilustrasi bangunan SVG orisinal bergaya isometrik, Grid/Flexbox responsif, menu HP, pergantian ilustrasi/profil, dan FAQ. Tidak memakai embed Spline atau hasil RVS rekaan.
 
 Tahap 2–3 baru parsial: belum ada persetujuan desain final atau verifikasi tampilan browser. Lockfile tersedia dan pemeriksaan container (audit/lint/typecheck/build) lulus. Tahap 4 hanya mencakup halaman pengantar dan contoh profil, belum formulir registrasi. Panduan Docker di README sudah disesuaikan dengan konfigurasi aktual beserta batas verifikasinya. Lihat `docs/testing/landing-page.md` untuk pemeriksaan tertunda. Publikasi website belum dilakukan.
+
+## Pembaruan UI workspace — 11 November 2026
+
+Usulan teknis/frontend demonstrasi untuk enam tahap sudah ditambahkan, termasuk formulir data dasar dengan validasi, draf, pencarian, filter, ubah data, profil, panduan, dan pratinjau informasi publik. Halaman screening, rujukan, retrofit serta dukungan/evaluasi menggunakan keadaan kosong yang menjelaskan ketergantungannya. Tidak ada skor, kategori risiko, rujukan otomatis, manfaat aktif, atau hasil RVS rekaan.
+
+Data demonstrasi tersimpan lokal di sessionStorage selama sesi tab, dengan fallback memori jika penyimpanan tidak tersedia. Menu Data demo menyediakan ekspor JSON dan reset dengan konfirmasi. Pembagian akun, otorisasi server, protokol penilaian, direktori ahli, insentif, dan cakupan data QR publik tetap **BELUM DIPUTUSKAN**. UI bukan persetujuan domain atau desain final. Tahap 4 berkembang menjadi demo pencatatan; verifikasi browser dan UAT masih harus dilakukan sebelum dinyatakan selesai.
+
+## Pembaruan UI masuk dan enam aktor — 11 November 2026
+
+Sesuai permintaan pengguna, UI simulasi dibuat untuk seluruh enam aktor sumber. Pilihan peran, dashboard terarah, navigasi sesuai peran, pembatasan URL frontend, keluar demo, dan matriks akses tersedia. UI tidak meminta kredensial atau membuat akun nyata. Pilihan peran hanya di memori, sehingga refresh mengharuskan pemilihan lagi. Data fiktif pemilik tidak diberikan ke tampilan profesional.
+
+Matriks dan kebutuhan backend ada di `docs/access-matrix.md`; skenario UAT di `docs/testing/uat.md`. Kebijakan akses produksi, backend/database, autentikasi dan verifikasi aktor tetap **BELUM DIPUTUSKAN**. Tahap 5 belum diimplementasikan; hasil tes frontend bukan bukti otorisasi server.

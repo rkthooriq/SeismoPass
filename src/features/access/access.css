@@ -1,0 +1,306 @@
+.actor-login {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 0.9fr 1.1fr;
+  background: #fafbf6;
+  color: #293b32;
+}
+.actor-intro {
+  background: #e9eedc;
+  padding: 45px clamp(25px, 5vw, 80px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+}
+.actor-brand {
+  font-size: 30px;
+  letter-spacing: -1.5px;
+  font-weight: 600;
+  margin-bottom: 65px;
+}
+.actor-eyebrow {
+  font-size: 10px;
+  letter-spacing: 1.6px;
+  color: #6a7c58;
+}
+.actor-intro h1 {
+  font-size: clamp(40px, 4.5vw, 66px);
+  line-height: 1.1;
+  margin: 20px 0;
+}
+.actor-intro p {
+  color: #6d795f;
+  font-size: 14px;
+  max-width: 400px;
+}
+.actor-art {
+  height: 290px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  margin: 20px -20px;
+}
+.actor-art svg {
+  width: 100%;
+  height: 100%;
+}
+.actor-intro .actor-intro-note {
+  font-size: 11px;
+  border-top: 1px solid #cdd8bc;
+  padding-top: 22px;
+  max-width: none;
+}
+.actor-entry {
+  padding: 40px clamp(25px, 5vw, 80px);
+  max-width: 850px;
+  align-self: center;
+}
+.actor-back {
+  display: block;
+  font-size: 12px;
+  color: #778367;
+  margin-bottom: 32px;
+}
+.actor-demo-label {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  border: 1px solid #d8e0cc;
+  background: #f0f4e7;
+  border-radius: 5px;
+  padding: 6px 9px;
+  display: inline-block;
+}
+.actor-entry h2 {
+  font-size: clamp(30px, 3vw, 42px);
+  margin: 18px 0 14px;
+}
+.actor-subtitle {
+  font-size: 12px;
+  color: #748068;
+  line-height: 1.8;
+  margin-bottom: 23px;
+}
+.actor-role-picker {
+  padding: 0;
+  border: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.actor-role-picker legend {
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.actor-role-picker label {
+  position: relative;
+  border: 1px solid #e0e5d7;
+  border-radius: 10px;
+  background: #fff;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+}
+.actor-role-picker label.selected {
+  background: #f0f5e7;
+  border-color: #8da579;
+}
+.actor-role-picker input {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+  accent-color: #50683e;
+  width: 13px;
+  height: 13px;
+}
+.actor-role-picker label:focus-within {
+  outline: 2px solid #687f50;
+  outline-offset: 3px;
+}
+.actor-symbol {
+  font-size: 23px;
+  line-height: 1.4;
+  color: #70865b;
+  flex-shrink: 0;
+}
+.actor-role-picker strong {
+  font-size: 12px;
+  display: block;
+  padding-right: 10px;
+}
+.actor-role-picker small {
+  font-size: 10px;
+  line-height: 1.7;
+  color: #7a856e;
+  display: block;
+  margin-top: 6px;
+}
+.actor-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  margin: 22px 0 16px;
+  font-size: 11px;
+  color: #6b775f;
+  line-height: 1.8;
+}
+.actor-consent input {
+  accent-color: #50683e;
+  margin-top: 5px;
+  flex-shrink: 0;
+}
+.actor-enter {
+  border: 0;
+  background: #314735;
+  color: #fff;
+  padding: 15px 18px;
+  border-radius: 9px;
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  font: inherit;
+  font-size: 12px;
+}
+.actor-enter:hover {
+  background: #49613f;
+}
+.actor-entry-note {
+  font-size: 10px;
+  color: #89937f;
+  margin-top: 17px;
+  line-height: 1.8;
+}
+.actor-error {
+  font-size: 11px;
+  color: #a0422d;
+  margin: 12px 0;
+}
+.actor-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+.workspace .actor-wrap-cell {
+  white-space: normal;
+  min-width: 230px;
+  max-width: 380px;
+  vertical-align: top;
+}
+.actor-table-caption {
+  text-align: left;
+  padding: 25px 12px 12px;
+  color: #7c886e;
+  font-size: 11px;
+}
+.actor-session-buttons {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.actor-session-buttons a,
+.actor-session-buttons button {
+  font-size: 10px;
+  white-space: nowrap;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #d8dfd0;
+  background: #fff;
+}
+.actor-session-buttons button:hover {
+  background: #edf1e3;
+}
+@media (max-width: 1000px) {
+  .actor-login {
+    grid-template-columns: 0.75fr 1.25fr;
+  }
+  .actor-intro {
+    padding: 35px;
+  }
+  .actor-entry {
+    padding: 35px;
+  }
+  .actor-role-picker {
+    grid-template-columns: 1fr;
+  }
+  .actor-intro h1 {
+    font-size: 42px;
+  }
+}
+@media (max-width: 680px) {
+  .actor-login {
+    display: block;
+  }
+  .actor-intro {
+    padding: 24px;
+  }
+  .actor-brand {
+    font-size: 26px;
+    margin-bottom: 25px;
+  }
+  .actor-intro h1 {
+    font-size: 36px;
+    margin: 15px 0;
+  }
+  .actor-intro p {
+    font-size: 12px;
+  }
+  .actor-art {
+    display: none;
+  }
+  .actor-intro .actor-intro-note {
+    margin-top: 25px;
+    padding-top: 15px;
+    font-size: 10px;
+  }
+  .actor-entry {
+    padding: 25px 20px 35px;
+  }
+  .actor-back {
+    margin-bottom: 22px;
+  }
+  .actor-role-picker {
+    grid-template-columns: 1fr 1fr;
+  }
+  .actor-role-picker label {
+    padding: 14px 10px;
+    gap: 7px;
+  }
+  .actor-role-picker strong {
+    font-size: 11px;
+  }
+  .actor-role-picker small {
+    font-size: 9px;
+  }
+  .actor-symbol {
+    font-size: 20px;
+  }
+  .actor-session-buttons {
+    gap: 5px;
+  }
+  .actor-session-buttons a,
+  .actor-session-buttons button {
+    padding: 5px 7px;
+    font-size: 9px;
+  }
+  .ws-topbar .ws-help {
+    display: none;
+  }
+}
+@media (max-width: 370px) {
+  .actor-role-picker {
+    grid-template-columns: 1fr;
+  }
+  .actor-entry h2 {
+    font-size: 29px;
+  }
+}
+@media (max-width: 680px) {
+  .workspace .ws-topbar > div:first-child > span {
+    display: none;
+  }
+}
