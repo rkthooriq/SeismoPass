@@ -1,0 +1,21 @@
+# Dependensi dan hasil build
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+
+# Konfigurasi lokal dan rahasia
+.env
+.env.*
+!.env.example
+*.local
+*.log
+
+# Berkas sistem operasi
+.DS_Store
+Thumbs.db
+
+# Berkas kerja sementara
+tmp/
+output/
+
