@@ -19,6 +19,32 @@ Tiga peran demo:
 
 
 
+## Cara Masuk untuk Demo
+
+Setelah aplikasi berjalan, buka **http://localhost:5173/#/login**. Semua akun di bawah **fiktif**, memakai satu kata sandi bersama: `SeismoDemo123!`. Jangan pakai kata sandi ini untuk akun sungguhan.
+
+| Peran | Email | Kondisi awal |
+| --- | --- | --- |
+| Admin | `admin@example.com` | Aktif; menyetujui pesurvei dan menugaskan laporan |
+| Pelapor | `pelapor@example.com` | Aktif; punya satu laporan contoh |
+| Pesurvei | `pesurvei@example.com` | Aktif; menunggu penugasan |
+| Calon pesurvei | `calon@example.com` | Menunggu tinjauan admin |
+
+Halaman masuk sengaja tidak menampilkan daftar akun dan tidak punya pilihan peran. Ketik email dan kata sandi di atas. Pelapor baru mendaftar lewat **Daftar**, calon pesurvei lewat **Ajukan akses** (email harus berakhiran `@example.com`).
+
+**Urutan demo 5 menit** (pakai satu tab yang sama; keluar lalu masuk saat berganti akun):
+
+1. **Pelapor:** masuk sebagai `pelapor@example.com`, klik **Buat laporan**, isi data bangunan, kirim. Lihat kartu **Langkah berikutnya** di Laporan saya.
+2. **Admin:** masuk sebagai `admin@example.com`. Buka **Pengajuan pesurvei**, setujui `calon@example.com`. Lalu **Laporan masuk**, periksa kelengkapan, dan **Penugasan survei**: pilih pesurvei dan isi catatan.
+3. **Pesurvei:** masuk sebagai `pesurvei@example.com`, buka **Penugasan saya**, mulai, isi simulasi RVS bila perlu, kirim catatan kunjungan.
+4. **Admin:** buka **Tinjauan catatan**, minta revisi atau tutup administrasi.
+5. **Pelapor:** masuk lagi, lihat status di **Laporan saya**. Hasil tetap "Belum dinilai"; RVS bukan sertifikat aman.
+
+**Alur pesurvei dari awal:** buka **Ajukan akses** di halaman masuk, isi email baru `@example.com`, simulasikan verifikasi email, keluar, lalu masuk admin untuk menyetujuinya.
+
+Catatan:
+- Data tersimpan di `sessionStorage` tab itu: tetap ada setelah refresh, hilang saat tab ditutup. Tidak tersinkron antartab atau perangkat. Setelah refresh, **masuk lagi**.
+- Mau mengulang dari awal: tutup tab, buka lagi.
 
 ## Menjalankan
 
