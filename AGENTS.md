@@ -6,7 +6,7 @@ SeismoPass adalah web untuk pencatatan bangunan, penyaringan awal RVS, profil di
 
 ## Batasan Domain
 
-RVS merupakan penyaringan awal, **bukan sertifikat aman**. Jangan menciptakan rumus, skor, kategori risiko, ambang rujukan, atau hasil screening. Implementasi penilaian menunggu protokol dan validasi ahli struktur. Tampilkan penjelasan keterbatasan RVS pada profil dan halaman QR. Jangan menjanjikan insentif fiskal, pembiayaan, atau asuransi yang belum disepakati.
+RVS merupakan penyaringan awal, **bukan sertifikat aman**. Jangan menciptakan rumus, skor, kategori risiko, ambang rujukan, atau hasil screening. Implementasi penilaian resmi menunggu protokol dan validasi ahli struktur. Atas permintaan pengguna tersedia simulasi pendidikan tabel FEMA P-154 HIGH Level 1, tanpa kategori risiko atau ambang otomatis; lihat `docs/rvs-demo.md`. Tampilkan penjelasan keterbatasan RVS pada profil dan halaman QR. Jangan menjanjikan insentif fiskal, pembiayaan, atau asuransi yang belum disepakati.
 
 ## Struktur Proyek
 
@@ -14,7 +14,7 @@ Saat ini tersedia landing page, UI workspace demonstrasi (formulir, daftar, prof
 
 ## Perintah Pengembangan
 
-Lihat README untuk bootstrap Docker dan lockfile. Script tersedia: `npm run dev`, `npm run typecheck`, `npm run build`, `npm run preview`, dan `npm run lint`. Lockfile sudah sinkron dengan manifest. Audit container pada 11 November 2026 menemukan 0 kerentanan; lint/typecheck/build lulus. Gunakan `npm ci` untuk mengikuti lockfile. `npm test` menjalankan 17 tes Node.js untuk validasi formulir, sesi demo, ekspor/reset, navigasi, dan batas halaman enam peran. UI masuk/keluar merupakan simulasi tanpa kredensial; lihat `docs/access-matrix.md`. Catatan UI tersimpan lokal di sessionStorage selama sesi tab jika tersedia; backend dan autentikasi belum tersedia. Gunakan Node.js sesuai `.nvmrc`; commit manifest dan lockfile bersama setelah instalasi berhasil.
+Lihat README untuk bootstrap Docker dan lockfile. Script tersedia: `npm run dev`, `npm run typecheck`, `npm run build`, `npm run preview`, dan `npm run lint`. Lockfile sudah sinkron dengan manifest. Audit container pada 11 November 2026 menemukan 0 kerentanan; lint/typecheck/build lulus. Gunakan `npm ci` untuk mengikuti lockfile. `npm test` menjalankan 45 tes Node.js untuk validasi formulir, sesi demo, alur laporan, ekspor/reset, navigasi, dan batas akses tiga peran demo (pelapor, admin, pesurvei). Lihat `docs/prd.md`. UI akun tanpa backend: satu login, pendaftaran pelapor dan pengajuan pesurvei dengan simulasi verifikasi email, persetujuan admin, penugasan oleh admin, serta penonaktifan. Metadata akun/laporan disimpan bersama tanpa password pengguna; semua akun demo memakai kredensial uji bersama. Undangan/pemulihan masih pratinjau; demo jelajah hanya pemilik. Lihat `docs/role-flows.md`. Lihat `docs/account-flow.md`; lihat `docs/access-matrix.md`. Catatan UI tersimpan lokal di sessionStorage selama sesi tab jika tersedia; backend dan autentikasi belum tersedia. Gunakan Node.js sesuai `.nvmrc`; commit manifest dan lockfile bersama setelah instalasi berhasil.
 
 ## Gaya Kode dan Pengujian
 

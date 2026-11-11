@@ -1,55 +1,49 @@
 # Panduan Demo SeismoPass
 
-## Membuka aplikasi
+Buka `http://localhost:5173/#/login`. Semua akun demo menggunakan `SeismoDemo123!`. Gunakan tab yang sama saat berganti akun agar pengajuan, keputusan, dan laporan yang disimpan pada sessionStorage tetap tersedia.
 
-Nyalakan Docker Desktop, jalankan `docker compose up --build` dari folder proyek, lalu buka http://localhost:5173. Pilih **Masuk demo / Jelajahi SeismoPass** atau buka http://localhost:5173/#/login. Pilih peran, centang pemahaman simulasi, lalu tekan **Masuk sebagai …**. Tidak ada email/kata sandi atau akun nyata.
+| Akun                  | Email                  | Kondisi awal                                            |
+| --------------------- | ---------------------- | ------------------------------------------------------- |
+| Admin                 | `admin@example.com`    | Aktif; tinjau akses dan tentukan penugasan              |
+| Pelapor               | `pelapor@example.com`  | Aktif; mencatat laporan bangunan                        |
+| Pesurvei              | `pesurvei@example.com` | Aktif; menunggu penugasan admin                         |
+| Calon pesurvei contoh | `calon@example.com`    | Menunggu tinjauan; verifikasi email hanya disimulasikan |
 
-Seluruh catatan merupakan data fiktif demonstrasi. Data baru disimpan lokal di sesi tab browser dan tidak dikirim ke server. Catatan bertahan saat refresh atau kembali ke landing page jika penyimpanan browser tersedia. Menutup tab biasanya mengakhiri sesi, tetapi pemulihan tab oleh browser dapat memulihkan catatan. Jika penyimpanan ditolak atau penuh, pemberitahuan menjelaskan bahwa catatan hanya ada dalam memori. Jangan gunakan data pribadi. Tidak ada akun atau layanan registrasi nyata.
+Pada layar laptop, navigasi berada di sidebar kiri. Pada layar kecil gunakan **Buka menu**. Panduan visual tersedia di `#/flows` atau **Panduan alur** dalam sidebar. Diagram dan skenario lengkap ada di [alur tiga peran](role-flows.md).
 
-## Mencatat bangunan
+## Admin
 
-1. Pilih **Tambah bangunan** di Ringkasan atau Bangunan saya.
-2. Isi nama, lokasi fiktif, fungsi, jumlah lantai, material, dan sistem struktur. Tahun boleh kosong; pilih **Belum diketahui** jika tidak yakin mengenai material atau struktur.
-3. Centang konfirmasi penggunaan data fiktif.
-4. Pilih **Simpan draf** untuk catatan belum lengkap (nama dan konfirmasi tetap wajib), atau **Simpan data bangunan** untuk data dasar lengkap.
-5. Jika ada kesalahan, pilih pesan kesalahan untuk menuju kolom terkait. Formulir tetap menyimpan isian selama belum ditinggalkan.
-6. Profil digital terbuka setelah disimpan. Pilih **Ubah data bangunan** untuk memperbarui catatan. **Batal** meninggalkan formulir tanpa menyimpan perubahan.
+1. Masuk, lihat hitungan pengajuan, laporan masuk, tugas yang menunggu penugasan, dan catatan yang perlu ditinjau.
+2. Buka **Pengajuan pesurvei**. Periksa informasi contoh; isi catatan, centang konfirmasi peninjauan untuk menyetujui, atau minta perbaikan/tolak dengan alasan.
+3. Buka **Laporan masuk**. Pilih **Data lengkap, siap ditugaskan** atau **Minta kelengkapan** dengan catatan.
+4. Buka **Penugasan survei**, buka laporan, pilih pesurvei aktif, isi catatan, dan **Simpan penugasan**. Sebelum pesurvei mulai, penugasan dapat diubah.
+5. Setelah pesurvei mengirim catatan, buka **Tinjauan catatan**. Beri catatan lalu **Minta revisi** atau **Tutup administrasi laporan**.
+6. **Kelola pesurvei** menyediakan penonaktifan dan pengaktifan kembali. Penonaktifan mengembalikan tugas yang masih berjalan ke penugasan; catatan lama tetap tersimpan.
+7. Cari/filter/unduh daftar melalui **Semua laporan**. Unduhan berlabel demonstrasi dan bukan hasil teknis yang disahkan.
 
-## Menemukan catatan
+## Pelapor
 
-Buka **Bangunan saya**, cari nama, ID atau lokasi, dan pilih filter **Draf** atau **Data tercatat**. Pilih **Buka** untuk profil. Hasil pencarian kosong memiliki tombol reset.
+1. Pakai akun contoh atau daftar dengan email fiktif `@example.com`. Akun baru memakai kata sandi demo bersama. Setelah daftar pilih **Simulasikan verifikasi email demo**.
+2. **Buat laporan**: isi nama, lokasi fiktif, fungsi, tahun jika diketahui, lantai, material, struktur, dan catatan. Material/struktur boleh **Belum diketahui**.
+3. Simpan draf bila belum lengkap; nama dan konfirmasi data fiktif tetap wajib. Pengiriman membutuhkan seluruh data dasar serta konfirmasi batas RVS.
+4. Buka **Laporan saya**. Jika dikembalikan, baca catatan, pilih **Ubah draf**, lengkapi dan kirim ulang.
+5. Pantau status. Buka bagian **Profil bangunan, simulasi RVS, dan QR** untuk melihat data yang tersedia. Selesai hanya berarti proses administrasi ditutup.
 
-Draf dan Data tercatat adalah status administratif usulan UI. Keduanya bukan kategori risiko. Semua bangunan demo berstatus screening **Belum dinilai**.
+## Pesurvei
 
-## Halaman lanjutan
+1. Di halaman masuk, pilih **Calon pesurvei? Ajukan akses**. Isi identitas, organisasi, dan ringkasan kompetensi contoh; konfirmasi data fiktif.
+2. Simulasikan verifikasi email. Tunggu tinjauan admin; hanya halaman status yang tersedia. Perbaiki pengajuan jika diminta/ditolak lalu kirim ulang.
+3. Setelah disetujui, masuk dan buka **Penugasan saya**. Laporan yang belum ditugaskan kepadamu tidak terlihat.
+4. Pilih **Mulai survei**, lalu isi tanggal/catatan kunjungan. Input RVS tersedia pada bagian tersendiri; lihat [panduan simulasi RVS](rvs-demo.md).
+5. **Kirim catatan ke admin**. Catatan hanya bisa diperbarui lagi setelah admin meminta revisi.
+6. Pantau **Riwayat survei**. Jika akses dinonaktifkan, workspace laporan tidak dapat dibuka.
 
-- **Screening RVS:** informasi tahapan dan keadaan belum ada screening. Tidak ada perhitungan atau formulir penilaian rekaan.
-- **Rujukan ahli:** informasi dasar rujukan resmi; belum ada ahli, penugasan, atau evaluasi.
-- **Rencana retrofit:** alur rencana, keputusan pemilik, pelaksanaan, dan verifikasi. Tidak ada metode teknis atau estimasi biaya rekaan.
-- **Dukungan & evaluasi:** jenis dukungan yang masih menunggu kebijakan/kerja sama. Tidak tersedia pengajuan atau manfaat otomatis.
-- **Profil → Lihat pratinjau terbatas:** contoh informasi publik tanpa identitas pemilik atau alamat rinci. QR dan tautan publik belum aktif.
-- **Pusat bantuan:** panduan alur dan pertanyaan umum.
+## Data, QR, dan batas
 
-Pada layar kecil, buka tombol **Menu** untuk berpindah halaman. Navigasi dan formulir dapat diakses dengan keyboard; kesalahan formulir diumumkan dan diarahkan ke ringkasan kesalahan.
+Akun/pengajuan/laporan bertahan setelah refresh selama sesi tab dan penyimpanan tersedia. Refresh meminta login lagi. Tidak ada sinkronisasi antar-tab atau perangkat. Demo menyimpan metadata tanpa password pengguna; semua kredensial uji bersifat bersama dan terbuka. Verifikasi email adalah simulasi tanpa email terkirim. Akun admin tidak tersedia melalui pendaftaran publik.
 
-**RVS adalah penyaringan awal, bukan sertifikat aman.** Status belum dinilai tidak menjamin keamanan dan bukan hasil pemeriksaan. Pemeriksaan harus dilakukan petugas terlatih dengan supervisi ahli menggunakan protokol yang disahkan.
+Latihan mandiri RVS ada di `#/rvs-lab`. QR hanya membawa data minimum simulasi dan tidak membuka identitas atau catatan privat. Untuk HP, gunakan alamat Network dari Vite di Wi-Fi yang sama dan buat ulang QR. Informasi dalam tautan demo dapat diubah dan tidak bertanda tangan digital.
 
-## Mengelola data demo
+Menu lama pencatatan bangunan masih dapat dibuka melalui URL pemilik contoh; ia terpisah dari alur laporan. Ekspor/reset pada halaman Data demo lama hanya berlaku untuk catatan bangunan lama, bukan direktori akun dan laporan baru.
 
-Buka **Data demo** dari navigasi workspace.
-
-1. Pilih **Unduh data demo** untuk menyimpan berkas JSON berlabel demonstrasi. Berkas memuat seluruh isian bangunan, tanpa hasil RVS. Fitur impor belum tersedia.
-2. Pilih **Reset data demo** jika ingin mulai ulang. Periksa konfirmasi lalu pilih **Batal** atau **Ya, reset ke data contoh**. Reset mengganti catatan dengan tiga bangunan awal; unduh dulu bila ingin menyimpan salinan.
-3. Jika data sesi rusak atau versinya tidak didukung, aplikasi menampilkan pemberitahuan dan memakai data contoh. Catatan lama belum ditimpa sampai perubahan baru disimpan atau reset dilakukan.
-
-Batas kapasitas demo adalah 500 catatan per sesi (batas teknis UI, bukan ketentuan domain). Penyimpanan browser bukan autentikasi, perlindungan akses, atau cadangan permanen.
-
-## Masuk, keluar dan mencoba peran
-
-Enam peran tersedia: pemilik/pengelola, petugas penilai, ahli struktur, pemerintah daerah, penyedia retrofit, dan mitra keuangan. Dashboard serta navigasi menyesuaikan peran; menu **Peran & hak akses** menjelaskan seluruh usulan pembagian.
-
-Pemilik dapat menjalankan alur pencatatan di atas. Peran profesional hanya melihat informasi yang relevan dan keadaan belum ada penugasan/layanan. Data bangunan pemilik tidak diberikan ke tampilan profesional. Pembatasan ini hanya simulasi di browser dan bukan kontrol keamanan layanan nyata.
-
-Pilih **Keluar demo** di bagian atas untuk mengakhiri peran. Untuk berganti peran, keluar lalu pilih peran lain. Refresh juga mengakhiri pilihan peran; pilih pemilik lagi untuk melanjutkan catatan fiktif yang tersimpan di sesi tab. Keluar demo tidak menghapus catatan fiktif; gunakan **Data demo → Reset** jika ingin mengembalikannya ke data contoh.
-
-Jika membuka URL halaman yang tidak termasuk peranmu, aplikasi menampilkan penjelasan batas peran dan tautan kembali ke dashboard. Halaman login tidak memverifikasi identitas siapa pun; jangan gunakan demo untuk data atau layanan nyata.
+**RVS adalah penyaringan awal, bukan sertifikat aman.** Persetujuan admin, skor simulasi, QR, dan penutupan administrasi tidak menggantikan protokol, pelatihan/supervisi, atau validasi ahli. Backend, autentikasi/otorisasi server, verifikasi email nyata, dan kebijakan operasional belum tersedia.

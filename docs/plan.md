@@ -6,7 +6,7 @@ SeismoPass membantu pemilik mencatat bangunan dan mengikuti proses pemeriksaan s
 
 **RVS adalah penyaringan awal, bukan sertifikat aman.** Website tidak menggantikan pemeriksaan ahli. Tidak dirujuk juga tidak boleh ditampilkan sebagai pernyataan aman.
 
-Sumber kebutuhan adalah [SeismoPass App Flow](SeismoPass%20App%20Flow.md), bukan `docs/app-flow.md` yang belum tersedia. Esai asli yang dirujuk sumber belum tersedia di repositori. Ketentuan domain di sini mengikuti ringkasan tersebut, bukan verifikasi mandiri terhadap esai atau pedoman RVS.
+Sumber kebutuhan adalah [SeismoPass App Flow](SeismoPass%20App%20Flow.md), bukan `docs/app-flow.md` yang belum tersedia. PDF esai asli kemudian diberikan pengguna dan diperiksa pada 11 November 2026; lihat [pemetaan implementasi esai](essay-implementation.md). PDF tidak disimpan di repositori. Pemeriksaan esai bukan validasi mandiri pedoman/metode RVS.
 
 Saat ini tersedia Git lokal, dokumentasi, kode landing page awal, dan konfigurasi Docker. Remote adalah `rkthooriq/SeismoPass`. Lockfile cocok dengan manifest; audit container menemukan 0 kerentanan dan lint/typecheck/build lulus pada 11 November 2026. Pengujian visual dan UAT belum dilakukan. Backend, database, dan deployment belum tersedia. Rencana sampai publikasi di bawah tetap memerlukan pemenuhan kriteria tiap tahap; implementasi awal tidak berarti semua tahap selesai.
 
@@ -153,3 +153,26 @@ Data demonstrasi tersimpan lokal di sessionStorage selama sesi tab, dengan fallb
 Sesuai permintaan pengguna, UI simulasi dibuat untuk seluruh enam aktor sumber. Pilihan peran, dashboard terarah, navigasi sesuai peran, pembatasan URL frontend, keluar demo, dan matriks akses tersedia. UI tidak meminta kredensial atau membuat akun nyata. Pilihan peran hanya di memori, sehingga refresh mengharuskan pemilihan lagi. Data fiktif pemilik tidak diberikan ke tampilan profesional.
 
 Matriks dan kebutuhan backend ada di `docs/access-matrix.md`; skenario UAT di `docs/testing/uat.md`. Kebijakan akses produksi, backend/database, autentikasi dan verifikasi aktor tetap **BELUM DIPUTUSKAN**. Tahap 5 belum diimplementasikan; hasil tes frontend bukan bukti otorisasi server.
+
+## Koreksi alur akun sesuai arahan pengguna
+
+Pemilih peran pada halaman masuk publik dihapus. Satu formulir masuk digunakan semua aktor; peran produksi harus ditentukan dari akun terverifikasi di server. Ditambahkan pratinjau pendaftaran pemilik, pengajuan akses profesional, undangan dan pemulihan akun. Permintaan akses tidak mengaktifkan peran. Alur rinci di `docs/account-flow.md`; backend dan kebijakan verifikasi tetap belum diputuskan. Tombol jelajah demo hanya membuka contoh pemilik. Rancangan dashboard profesional dipertahankan untuk integrasi akun yang sah berikutnya.
+
+## Cakupan demo tiga peran
+
+Pengguna membatasi akun demo menjadi pelapor, admin, dan pesurvei. Pelapor mengirim laporan, admin memeriksa kelengkapan lalu meninjau dan menutup, dan pesurvei mencatat kunjungan pada laporan yang ditugaskan admin (lihat pembaruan alur penugasan di bawah). Ini keputusan cakupan demo, terpisah dari aktor dalam dokumen kebutuhan dan kebijakan akses produksi.
+
+
+## Penyelarasan dengan PDF esai — 11 November 2026
+
+Data dasar bangunan dan konfirmasi batas RVS kini terhubung langsung ke laporan tiga peran. Setiap laporan menampilkan profil enam tahap serta pratinjau informasi QR tanpa data rinci. Tab Rencana pilot memuat lokasi, fase, dan indikator usulan dari PDF. Capaian belum diukur; penutupan administrasi tidak menghasilkan hasil screening. Detail kebutuhan, pilihan teknis, batas, dan verifikasi ada di [pemetaan esai](essay-implementation.md).
+
+
+## Permintaan input RVS dan QR — 11 November 2026
+
+Pengguna memberikan gambar formulir dan meminta input, hasil, QR, serta menjalankan web. Ditambahkan simulasi pendidikan tabel FEMA P-154 HIGH Level 1 dengan rincian hitung, pencatatan pesurvei, dan QR berisi data minimum. Ini perluasan demo, bukan validasi protokol Indonesia atau pengaktifan penilaian resmi. Lihat [rincian sumber, batas, dan tes](rvs-demo.md). Ambang rujukan, kategori risiko, verifikasi ahli, serta layanan produksi tetap tertunda.
+
+
+## Persetujuan pesurvei dan dashboard tiga peran — 11 November 2026
+
+Sesuai arahan pengguna, admin menyetujui akses pesurvei dan menentukan penugasan bangunan. Pengambilan mandiri dari antrean diganti. Pendaftaran/verifikasi email demo, halaman status pemohon, perbaikan/penolakan, penonaktifan/pengaktifan kembali, pengembalian tugas, serta riwayat keputusan tersedia. Dashboard memakai sidebar responsif dan ringkasan berbeda tiap peran. Metadata akun dan laporan tersimpan bersama dalam sessionStorage tanpa password pengguna. Semua tetap simulasi frontend; backend dan keamanan server belum selesai. Lihat [alur tiga peran](role-flows.md).

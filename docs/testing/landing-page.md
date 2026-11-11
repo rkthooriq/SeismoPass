@@ -79,3 +79,7 @@ Hentikan urutan jika instalasi, lint, atau build gagal dan simpan laporan. Tidak
 ## Simulasi masuk dan akses multiaktor — 11 November 2026
 
 `npm test` lulus 17 tes logika, termasuk enam tes matriks aktor: akses pemilik, pemisahan petugas/ahli, penyedia retrofit, pemerintah/mitra, serta penolakan peran/halaman tidak dikenal. Lint/typecheck/build juga lulus. Tes tersebut belum memverifikasi klik login, logout, fokus, menu mobile, atau tampilan browser. Skenario manual belum dijalankan; lihat `uat.md`. Tidak ada pengujian autentikasi atau otorisasi backend karena layanan tersebut belum tersedia.
+
+## Koreksi alur akun — 11 November 2026
+
+Pemilih peran publik dihapus. Ditambahkan formulir masuk umum, daftar pemilik, pengajuan profesional, undangan dan pemulihan sebagai pratinjau. `npm test` lulus 23 tes logika; enam tambahan memeriksa rute akun, validasi masuk/daftar, permintaan akses profesional, undangan dan pemulihan. Lint/typecheck/build lulus. Tidak ada verifikasi kredensial, email terkirim atau akun dibuat; pemeriksaan keunikan email dan otorisasi tetap pekerjaan backend. Pengujian browser belum dilakukan.

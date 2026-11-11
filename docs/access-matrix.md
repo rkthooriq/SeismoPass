@@ -1,36 +1,31 @@
 # Matriks Peran dan Hak Akses SeismoPass
 
-## Status keputusan
+Pengguna memutuskan tiga peran demo: pelapor, admin, pesurvei. Admin menyetujui akses pesurvei dan mengatur penugasan; pengambilan mandiri dari antrean diganti. Lihat [alur tiga peran](role-flows.md) dan [alur akun](account-flow.md).
 
-Enam aktor berasal dari `SeismoPass App Flow.md`. Pengguna meminta UI untuk semua aktor. Pembagian dashboard dan akses berikut adalah **usulan implementasi demo**, bukan ketentuan sumber atau kebijakan produksi yang telah disahkan. Tidak ada tambahan akun admin operasional.
+## Matriks demo saat ini
 
-Implementasi sekarang: pemilihan peran tanpa email/kata sandi, pembatasan navigasi dan URL di frontend, data bangunan fiktif hanya diberikan ke tampilan pemilik, serta keluar demo. Pilihan peran hanya di memori aplikasi dan hilang saat refresh. Setiap orang dapat memilih peran; ini bukan autentikasi atau verifikasi kewenangan.
+| Operasi                              | Pelapor aktif                             | Admin aktif                                                 | Pesurvei aktif dan disetujui                      | Pemohon / nonaktif            |
+| ------------------------------------ | ----------------------------------------- | ----------------------------------------------------------- | ------------------------------------------------- | ----------------------------- |
+| Membuat/mengubah laporan             | Milik sendiri, saat Draf/Perlu dilengkapi | Tidak                                                       | Tidak                                             | Tidak                         |
+| Melihat laporan                      | Milik sendiri                             | Laporan yang sudah dikirim, tanpa draf pribadi              | Hanya penugasan sendiri                           | Tidak                         |
+| Memeriksa kelengkapan                | Tidak                                     | Ya; dapat meminta kelengkapan                               | Tidak                                             | Tidak                         |
+| Meninjau pengajuan akses             | Tidak                                     | Ya; catatan wajib, konfirmasi pemeriksaan untuk persetujuan | Tidak                                             | Status/pengajuan sendiri saja |
+| Menonaktifkan/mengaktifkan pesurvei  | Tidak                                     | Ya, dengan alasan                                           | Tidak                                             | Tidak                         |
+| Menugaskan laporan                   | Tidak                                     | Hanya ke pesurvei aktif dengan email demo terverifikasi     | Tidak; tidak ada ambil sendiri                    | Tidak                         |
+| Memulai survei                       | Tidak                                     | Tidak                                                       | Hanya penugasan sendiri berstatus Ditugaskan      | Tidak                         |
+| Input simulasi RVS/catatan kunjungan | Tidak                                     | Membaca/tinjau administrasi                                 | Penugasan sendiri, saat Dalam survei/Perlu revisi | Tidak                         |
+| Menutup administrasi                 | Tidak                                     | Saat Ditinjau, catatan wajib                                | Tidak                                             | Tidak                         |
+| Ekspor daftar laporan                | Tidak                                     | Daftar sesuai filter, tanpa draf                            | Tidak                                             | Tidak                         |
+| Latihan RVS/halaman QR contoh        | Publik, data minimum                      | Publik, data minimum                                        | Publik, data minimum                              | Publik, data minimum          |
 
-## Ruang kerja demonstrasi
+Sidebar dan URL dashboard dibatasi sesuai peran. Simulasi email dan status akun pemohon disediakan pada halaman status, tanpa mengirim data laporan kepadanya melalui komponen workspace. Semua data tetap merupakan data fiktif di browser, bukan kontrol akses server.
 
-| Aktor | Halaman yang tersedia selain dashboard/panduan/matriks | Batas usulan layanan nyata |
-| --- | --- | --- |
-| Pemilik/pengelola | Daftar, tambah/ubah bangunan, profil, informasi enam tahap, data demo dan pratinjau publik | Hanya bangunan sendiri; persetujuan berbagi dan keputusan retrofit oleh pemilik |
-| Petugas penilai | Informasi screening | Bangunan penugasan, metode resmi dan supervisi ahli; tidak membuat rencana retrofit atau keputusan pendanaan |
-| Ahli struktur | Informasi screening, rujukan dan retrofit | Kasus penugasan, validasi dan kewenangan yang diverifikasi; bukan akses bebas ke seluruh bangunan |
-| Pemerintah daerah | Informasi dukungan dan evaluasi | Ringkasan sesuai kewenangan; data rinci/identitas tidak otomatis dibuka |
-| Penyedia retrofit | Informasi retrofit | Pekerjaan yang ditugaskan berdasarkan rencana ahli; tidak menilai screening atau memvalidasi pekerjaan sendiri |
-| Mitra keuangan | Informasi dukungan dan evaluasi | Data minimum berdasarkan persetujuan dan kesepakatan; tidak membuat penawaran atau keputusan otomatis |
+## Aktor sumber yang ditunda
 
-Halaman profesional belum memuat penugasan, hasil teknis, dokumen, pengajuan, atau data operasional. Nilai “belum ada” bukan hasil screening. Tombol unduh/reset data demo hanya tersedia untuk simulasi pemilik. Ini tidak memberikan akses produksi.
+Ahli struktur/perguruan tinggi, pemerintah daerah, penyedia retrofit, dan mitra keuangan tetap merupakan aktor sumber; aktor tidak otomatis berarti akun aplikasi. Pembagian akun produksi dan batas organisasi belum diputuskan. Penilai terpisah dari pelaksana retrofit. Admin tidak mengesahkan penilaian struktur melalui penutupan administrasi.
 
-## Sebelum backend login nyata
+## Sebelum layanan produksi
 
-**BELUM DIPUTUSKAN:** penyedia identitas, backend/database, model organisasi, akses ganda satu pengguna, verifikasi aktor profesional, persetujuan berbagi, masa simpan data dan penanggung jawab operasional.
+Backend harus memeriksa identitas, status akun, peran, kepemilikan/penugasan objek, dan persetujuan pada setiap baca/tulis/ekspor. Perubahan URL, ID laporan, role, atau sessionStorage tidak boleh memberikan akses. Verifikasi email nyata, pencabutan sesi, pembatasan percobaan login, MFA admin, audit terlindungi, dan pengujian API lintas pengguna diperlukan sebelum data nyata. Ketentuan kompetensi/supervisi, privasi QR, masa simpan, serta operator persetujuan perlu disepakati.
 
-Rancangan berikut perlu diwujudkan dan diuji sebelum memakai data nyata:
-
-1. Identitas pengguna diverifikasi; pengguna tidak boleh menaikkan perannya sendiri melalui pilihan peran UI.
-2. Server menentukan hak akses dari keanggotaan/peran yang disahkan, kepemilikan, penugasan, dan persetujuan yang masih berlaku.
-3. Setiap operasi baca/tulis/ekspor diperiksa di server pada objek yang diminta; ID bangunan dan peran dari browser tidak dipercaya.
-4. Login, logout, pencabutan sesi, kegagalan masuk, pembatasan percobaan, serta pemulihan akun memiliki prosedur yang diuji. Tidak menyimpan kata sandi/token sesi dalam source atau sessionStorage frontend.
-5. Akses lintas pengguna, lintas organisasi dan perubahan penugasan diuji lewat API. Log audit memuat aktor/tindakan/waktu tanpa mengekspos rahasia atau data pribadi yang tidak perlu.
-6. Data QR dipisahkan dari profil privat, menggunakan cakupan publik minimum yang telah disetujui. QR bukan sertifikat aman.
-7. Validasi/hasil RVS menunggu protokol ahli; insentif dan dukungan menunggu kebijakan atau kesepakatan. Pemilihan peran tidak mengaktifkan fitur tersebut.
-
-Keamanan backend, penerimaan pengguna, dan persetujuan kebijakan akses produksi belum selesai hanya karena tes frontend lulus.
+RVS adalah penyaringan awal, bukan sertifikat aman. Hasil simulasi belum divalidasi ahli; insentif tetap menunggu program/kesepakatan yang tersedia.

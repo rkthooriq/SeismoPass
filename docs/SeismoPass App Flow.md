@@ -113,3 +113,12 @@ Catatan ini merupakan penanda perencanaan, bukan tambahan isi laporan. Lihat [re
 - **BERGANTUNG PERSETUJUAN PIHAK TERKAIT:** ketersediaan insentif fiskal dan dukungan mitra; bukan manfaat yang otomatis berlaku.
 
 RVS tetap penyaringan awal, bukan sertifikat aman. Rencana sampai publikasi tidak merupakan persetujuan untuk menjalankan semua tahap sekarang.
+
+
+## 09Verifikasi terhadap PDF asli — 11 November 2026
+
+PDF 24 halaman yang diberikan pengguna telah diperiksa. Gambar 7 berada di halaman 7, Tabel 1 di halaman 10, Tabel 2 di halaman 11, Tabel 3 di halaman 12–13, dan Tabel 4 di halaman 13–14; daftar isi PDF masih memakai nomor sebelumnya.
+
+Tambahan kebutuhan pilot dari Tabel 2–3: persiapan bulan 1, protokol bulan 2, uji coba bulan 3–5, evaluasi bulan 6, replikasi hanya setelah evaluasi. Target usulan: cakupan minimal 90% (225 dari 250 bangunan); kesesuaian verifikasi ahli minimal 80% dengan sampel 10%; tindak lanjut rujukan minimal 50% dalam 3 bulan; pemahaman pemilik minimal 90%. Target ditetapkan ulang bersama ahli dan mitra pada fase protokol, bukan capaian yang sudah terjadi dan bukan kategori risiko bangunan.
+
+Lihat [pemetaan esai ke implementasi](essay-implementation.md) untuk batas fitur yang sudah tersedia.
