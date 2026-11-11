@@ -14,3 +14,7 @@ coverage/
 # Berkas sistem operasi
 .DS_Store
 Thumbs.db
+
+# Berkas kerja sementara
+tmp/
+output/
