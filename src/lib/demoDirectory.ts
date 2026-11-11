@@ -4,33 +4,14 @@ import { restoreReports } from './reportSession.ts';
 import type { AccessDecision, AccountStatus } from './surveyorAccess';
 
 export const demoSessionKey = 'seismopass.workflow.demo.v2';
+// Hanya tiga akun bawaan (pelapor, admin, pesurvei aktif sebagai jalan pintas).
+// Pesurvei baru dibuat admin lewat Kelola pesurvei dengan sandi sementara.
 export function initialDirectory(): DemoAccount[] {
-  return [
-    ...demoAccounts.map((account) => ({ ...account })),
-    {
-      id: 'surveyor-applicant-demo',
-      name: 'Calon Pesurvei Demo',
-      email: 'calon@example.com',
-      password: demoPassword,
-      role: 'surveyor',
-      status: 'pending',
-      emailVerified: true,
-      organization: 'Tim Lapangan Contoh',
-      qualification:
-        'Contoh catatan pelatihan RVS dan supervisi; dokumen nyata tidak diunggah pada demo.',
-      history: [
-        {
-          action: 'email-demo',
-          by: 'surveyor-applicant-demo',
-          note: 'Contoh verifikasi email demo; bukan verifikasi email nyata.',
-          at: '2026-11-11T00:00:00.000Z',
-        },
-      ],
-    },
-  ];
+  return demoAccounts.map((account) => ({ ...account }));
 }
 const statuses: AccountStatus[] = [
   'pending-email',
+  'must-change-password',
   'pending',
   'changes-requested',
   'rejected',
@@ -39,6 +20,9 @@ const statuses: AccountStatus[] = [
 ];
 const actions: AccessDecision['action'][] = [
   'submitted',
+  'created-by-admin',
+  'temp-password-issued',
+  'password-changed',
   'email-demo',
   'approved',
   'changes-requested',
@@ -68,6 +52,9 @@ export function restoreDirectory(value: unknown): DemoAccount[] | null {
     )
       return null;
     if (r.role === 'admin' && r.id !== 'admin-demo') return null;
+    if (r.managed !== undefined && typeof r.managed !== 'boolean') return null;
+    if (r.managed && r.role !== 'surveyor') return null;
+    if (r.status === 'must-change-password' && !r.managed) return null;
     const seed = demoAccounts.find((account) => account.id === r.id);
     if (seed && (r.role !== seed.role || r.email !== seed.email)) return null;
     if (r.role === 'admin' && (r.status !== 'active' || !r.emailVerified))
@@ -104,7 +91,10 @@ export function restoreDirectory(value: unknown): DemoAccount[] | null {
       role: r.role as DemoAccount['role'],
       status: r.status as AccountStatus,
       emailVerified: r.emailVerified,
-      password: demoPassword,
+      // Sandi tidak disimpan di sesi. Akun buatan admin harus diberi sandi
+      // sementara baru setelah halaman dimuat ulang.
+      password: r.managed ? '' : demoPassword,
+      managed: r.managed === true ? true : undefined,
       organization: r.organization as string | undefined,
       qualification: r.qualification as string | undefined,
       reviewNote: r.reviewNote as string | undefined,

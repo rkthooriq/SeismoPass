@@ -12,6 +12,8 @@ export interface DemoAccount {
   password: string;
   status: AccountStatus;
   emailVerified: boolean;
+  // Akun yang dibuat admin. Sandinya hanya ada di memori tab, tidak disimpan.
+  managed?: boolean;
   organization?: string;
   qualification?: string;
   reviewNote?: string;

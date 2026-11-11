@@ -246,11 +246,13 @@ test('new owner/applicant metadata and reports persist together without persisti
   );
 });
 test('sidebar destinations are restricted by role including direct URL access', () => {
+  // Pesurvei didaftarkan admin, jadi tidak ada lagi halaman pengajuan publik.
+  assert.equal(resolveWorkflowPage('admin', 'dashboard/applications'), null);
   assert.equal(
-    resolveWorkflowPage('admin', 'dashboard/applications'),
-    'applications',
+    resolveWorkflowPage('admin', 'dashboard/surveyors'),
+    'surveyors',
   );
-  assert.equal(resolveWorkflowPage('owner', 'dashboard/applications'), null);
+  assert.equal(resolveWorkflowPage('owner', 'dashboard/surveyors'), null);
   assert.equal(resolveWorkflowPage('surveyor', 'dashboard/surveyors'), null);
   assert.equal(resolveWorkflowPage('surveyor', 'dashboard/tasks'), 'tasks');
   assert.equal(resolveWorkflowPage('admin', 'dashboard/new'), null);

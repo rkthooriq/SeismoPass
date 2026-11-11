@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { accountStatusLabels } from '../../lib/surveyorAccess';
+import type { NewSurveyorInput } from '../../lib/surveyorAccess';
 import type { DemoAccount, Report } from '../../lib/reportDemo';
 export type ReviewAction =
   | 'approve'
@@ -8,11 +9,19 @@ export type ReviewAction =
   | 'reject'
   | 'suspend'
   | 'reactivate';
+export interface IssuedPassword {
+  name: string;
+  email: string;
+  password: string;
+}
+type IssueResult = IssuedPassword | { error: string };
 export default function SurveyorManagement({
   accounts,
   reports,
   mode,
   onReview,
+  onAdd,
+  onReissue,
 }: {
   accounts: DemoAccount[];
   reports: Report[];
@@ -23,15 +32,50 @@ export default function SurveyorManagement({
     note: string,
     checked: boolean,
   ) => boolean;
+  onAdd: (input: NewSurveyorInput) => IssueResult;
+  onReissue: (id: string) => IssueResult;
 }) {
   const [message, setMessage] = useState('');
+  // Sandi sementara hanya hidup di state ini, tampil sekali, tidak disimpan.
+  const [issued, setIssued] = useState<IssuedPassword | null>(null);
+  const [addError, setAddError] = useState('');
+  const settled = ['active', 'suspended', 'must-change-password'];
   const candidates = accounts.filter(
     (account) =>
       account.role === 'surveyor' &&
       (mode === 'applications'
-        ? !['active', 'suspended'].includes(account.status)
-        : ['active', 'suspended'].includes(account.status)),
+        ? !settled.includes(account.status)
+        : settled.includes(account.status)),
   );
+  function addSurveyor(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = event.currentTarget;
+    const data = new FormData(form);
+    const result = onAdd({
+      name: String(data.get('name') ?? ''),
+      email: String(data.get('email') ?? ''),
+      organization: String(data.get('organization') ?? ''),
+      qualification: String(data.get('qualification') ?? ''),
+    });
+    if ('error' in result) {
+      setAddError(result.error);
+      return;
+    }
+    setAddError('');
+    setMessage('');
+    setIssued(result);
+    form.reset();
+  }
+  function reissue(candidate: DemoAccount) {
+    const result = onReissue(candidate.id);
+    if ('error' in result) {
+      setIssued(null);
+      setMessage(result.error);
+      return;
+    }
+    setMessage('');
+    setIssued(result);
+  }
   function submit(event: FormEvent<HTMLFormElement>, candidate: DemoAccount) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -57,8 +101,8 @@ export default function SurveyorManagement({
             {mode === 'applications' ? 'Pengajuan pesurvei' : 'Kelola pesurvei'}
           </h2>
           <p>
-            Admin menentukan akses pesurvei. Penugasan bangunan dilakukan secara
-            terpisah.
+            Admin menentukan siapa yang menjadi pesurvei dan menyiapkan akunnya.
+            Penugasan bangunan dilakukan secara terpisah.
           </p>
         </div>
         <span className="ws-badge">{candidates.length} akun</span>
@@ -67,6 +111,67 @@ export default function SurveyorManagement({
         Semua identitas dan bukti di halaman ini adalah contoh demo. Verifikasi
         kompetensi nyata memerlukan tata cara organisasi dan supervisi ahli.
       </p>
+      {mode === 'surveyors' && (
+        <form className="report-form access-add" onSubmit={addSurveyor}>
+          <h3>Tambah pesurvei</h3>
+          <p className="ws-muted">
+            Sistem membuat akun dengan sandi sementara acak. Pesurvei wajib
+            membuat kata sandi barunya sendiri saat masuk pertama, sehingga
+            admin tidak pernah mengetahui kata sandi mereka.
+          </p>
+          <label>
+            Nama pesurvei (contoh)
+            <input name="name" maxLength={200} required />
+          </label>
+          <label>
+            Alamat email
+            <input
+              name="email"
+              type="email"
+              maxLength={254}
+              placeholder="nama@example.com"
+              required
+            />
+          </label>
+          <label>
+            Organisasi / instansi (contoh)
+            <input name="organization" maxLength={200} required />
+          </label>
+          <label>
+            Catatan pelatihan / kompetensi (contoh)
+            <textarea
+              name="qualification"
+              maxLength={1000}
+              placeholder="Contoh pelatihan RVS dan kebutuhan supervisi ahli"
+              required
+            />
+          </label>
+          {addError && (
+            <p role="alert" className="ws-disclaimer">
+              {addError}
+            </p>
+          )}
+          <button className="ws-primary">Buat akun pesurvei</button>
+        </form>
+      )}
+      {issued && (
+        <div className="ws-notice access-issued" role="status">
+          <strong>Sandi sementara untuk {issued.name}</strong>
+          <p>
+            Email: <code>{issued.email}</code>
+            <br />
+            Sandi sementara: <code>{issued.password}</code>
+          </p>
+          <p>
+            Catat sekarang. Sandi ini hanya tampil sekali dan tidak disimpan.
+            Sampaikan lewat jalur terpisah. Pesurvei wajib menggantinya saat
+            masuk pertama.
+          </p>
+          <button className="ws-secondary" onClick={() => setIssued(null)}>
+            Sudah saya catat, tutup
+          </button>
+        </div>
+      )}
       {message && (
         <p role="status" className="ws-notice">
           {message}
@@ -98,10 +203,12 @@ export default function SurveyorManagement({
               </span>
             </header>
             <p>
-              <strong>Email demo: </strong>
-              {candidate.emailVerified
-                ? 'Disimulasikan terverifikasi'
-                : 'Belum disimulasikan'}
+              <strong>{candidate.managed ? 'Akun: ' : 'Email demo: '}</strong>
+              {candidate.managed
+                ? 'Dibuat dan didata admin'
+                : candidate.emailVerified
+                  ? 'Disimulasikan terverifikasi'
+                  : 'Belum disimulasikan'}
             </p>
             <p>
               <strong>Ringkasan kompetensi: </strong>
@@ -113,7 +220,24 @@ export default function SurveyorManagement({
                 {candidate.reviewNote}
               </p>
             )}
-            {candidate.status === 'pending-email' ? (
+            {candidate.status === 'must-change-password' ? (
+              <>
+                <p className="ws-disclaimer">
+                  Menunggu pesurvei masuk dengan sandi sementara dan membuat
+                  kata sandi baru. Sebelum itu akun belum dapat menerima
+                  penugasan.
+                </p>
+                <div className="report-actions">
+                  <button
+                    className="ws-secondary"
+                    type="button"
+                    onClick={() => reissue(candidate)}
+                  >
+                    Terbitkan sandi sementara baru
+                  </button>
+                </div>
+              </>
+            ) : candidate.status === 'pending-email' ? (
               <p className="ws-disclaimer">
                 Pemohon perlu menyelesaikan simulasi verifikasi email sebelum
                 admin dapat menyetujui.
@@ -175,6 +299,15 @@ export default function SurveyorManagement({
                   {candidate.status === 'active' && (
                     <button className="ws-secondary" value="suspend">
                       Nonaktifkan akses
+                    </button>
+                  )}
+                  {candidate.status === 'active' && candidate.managed && (
+                    <button
+                      className="ws-secondary"
+                      type="button"
+                      onClick={() => reissue(candidate)}
+                    >
+                      Terbitkan sandi sementara baru
                     </button>
                   )}
                   {candidate.status === 'suspended' && (

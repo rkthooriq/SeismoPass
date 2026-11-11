@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import BuildingScene from '../../components/BuildingScene';
-import { professionalRoles, validateAccountForm } from '../../lib/accountFlow';
+import { validateAccountForm } from '../../lib/accountFlow';
 import type { AccountForm, AccountPage } from '../../lib/accountFlow';
 import { demoPassword } from '../../lib/reportDemo';
 import './access.css';
@@ -21,12 +21,6 @@ const copy: Record<
     subtitle: 'Gunakan alamat @example.com untuk membuat akun pelapor demo.',
     button: 'Buat akun demo',
   },
-  'request-access': {
-    title: 'Berkontribusi sesuai keahlian.',
-    subtitle:
-      'Daftar sebagai calon pesurvei. Verifikasi email demo, lalu tunggu persetujuan admin.',
-    button: 'Kirim pengajuan pesurvei',
-  },
   'forgot-password': {
     title: 'Kembali ke ruang kerjamu.',
     subtitle:
@@ -45,8 +39,6 @@ const empty: AccountForm = {
   email: '',
   password: '',
   confirmPassword: '',
-  organization: '',
-  requestedRole: 'surveyor',
   reference: '',
   consent: false,
 };
@@ -56,13 +48,11 @@ export default function ActorLogin({
   onExplore,
   onSignIn,
   onRegister,
-  onRequest,
 }: {
   page?: AccountPage;
   onExplore: () => void;
   onSignIn: (data: AccountForm) => string;
   onRegister: (data: AccountForm) => string;
-  onRequest: (data: AccountForm) => string;
 }) {
   const [data, setData] = useState<AccountForm>({
     ...empty,
@@ -84,13 +74,8 @@ export default function ActorLogin({
       requestAnimationFrame(() => summary.current?.focus());
       return;
     }
-    if (page === 'login' || page === 'register' || page === 'request-access') {
-      const error =
-        page === 'login'
-          ? onSignIn(data)
-          : page === 'register'
-            ? onRegister(data)
-            : onRequest(data);
+    if (page === 'login' || page === 'register') {
+      const error = page === 'login' ? onSignIn(data) : onRegister(data);
       setAccountError(error);
       if (error) requestAnimationFrame(() => summary.current?.focus());
       return;
@@ -191,11 +176,9 @@ export default function ActorLogin({
                 ? 'Kredensial tidak diverifikasi dan kamu belum masuk. Login nyata membutuhkan layanan akun.'
                 : page === 'register'
                   ? 'Pada layanan nyata: periksa keunikan email → kirim verifikasi → pengguna memverifikasi email → aktifkan akun pemilik. Pendaftaran ini belum membuat akun atau mengirim email.'
-                  : page === 'request-access'
-                    ? 'Pada layanan nyata: verifikasi email → tinjau organisasi dan kewenangan → setujui atau minta perbaikan → aktifkan peran sesuai persetujuan. Pengajuan belum dikirim dan tidak memberikan akses.'
-                    : page === 'invitation'
-                      ? 'Pada layanan nyata: verifikasi token undangan, penerima dan masa berlaku → verifikasi email → aktifkan peran dari undangan. Kode belum diperiksa dan akses belum diberikan.'
-                      : 'Pada layanan nyata, tampilkan respons umum lalu kirim tautan pemulihan hanya jika akun memenuhi syarat. Di pratinjau ini, email belum dikirim.'}
+                  : page === 'invitation'
+                    ? 'Pada layanan nyata: verifikasi token undangan, penerima dan masa berlaku → verifikasi email → aktifkan peran dari undangan. Kode belum diperiksa dan akses belum diberikan.'
+                    : 'Pada layanan nyata, tampilkan respons umum lalu kirim tautan pemulihan hanya jika akun memenuhi syarat. Di pratinjau ini, email belum dikirim.'}
             </p>
             <p className="actor-entry-note">
               Isian hanya diproses di memori tampilan, tanpa dikirim atau
@@ -243,7 +226,7 @@ export default function ActorLogin({
                 </ul>
               </div>
             )}
-            {['register', 'request-access'].includes(page) &&
+            {page === 'register' &&
               field('name', 'Nama (contoh)', 'text', 'Nama fiktif')}
             {field('email', 'Alamat email', 'email', 'nama@example.com')}
             {['login', 'register'].includes(page) &&
@@ -268,64 +251,6 @@ export default function ActorLogin({
                 </p>
               </>
             )}
-            {page === 'request-access' && (
-              <>
-                {field(
-                  'organization',
-                  'Organisasi / instansi (contoh)',
-                  'text',
-                  'Nama organisasi fiktif',
-                )}
-                <label
-                  className="account-field"
-                  htmlFor="account-requestedRole"
-                >
-                  Jenis akses yang diajukan
-                  <select
-                    id="account-requestedRole"
-                    value={data.requestedRole}
-                    onChange={(e) =>
-                      setData((previous) => ({
-                        ...previous,
-                        requestedRole: e.target.value,
-                      }))
-                    }
-                    aria-invalid={Boolean(errors.requestedRole)}
-                    aria-describedby={
-                      errors.requestedRole
-                        ? 'account-error-requestedRole'
-                        : undefined
-                    }
-                  >
-                    <option value="">Pilih jenis akses</option>
-                    {professionalRoles.map(([id, label]) => (
-                      <option value={id} key={id}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                  {errors.requestedRole && (
-                    <small
-                      className="actor-error"
-                      id="account-error-requestedRole"
-                    >
-                      {errors.requestedRole}
-                    </small>
-                  )}
-                </label>
-                {field(
-                  'reference',
-                  'Ringkasan pelatihan / kompetensi (contoh)',
-                  'text',
-                  'Contoh pelatihan RVS dan kebutuhan supervisi',
-                )}
-                <div className="account-info">
-                  Bukti kompetensi, surat penugasan, dan tata cara verifikasi
-                  mengikuti kebijakan yang masih perlu disepakati. Jangan unggah
-                  dokumen pribadi pada demo.
-                </div>
-              </>
-            )}
             {page === 'invitation' &&
               field(
                 'reference',
@@ -337,6 +262,12 @@ export default function ActorLogin({
               <a className="account-forgot" href="#/forgot-password">
                 Lupa kata sandi?
               </a>
+            )}
+            {page === 'login' && (
+              <p className="actor-entry-note">
+                Pesurvei: akunmu dibuat oleh admin. Masuk dengan sandi sementara
+                dari admin, lalu buat kata sandi barumu sendiri.
+              </p>
             )}
             {!['login', 'forgot-password'].includes(page) && (
               <label className="actor-consent">
@@ -369,9 +300,9 @@ export default function ActorLogin({
               {details.button} <span aria-hidden="true">→</span>
             </button>
             <p className="actor-entry-note">
-              Akun dan pengajuan demo bertahan selama sesi tab. Gunakan kata
-              sandi uji bersama SeismoDemo123!. Verifikasi email disimulasikan;
-              tidak ada email dikirim.
+              Akun demo bertahan selama sesi tab. Akun contoh memakai kata sandi
+              uji bersama SeismoDemo123!. Verifikasi email disimulasikan; tidak
+              ada email dikirim.
             </p>
           </form>
         )}
@@ -379,9 +310,6 @@ export default function ActorLogin({
           {page !== 'login' && <a href="#/login">Sudah punya akun? Masuk →</a>}
           {page !== 'register' && (
             <a href="#/register">Pemilik / pengelola baru? Daftar →</a>
-          )}
-          {page !== 'request-access' && (
-            <a href="#/request-access">Calon pesurvei? Ajukan akses →</a>
           )}
           {page !== 'invitation' && (
             <a href="#/invitation">Punya undangan organisasi? →</a>

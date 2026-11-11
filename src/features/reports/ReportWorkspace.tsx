@@ -13,7 +13,11 @@ import {
   workflowMenus,
 } from '../../lib/workflowNavigation';
 import type { WorkflowPage } from '../../lib/workflowNavigation';
-import type { ReviewAction } from '../onboarding/SurveyorManagement';
+import type {
+  IssuedPassword,
+  ReviewAction,
+} from '../onboarding/SurveyorManagement';
+import type { NewSurveyorInput } from '../../lib/surveyorAccess';
 import SurveyorManagement from '../onboarding/SurveyorManagement';
 import WorkspaceShell from './WorkspaceShell';
 import ReportCard from './ReportCard';
@@ -32,6 +36,8 @@ export default function ReportWorkspace({
   reports,
   onChange,
   onReview,
+  onAddSurveyor,
+  onReissuePassword,
   onLeave,
   storageFailed,
   invalidSession = false,
@@ -47,6 +53,10 @@ export default function ReportWorkspace({
     note: string,
     checked: boolean,
   ) => boolean;
+  onAddSurveyor: (
+    input: NewSurveyorInput,
+  ) => IssuedPassword | { error: string };
+  onReissuePassword: (id: string) => IssuedPassword | { error: string };
   onLeave: () => void;
   storageFailed: boolean;
   invalidSession?: boolean;
@@ -57,11 +67,6 @@ export default function ReportWorkspace({
   const [editing, setEditing] = useState<Report | null>(null);
   const [message, setMessage] = useState('');
   const visible = visibleReports(reports, account);
-  const pending = accounts.filter(
-    (person) =>
-      person.role === 'surveyor' &&
-      ['pending', 'changes-requested'].includes(person.status),
-  ).length;
   const matchesPage = (report: Report) =>
     page === 'incoming'
       ? report.status === 'Dikirim'
@@ -87,7 +92,6 @@ export default function ReportWorkspace({
   const count = (statuses: string[]) =>
     visible.filter((report) => statuses.includes(report.status)).length;
   const counts: Partial<Record<WorkflowPage, number>> = {
-    applications: pending,
     incoming: count(['Dikirim']),
     assignments: count(['Siap disurvei', 'Ditugaskan']),
     review: count(['Ditinjau']),
@@ -243,10 +247,13 @@ export default function ReportWorkspace({
     account.role === 'admin'
       ? [
           {
-            label: 'Pengajuan perlu ditinjau',
-            value: pending,
-            page: 'applications',
-            note: 'Persetujuan akses pesurvei',
+            label: 'Pesurvei aktif',
+            value: accounts.filter(
+              (person) =>
+                person.role === 'surveyor' && person.status === 'active',
+            ).length,
+            page: 'surveyors',
+            note: 'Akun yang kamu daftarkan',
           },
           {
             label: 'Laporan masuk',
@@ -445,24 +452,24 @@ export default function ReportWorkspace({
               <span className="ws-badge">LANGKAH BERIKUTNYA</span>
               <h2>
                 {account.role === 'admin'
-                  ? 'Mulai dari akses yang tepat.'
+                  ? 'Daftarkan pesurvei yang tepat.'
                   : account.role === 'owner'
                     ? 'Satu catatan, langkah lebih jelas.'
                     : 'Penugasan yang jelas, catatan tertata.'}
               </h2>
               <p>
                 {account.role === 'admin'
-                  ? 'Tinjau pengajuan pesurvei, lalu tugaskan laporan kepada akun yang telah disetujui.'
+                  ? 'Daftarkan pesurvei yang berwenang dan siapkan akunnya, lalu tugaskan laporan kepada pesurvei yang aktif.'
                   : account.role === 'owner'
                     ? 'Lengkapi data dasar. Admin akan memeriksa dan mengatur kunjungan pesurvei.'
                     : 'Buka penugasanmu, mulai survei, lalu kirim catatan kunjungan untuk ditinjau admin.'}
               </p>
               <a
                 className="ws-primary"
-                href={`#/dashboard/${account.role === 'admin' ? 'applications' : account.role === 'owner' ? 'new' : 'tasks'}`}
+                href={`#/dashboard/${account.role === 'admin' ? 'surveyors' : account.role === 'owner' ? 'new' : 'tasks'}`}
               >
                 {account.role === 'admin'
-                  ? 'Tinjau pengajuan'
+                  ? 'Kelola pesurvei'
                   : account.role === 'owner'
                     ? 'Catat bangunan'
                     : 'Lihat penugasan'}{' '}
@@ -473,15 +480,16 @@ export default function ReportWorkspace({
           </div>
         </>
       )}
-      {(page === 'applications' || page === 'surveyors') &&
-        account.role === 'admin' && (
-          <SurveyorManagement
-            accounts={accounts}
-            reports={reports}
-            mode={page}
-            onReview={onReview}
-          />
-        )}
+      {page === 'surveyors' && account.role === 'admin' && (
+        <SurveyorManagement
+          accounts={accounts}
+          reports={reports}
+          mode="surveyors"
+          onReview={onReview}
+          onAdd={onAddSurveyor}
+          onReissue={onReissuePassword}
+        />
+      )}
       {page === 'new' && account.role === 'owner' && (
         <ReportRegistrationForm
           initial={null}

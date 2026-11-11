@@ -2,7 +2,6 @@ import type { ActorRole } from './actorAccess';
 export const workflowMenus = {
   admin: [
     ['overview', 'Ringkasan', '◫'],
-    ['applications', 'Pengajuan pesurvei', '＋'],
     ['surveyors', 'Kelola pesurvei', '◎'],
     ['incoming', 'Laporan masuk', '↙'],
     ['assignments', 'Penugasan survei', '↗'],

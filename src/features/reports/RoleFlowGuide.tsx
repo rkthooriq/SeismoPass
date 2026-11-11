@@ -1,15 +1,15 @@
 const flows = [
   {
     role: 'Admin',
-    intro: 'Mengelola akses, penugasan, dan tinjauan administrasi.',
+    intro: 'Mendata pesurvei, menugaskan laporan, dan meninjau administrasi.',
     steps: [
       [
-        'Tinjau pengajuan pesurvei',
-        'Periksa email demo, organisasi, ringkasan kompetensi, dan supervisi.',
+        'Tambah pesurvei',
+        'Isi nama, email, organisasi, dan catatan kompetensi. Sistem membuat akun dengan sandi sementara acak.',
       ],
       [
-        'Putuskan akses',
-        'Setujui, minta perbaikan, atau tolak dengan alasan. Akses belum aktif selama menunggu.',
+        'Sampaikan sandi sementara',
+        'Sandi tampil sekali. Sampaikan lewat jalur terpisah; admin tidak pernah tahu sandi baru pesurvei.',
       ],
       [
         'Periksa laporan masuk',
@@ -58,23 +58,19 @@ const flows = [
   },
   {
     role: 'Pesurvei',
-    intro: 'Mengajukan akses dan mengerjakan penugasan dari admin.',
+    intro: 'Akunnya dibuat admin, lalu mengerjakan penugasan dari admin.',
     steps: [
       [
-        'Ajukan akses pesurvei',
-        'Isi organisasi dan ringkasan pelatihan/kompetensi contoh.',
+        'Masuk dengan sandi sementara',
+        'Gunakan email dan sandi sementara dari admin di halaman masuk yang sama dengan peran lain.',
       ],
       [
-        'Verifikasi email demo',
-        'Sesudah simulasi verifikasi, pengajuan menunggu tinjauan admin.',
-      ],
-      [
-        'Tunggu keputusan admin',
-        'Jika perlu perbaikan/ditolak, perbaiki dan kirim ulang. Akun belum bisa membuka laporan.',
+        'Buat kata sandi baru',
+        'Wajib pada masuk pertama (minimal 12 karakter). Sebelum itu akun belum bisa membuka laporan.',
       ],
       [
         'Buka penugasan admin',
-        'Setelah akses aktif, hanya laporan yang ditugaskan kepadamu terlihat. Pilih Mulai survei.',
+        'Setelah sandi baru dibuat, hanya laporan yang ditugaskan kepadamu terlihat. Pilih Mulai survei.',
       ],
       [
         'Catat kunjungan dan input RVS',

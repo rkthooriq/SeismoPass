@@ -1,7 +1,6 @@
 export const accountPages = [
   'login',
   'register',
-  'request-access',
   'forgot-password',
   'invitation',
 ] as const;
@@ -14,12 +13,9 @@ export interface AccountForm {
   email: string;
   password: string;
   confirmPassword: string;
-  organization: string;
-  requestedRole: string;
   reference: string;
   consent: boolean;
 }
-export const professionalRoles = [['surveyor', 'Pesurvei']] as const;
 export function validateAccountForm(
   page: AccountPage,
   data: AccountForm,
@@ -40,20 +36,11 @@ export function validateAccountForm(
     if (data.confirmPassword !== data.password)
       errors.confirmPassword = 'Konfirmasi kata sandi belum sama.';
   }
-  if (page === 'request-access') {
-    if (!data.name.trim()) errors.name = 'Isi nama pemohon.';
-    if (!data.organization.trim())
-      errors.organization = 'Isi nama organisasi atau instansi.';
-    if (!data.reference.trim())
-      errors.reference = 'Isi ringkasan pelatihan atau kompetensi contoh.';
-    if (!professionalRoles.some(([role]) => role === data.requestedRole))
-      errors.requestedRole = 'Pilih jenis akses yang diajukan.';
-  }
   if (page === 'invitation' && !data.reference.trim())
     errors.reference = 'Isi kode undangan.';
   if (page !== 'login' && page !== 'forgot-password' && !data.consent)
     errors.consent = 'Konfirmasi penggunaan data contoh pada pratinjau ini.';
-  for (const key of ['name', 'organization', 'reference'] as const)
+  for (const key of ['name', 'reference'] as const)
     if (data[key].length > 1000) errors[key] = 'Maksimal 1000 karakter.';
   return errors;
 }

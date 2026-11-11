@@ -8,14 +8,29 @@ export default function AccountPortal({
   account,
   onVerify,
   onResubmit,
+  onChangePassword,
   onLeave,
 }: {
   account: DemoAccount;
+  onChangePassword: (current: string, next: string, confirm: string) => string;
   onVerify: () => void;
   onResubmit: (organization: string, qualification: string) => boolean;
   onLeave: () => void;
 }) {
   const [message, setMessage] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+  function changePassword(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    // Isian dibaca langsung dari form dan tidak disimpan di state.
+    setPasswordError(
+      onChangePassword(
+        String(form.get('current') ?? ''),
+        String(form.get('next') ?? ''),
+        String(form.get('confirm') ?? ''),
+      ),
+    );
+  }
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -46,11 +61,72 @@ export default function AccountPortal({
             {account.name} · {account.email}
           </p>
           <ol className="access-progress">
-            <li>Daftar akun</li>
-            <li>Verifikasi email demo</li>
-            {account.role === 'surveyor' && <li>Tinjauan admin</li>}
-            <li>Akses diaktifkan</li>
+            {account.managed ? (
+              <>
+                <li>Akun dibuat admin</li>
+                <li>Buat kata sandi baru</li>
+                <li>Akses diaktifkan</li>
+              </>
+            ) : (
+              <>
+                <li>Daftar akun</li>
+                <li>Verifikasi email demo</li>
+                {account.role === 'surveyor' && <li>Tinjauan admin</li>}
+                <li>Akses diaktifkan</li>
+              </>
+            )}
           </ol>
+          {account.status === 'must-change-password' && (
+            <form className="report-form" onSubmit={changePassword}>
+              <p>
+                Admin menyiapkan akunmu dengan sandi sementara. Buat kata sandi
+                barumu sendiri agar admin tidak mengetahuinya. Sebelum itu kamu
+                belum dapat membuka penugasan.
+              </p>
+              <label>
+                Sandi sementara dari admin
+                <input
+                  name="current"
+                  type="password"
+                  autoComplete="off"
+                  maxLength={200}
+                  required
+                />
+              </label>
+              <label>
+                Kata sandi baru (minimal 12 karakter)
+                <input
+                  name="next"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={12}
+                  maxLength={200}
+                  required
+                />
+              </label>
+              <label>
+                Ulangi kata sandi baru
+                <input
+                  name="confirm"
+                  type="password"
+                  autoComplete="new-password"
+                  minLength={12}
+                  maxLength={200}
+                  required
+                />
+              </label>
+              {passwordError && (
+                <p role="alert" className="ws-disclaimer">
+                  {passwordError}
+                </p>
+              )}
+              <button className="ws-primary">Simpan kata sandi baru</button>
+              <p className="ws-muted">
+                Demo ini menyimpan kata sandi hanya di memori tab. Setelah muat
+                ulang, admin perlu menerbitkan sandi sementara baru.
+              </p>
+            </form>
+          )}
           {account.status === 'pending-email' && (
             <>
               <p>

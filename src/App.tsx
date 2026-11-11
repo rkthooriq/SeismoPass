@@ -27,7 +27,12 @@ import {
   verifyDemoEmail,
   reviewSurveyor,
   resubmitSurveyor,
+  createManagedSurveyor,
+  issueTemporaryPassword,
+  changeInitialPassword,
+  generateTemporaryPassword,
 } from './lib/surveyorAccess';
+import type { NewSurveyorInput } from './lib/surveyorAccess';
 import { demoId } from './lib/demoId';
 import RvsLab from './features/rvs/RvsLab';
 import AccountPortal from './features/onboarding/AccountPortal';
@@ -65,50 +70,94 @@ export default function App() {
     const match = workflow.accounts.find(
       (person) => person.email === data.email.trim().toLowerCase(),
     );
-    if (!match || data.password !== demoPassword)
-      return 'Email atau kata sandi demo tidak cocok.';
+    // Kata sandi hanya ada di memori tab. Akun buatan admin yang sandinya
+    // hilang (misalnya setelah muat ulang) perlu sandi sementara baru.
+    if (!match || !match.password || data.password !== match.password)
+      return 'Email atau kata sandi tidak cocok. Pesurvei yang kehilangan sandi perlu meminta sandi sementara baru dari admin.';
     enter(match);
     return '';
   }
-  function createAccount(data: AccountForm, role: 'owner' | 'surveyor') {
-    const errors = validateAccountForm(
-      role === 'owner' ? 'register' : 'request-access',
-      data,
-    );
+  function registerOwner(data: AccountForm) {
+    const errors = validateAccountForm('register', data);
     if (Object.keys(errors).length) return Object.values(errors).join(' ');
     const email = data.email.trim().toLowerCase();
     if (!/^[^\s@]+@example\.com$/.test(email))
       return 'Gunakan alamat fiktif dengan domain example.com.';
     if (workflow.accounts.some((person) => person.email === email))
-      return 'Email demo sudah digunakan. Masuk untuk melihat status akun atau pengajuanmu.';
+      return 'Email demo sudah digunakan. Masuk dengan akun tersebut.';
     if (workflow.accounts.length >= 500)
       return 'Batas akun demo sesi ini tercapai.';
-    if (role === 'owner' && data.password !== demoPassword)
+    if (data.password !== demoPassword)
       return `Gunakan kata sandi demo bersama: ${demoPassword}`;
     const person: DemoAccount = {
       id: demoId(),
       name: data.name.trim(),
       email,
-      role,
+      role: 'owner',
       password: demoPassword,
       status: 'pending-email',
       emailVerified: false,
-      organization: role === 'surveyor' ? data.organization.trim() : undefined,
-      qualification: role === 'surveyor' ? data.reference.trim() : undefined,
       history: [
         {
           action: 'submitted',
           by: 'pemohon',
-          note:
-            role === 'surveyor'
-              ? 'Pengajuan akses pesurvei demo dibuat.'
-              : 'Pendaftaran pelapor demo dibuat.',
+          note: 'Pendaftaran pelapor demo dibuat.',
           at: new Date().toISOString(),
         },
       ],
     };
     updateWorkflow([...workflow.accounts, person], workflow.reports);
     enter(person);
+    return '';
+  }
+  // Sandi sementara hanya dikembalikan sekali ke layar admin dan tidak
+  // pernah disimpan di sesi browser.
+  function addSurveyor(input: NewSurveyorInput) {
+    if (!account) return { error: 'Masuk sebagai admin terlebih dahulu.' };
+    const password = generateTemporaryPassword();
+    const result = createManagedSurveyor(
+      account,
+      input,
+      workflow.accounts,
+      demoId(),
+      password,
+    );
+    if ('error' in result) return result;
+    updateWorkflow([...workflow.accounts, result.account], workflow.reports);
+    return {
+      name: result.account.name,
+      email: result.account.email,
+      password,
+    };
+  }
+  function reissuePassword(id: string) {
+    const person = workflow.accounts.find((candidate) => candidate.id === id);
+    if (!account || !person) return { error: 'Akun pesurvei tidak ditemukan.' };
+    const password = generateTemporaryPassword();
+    const next = issueTemporaryPassword(account, person, password);
+    if (!next)
+      return {
+        error:
+          'Sandi sementara hanya dapat diterbitkan untuk pesurvei buatan admin yang aktif atau belum mengganti sandi.',
+      };
+    updateWorkflow(
+      workflow.accounts.map((candidate) =>
+        candidate.id === id ? next : candidate,
+      ),
+      workflow.reports,
+    );
+    return { name: next.name, email: next.email, password };
+  }
+  function changePassword(current: string, next: string, confirm: string) {
+    if (!account) return 'Masuk terlebih dahulu.';
+    const result = changeInitialPassword(account, current, next, confirm);
+    if ('error' in result) return result.error;
+    updateWorkflow(
+      workflow.accounts.map((person) =>
+        person.id === account.id ? result.account : person,
+      ),
+      workflow.reports,
+    );
     return '';
   }
   function review(
@@ -180,8 +229,7 @@ export default function App() {
           enter(workflow.accounts.find((person) => person.id === 'owner-demo')!)
         }
         onSignIn={signIn}
-        onRegister={(data) => createAccount(data, 'owner')}
-        onRequest={(data) => createAccount(data, 'surveyor')}
+        onRegister={registerOwner}
       />
     );
   }
@@ -191,6 +239,7 @@ export default function App() {
         key={`${account.id}-${account.status}`}
         account={account}
         onLeave={leave}
+        onChangePassword={changePassword}
         onVerify={() => {
           const next = verifyDemoEmail(account);
           if (next)
@@ -228,6 +277,8 @@ export default function App() {
         reports={workflow.reports}
         onChange={(reports) => updateWorkflow(workflow.accounts, reports)}
         onReview={review}
+        onAddSurveyor={addSurveyor}
+        onReissuePassword={reissuePassword}
         onLeave={leave}
         storageFailed={storageFailed}
         invalidSession={workflow.invalid}
