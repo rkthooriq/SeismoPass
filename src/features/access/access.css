@@ -304,3 +304,124 @@
     display: none;
   }
 }
+.account-entry {
+  width: 100%;
+}
+.account-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 12px;
+  margin-bottom: 18px;
+  font-weight: 550;
+}
+.account-field input,
+.account-field select {
+  font: inherit;
+  font-weight: 400;
+  border: 1px solid #d8dfcf;
+  padding: 13px 15px;
+  border-radius: 9px;
+  background: #fff;
+  color: #293b32;
+  width: 100%;
+  min-width: 0;
+}
+.account-field input:focus-visible,
+.account-field select:focus-visible {
+  outline: 3px solid #7c9464;
+  outline-offset: 2px;
+}
+.account-field [aria-invalid='true'] {
+  border-color: #b26651;
+}
+.account-forgot {
+  display: block;
+  text-align: right;
+  color: #627850;
+  font-size: 11px;
+  margin: -5px 0 23px;
+}
+.account-links {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border-top: 1px solid #dce3d0;
+  padding-top: 23px;
+  margin-top: 25px;
+  font-size: 11px;
+  color: #5b704b;
+}
+.account-explore {
+  margin-top: 25px;
+  padding: 17px;
+  background: #eef2e5;
+  border-radius: 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 11px;
+}
+.account-explore button {
+  border: 0;
+  padding: 0;
+  text-align: left;
+  color: #354d2d;
+  background: transparent;
+  font: inherit;
+  font-weight: 600;
+}
+.account-explore small {
+  font-size: 10px;
+  color: #7c896f;
+}
+.account-result,
+.account-info {
+  padding: 20px;
+  border: 1px solid #dce3d0;
+  border-radius: 10px;
+  background: #f0f4e8;
+  margin-bottom: 20px;
+}
+.account-result h3 {
+  font-size: 22px;
+  margin: 10px 0 15px;
+}
+.account-result p {
+  font-size: 12px;
+  line-height: 1.9;
+  color: #657459;
+  margin: 15px 0;
+}
+.account-info {
+  font-size: 11px;
+  color: #748068;
+  line-height: 1.8;
+}
+.account-errors {
+  background: #fbf0eb;
+  border: 1px solid #e8c3b5;
+  color: #964932;
+  border-radius: 9px;
+  padding: 18px;
+  font-size: 12px;
+  margin-bottom: 20px;
+}
+.account-errors ul {
+  padding-left: 18px;
+  margin-bottom: 0;
+}
+.account-errors a {
+  text-decoration: underline;
+}
+
+.account-fill {
+  margin-block: 4px;
+  padding: 4px 8px;
+  color: inherit;
+  background: white;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+  font: inherit;
+  cursor: pointer;
+}

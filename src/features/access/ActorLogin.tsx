@@ -1,27 +1,144 @@
 import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import { actorRoles } from '../../lib/actorAccess';
-import type { ActorRole } from '../../lib/actorAccess';
 import BuildingScene from '../../components/BuildingScene';
+import { professionalRoles, validateAccountForm } from '../../lib/accountFlow';
+import type { AccountForm, AccountPage } from '../../lib/accountFlow';
+import type { DemoAccount } from '../../lib/reportDemo';
+import { demoAccounts, demoPassword } from '../../lib/reportDemo';
 import './access.css';
 
+const copy: Record<
+  AccountPage,
+  { title: string; subtitle: string; button: string }
+> = {
+  login: {
+    title: 'Selamat datang kembali.',
+    subtitle:
+      'Satu akun untuk ruang kerjamu. Akses mengikuti peran yang telah diaktifkan pada akun.',
+    button: 'Masuk',
+  },
+  register: {
+    title: 'Awali cerita bangunanmu.',
+    subtitle: 'Gunakan alamat @example.com untuk membuat akun pelapor demo.',
+    button: 'Buat akun demo',
+  },
+  'request-access': {
+    title: 'Berkontribusi sesuai keahlian.',
+    subtitle:
+      'Daftar sebagai calon pesurvei. Verifikasi email demo, lalu tunggu persetujuan admin.',
+    button: 'Kirim pengajuan pesurvei',
+  },
+  'forgot-password': {
+    title: 'Kembali ke ruang kerjamu.',
+    subtitle:
+      'Pada layanan nyata, pemulihan akun dilakukan melalui email yang terdaftar.',
+    button: 'Lihat alur pemulihan',
+  },
+  invitation: {
+    title: 'Satu undangan. Peran yang tepat.',
+    subtitle:
+      'Undangan perlu cocok dengan email penerima, masih berlaku, dan diverifikasi oleh layanan.',
+    button: 'Tinjau alur undangan',
+  },
+};
+const empty: AccountForm = {
+  name: '',
+  email: '',
+  password: '',
+  confirmPassword: '',
+  organization: '',
+  requestedRole: 'surveyor',
+  reference: '',
+  consent: false,
+};
+
 export default function ActorLogin({
-  onEnter,
+  page = 'login',
+  onExplore,
+  onSignIn,
+  onRegister,
+  onRequest,
+  availableAccounts = demoAccounts,
 }: {
-  onEnter: (role: ActorRole) => void;
+  page?: AccountPage;
+  onExplore: () => void;
+  onSignIn: (data: AccountForm) => string;
+  onRegister: (data: AccountForm) => string;
+  onRequest: (data: AccountForm) => string;
+  availableAccounts?: DemoAccount[];
 }) {
-  const [role, setRole] = useState<ActorRole>('owner');
-  const [consent, setConsent] = useState(false);
-  const [error, setError] = useState('');
-  const checkbox = useRef<HTMLInputElement>(null);
+  const [data, setData] = useState<AccountForm>({
+    ...empty,
+    ...(page === 'register'
+      ? { password: demoPassword, confirmPassword: demoPassword }
+      : {}),
+  });
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [accountError, setAccountError] = useState('');
+  const [preview, setPreview] = useState(false);
+  const summary = useRef<HTMLDivElement>(null);
+  const result = useRef<HTMLDivElement>(null);
+  const details = copy[page];
   function submit(event: FormEvent) {
     event.preventDefault();
-    if (!consent) {
-      setError('Konfirmasi penggunaan simulasi sebelum melanjutkan.');
-      checkbox.current?.focus();
+    const next = validateAccountForm(page, data);
+    setErrors(next);
+    if (Object.keys(next).length) {
+      requestAnimationFrame(() => summary.current?.focus());
       return;
     }
-    onEnter(role);
+    if (page === 'login' || page === 'register' || page === 'request-access') {
+      const error =
+        page === 'login'
+          ? onSignIn(data)
+          : page === 'register'
+            ? onRegister(data)
+            : onRequest(data);
+      setAccountError(error);
+      if (error) requestAnimationFrame(() => summary.current?.focus());
+      return;
+    }
+    setData((previous) => ({
+      ...previous,
+      password: '',
+      confirmPassword: '',
+      reference: '',
+    }));
+    setPreview(true);
+    requestAnimationFrame(() => result.current?.focus());
+  }
+  function field(
+    key: keyof Omit<AccountForm, 'consent'>,
+    label: string,
+    type = 'text',
+    placeholder = '',
+  ) {
+    return (
+      <label className="account-field" htmlFor={`account-${key}`}>
+        {label}
+        <input
+          id={`account-${key}`}
+          type={type}
+          value={data[key]}
+          placeholder={placeholder}
+          autoComplete="off"
+          readOnly={
+            page === 'register' && ['password', 'confirmPassword'].includes(key)
+          }
+          maxLength={key === 'email' ? 254 : 200}
+          aria-invalid={Boolean(errors[key])}
+          aria-describedby={errors[key] ? `account-error-${key}` : undefined}
+          onChange={(event) =>
+            setData((previous) => ({ ...previous, [key]: event.target.value }))
+          }
+        />
+        {errors[key] && (
+          <small id={`account-error-${key}`} className="actor-error">
+            {errors[key]}
+          </small>
+        )}
+      </label>
+    );
   }
   return (
     <main className="actor-login">
@@ -30,15 +147,15 @@ export default function ActorLogin({
           ▥ seismopass.
         </a>
         <div>
-          <span className="actor-eyebrow">SATU ALUR, BERBAGAI PERAN</span>
+          <span className="actor-eyebrow">MENGENAL. MENCATAT. MELANGKAH.</span>
           <h1>
-            Langkah bersama.
+            Bangunan punya cerita.
             <br />
-            Peran yang berarti.
+            Mulai dari milikmu.
           </h1>
           <p>
-            Dari mengenal bangunan hingga menyiapkan tindak lanjut, setiap peran
-            punya ruang untuk berkontribusi.
+            Satu paspor digital untuk menghubungkan catatan bangunan,
+            pemeriksaan awal, dan tindak lanjut bersama ahli.
           </p>
         </div>
         <div className="actor-art">
@@ -48,76 +165,270 @@ export default function ActorLogin({
           RVS adalah penyaringan awal, bukan sertifikat aman.
         </p>
       </section>
-      <section className="actor-entry">
+      <section className="actor-entry account-entry">
         <a href="#" className="actor-back">
           ← Kembali ke beranda
         </a>
         <span className="actor-demo-label">
-          SIMULASI AKSES · TANPA AKUN NYATA
+          AKUN DEMO · GUNAKAN DATA FIKTIF
         </span>
-        <h2>Masuk ke ruang peranmu.</h2>
-        <p className="actor-subtitle">
-          Pilih aktor untuk menjelajahi usulan dashboard dan batas aksesnya.
-          Tidak perlu email atau kata sandi.
-        </p>
-        <form onSubmit={submit}>
-          <fieldset className="actor-role-picker">
-            <legend>Pilih peran demo</legend>
-            {actorRoles.map((actor) => (
-              <label
-                key={actor.id}
-                className={role === actor.id ? 'selected' : ''}
+        <h2>{details.title}</h2>
+        <p className="actor-subtitle">{details.subtitle}</p>
+        {preview ? (
+          <div
+            ref={result}
+            tabIndex={-1}
+            className="account-result"
+            role="status"
+          >
+            <span className="actor-symbol" aria-hidden="true">
+              {page === 'login' ? '◎' : '↗'}
+            </span>
+            <h3>
+              {page === 'login'
+                ? 'Layanan masuk belum terhubung.'
+                : 'Begini langkah berikutnya.'}
+            </h3>
+            <p>
+              {page === 'login'
+                ? 'Kredensial tidak diverifikasi dan kamu belum masuk. Login nyata membutuhkan layanan akun.'
+                : page === 'register'
+                  ? 'Pada layanan nyata: periksa keunikan email → kirim verifikasi → pengguna memverifikasi email → aktifkan akun pemilik. Pendaftaran ini belum membuat akun atau mengirim email.'
+                  : page === 'request-access'
+                    ? 'Pada layanan nyata: verifikasi email → tinjau organisasi dan kewenangan → setujui atau minta perbaikan → aktifkan peran sesuai persetujuan. Pengajuan belum dikirim dan tidak memberikan akses.'
+                    : page === 'invitation'
+                      ? 'Pada layanan nyata: verifikasi token undangan, penerima dan masa berlaku → verifikasi email → aktifkan peran dari undangan. Kode belum diperiksa dan akses belum diberikan.'
+                      : 'Pada layanan nyata, tampilkan respons umum lalu kirim tautan pemulihan hanya jika akun memenuhi syarat. Di pratinjau ini, email belum dikirim.'}
+            </p>
+            <p className="actor-entry-note">
+              Isian hanya diproses di memori tampilan, tanpa dikirim atau
+              disimpan sebagai akun. Contoh kata sandi dan kode sudah
+              dibersihkan.
+            </p>
+            <button className="actor-enter" onClick={() => setPreview(false)}>
+              Kembali ke formulir ←
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={submit} noValidate>
+            {accountError && (
+              <div
+                ref={summary}
+                tabIndex={-1}
+                className="account-errors"
+                role="alert"
               >
+                {accountError}
+              </div>
+            )}
+            {page === 'login' && (
+              <details className="account-info">
+                <summary>Akun uji SeismoPass</summary>
+                <ul>
+                  {availableAccounts.slice(0, 10).map((account) => (
+                    <li key={account.id}>
+                      <span>
+                        {account.name} · {account.email}
+                      </span>{' '}
+                      <button
+                        type="button"
+                        className="account-fill"
+                        onClick={() => {
+                          setData((previous) => ({
+                            ...previous,
+                            email: account.email,
+                            password: account.password,
+                          }));
+                          setErrors({});
+                          setAccountError('');
+                        }}
+                      >
+                        Isi akun {account.name.replace(' Demo', '')}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+                <p>
+                  Kata sandi fiktif bersama: <code>{demoPassword}</code>
+                </p>
+              </details>
+            )}
+            {Object.keys(errors).length > 0 && (
+              <div
+                className="account-errors"
+                role="alert"
+                ref={summary}
+                tabIndex={-1}
+              >
+                <strong>Periksa kembali isian.</strong>
+                <ul>
+                  {Object.entries(errors).map(([key, value]) => (
+                    <li key={key}>
+                      <a
+                        href={`#account-${key}`}
+                        onClick={(e) => {
+                          e.preventDefault();
+                          document.getElementById(`account-${key}`)?.focus();
+                        }}
+                      >
+                        {value}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            {['register', 'request-access'].includes(page) &&
+              field('name', 'Nama (contoh)', 'text', 'Nama fiktif')}
+            {field('email', 'Alamat email', 'email', 'nama@example.com')}
+            {['login', 'register'].includes(page) &&
+              field(
+                'password',
+                page === 'register'
+                  ? 'Kata sandi demo bersama (tetap)'
+                  : 'Kata sandi contoh',
+                'password',
+                'Jangan gunakan kata sandi asli',
+              )}
+            {page === 'register' && (
+              <>
+                {field(
+                  'confirmPassword',
+                  'Ulangi kata sandi contoh',
+                  'password',
+                )}
+                <p className="actor-entry-note">
+                  Untuk demonstrasi, semua akun memakai SeismoDemo123!. Tidak
+                  ada kata sandi pengguna yang disimpan di sesi browser.
+                </p>
+              </>
+            )}
+            {page === 'request-access' && (
+              <>
+                {field(
+                  'organization',
+                  'Organisasi / instansi (contoh)',
+                  'text',
+                  'Nama organisasi fiktif',
+                )}
+                <label
+                  className="account-field"
+                  htmlFor="account-requestedRole"
+                >
+                  Jenis akses yang diajukan
+                  <select
+                    id="account-requestedRole"
+                    value={data.requestedRole}
+                    onChange={(e) =>
+                      setData((previous) => ({
+                        ...previous,
+                        requestedRole: e.target.value,
+                      }))
+                    }
+                    aria-invalid={Boolean(errors.requestedRole)}
+                    aria-describedby={
+                      errors.requestedRole
+                        ? 'account-error-requestedRole'
+                        : undefined
+                    }
+                  >
+                    <option value="">Pilih jenis akses</option>
+                    {professionalRoles.map(([id, label]) => (
+                      <option value={id} key={id}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.requestedRole && (
+                    <small
+                      className="actor-error"
+                      id="account-error-requestedRole"
+                    >
+                      {errors.requestedRole}
+                    </small>
+                  )}
+                </label>
+                {field(
+                  'reference',
+                  'Ringkasan pelatihan / kompetensi (contoh)',
+                  'text',
+                  'Contoh pelatihan RVS dan kebutuhan supervisi',
+                )}
+                <div className="account-info">
+                  Bukti kompetensi, surat penugasan, dan tata cara verifikasi
+                  mengikuti kebijakan yang masih perlu disepakati. Jangan unggah
+                  dokumen pribadi pada demo.
+                </div>
+              </>
+            )}
+            {page === 'invitation' &&
+              field(
+                'reference',
+                'Kode undangan contoh',
+                'text',
+                'Kode dari undangan organisasi',
+              )}
+            {page === 'login' && (
+              <a className="account-forgot" href="#/forgot-password">
+                Lupa kata sandi?
+              </a>
+            )}
+            {!['login', 'forgot-password'].includes(page) && (
+              <label className="actor-consent">
                 <input
-                  type="radio"
-                  name="actor"
-                  value={actor.id}
-                  checked={role === actor.id}
-                  onChange={() => setRole(actor.id)}
+                  id="account-consent"
+                  type="checkbox"
+                  checked={data.consent}
+                  onChange={(e) =>
+                    setData((previous) => ({
+                      ...previous,
+                      consent: e.target.checked,
+                    }))
+                  }
+                  aria-invalid={Boolean(errors.consent)}
+                  aria-describedby={
+                    errors.consent ? 'account-error-consent' : undefined
+                  }
                 />
-                <span className="actor-symbol" aria-hidden="true">
-                  {actor.symbol}
-                </span>
                 <span>
-                  <strong>{actor.name}</strong>
-                  <small>{actor.description}</small>
+                  Saya menggunakan data fiktif untuk mencoba alur demo.
                 </span>
               </label>
-            ))}
-          </fieldset>
-          <label className="actor-consent">
-            <input
-              ref={checkbox}
-              type="checkbox"
-              checked={consent}
-              onChange={(e) => {
-                setConsent(e.target.checked);
-                setError('');
-              }}
-              aria-invalid={Boolean(error)}
-              aria-describedby={error ? 'actor-login-error' : undefined}
-            />
-            <span>
-              Saya memahami ini simulasi peran dengan data fiktif, bukan login
-              atau otorisasi nyata.
-            </span>
-          </label>
-          {error && (
-            <p id="actor-login-error" role="alert" className="actor-error">
-              {error}
+            )}
+            {errors.consent && (
+              <p id="account-error-consent" className="actor-error">
+                {errors.consent}
+              </p>
+            )}
+            <button className="actor-enter" type="submit">
+              {details.button} <span aria-hidden="true">→</span>
+            </button>
+            <p className="actor-entry-note">
+              Akun dan pengajuan demo bertahan selama sesi tab. Gunakan kata
+              sandi uji bersama SeismoDemo123!. Verifikasi email disimulasikan;
+              tidak ada email dikirim.
             </p>
+          </form>
+        )}
+        <nav className="account-links" aria-label="Navigasi akun">
+          {page !== 'login' && <a href="#/login">Sudah punya akun? Masuk →</a>}
+          {page !== 'register' && (
+            <a href="#/register">Pemilik / pengelola baru? Daftar →</a>
           )}
-          <button className="actor-enter" type="submit">
-            Masuk sebagai{' '}
-            {actorRoles.find((actor) => actor.id === role)?.shortName}{' '}
-            <span aria-hidden="true">→</span>
+          {page !== 'request-access' && (
+            <a href="#/request-access">Calon pesurvei? Ajukan akses →</a>
+          )}
+          {page !== 'invitation' && (
+            <a href="#/invitation">Punya undangan organisasi? →</a>
+          )}
+        </nav>
+        <div className="account-explore">
+          <span>Ingin mengenal aplikasinya dulu?</span>
+          <button type="button" onClick={onExplore}>
+            Jelajahi contoh bangunan ↗
           </button>
-        </form>
-        <p className="actor-entry-note">
-          Pilihan peran berlaku selama aplikasi terbuka dan berakhir saat
-          refresh. Akun aktor, verifikasi kewenangan, dan hak akses produksi
-          masih perlu disepakati.
-        </p>
+          <small>Demo pemilik dengan data fiktif, tanpa membuat akun.</small>
+        </div>
       </section>
     </main>
   );

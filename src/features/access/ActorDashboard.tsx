@@ -3,14 +3,7 @@ import type { ActorRole } from '../../lib/actorAccess';
 
 export function ActorDashboard({ role }: { role: ActorRole }) {
   const actor = getActor(role);
-  const noun =
-    role === 'government'
-      ? 'ringkasan pilot resmi'
-      : role === 'finance'
-        ? 'pengajuan dukungan'
-        : role === 'provider'
-          ? 'pekerjaan retrofit'
-          : 'penugasan';
+  const noun = 'penugasan';
   return (
     <>
       <section className="ws-feature-hero">

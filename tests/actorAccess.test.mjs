@@ -2,58 +2,117 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   actorRoles,
-  isActorRole,
   canOpenPage,
   canManageBuildings,
 } from '../src/lib/actorAccess.ts';
+import {
+  advanceReport,
+  assignReport,
+  demoAccounts,
+  sampleReports,
+  visibleReports,
+} from '../src/lib/reportDemo.ts';
 
-test('all six source actors have separate demo identities and shared help/access pages', () => {
+const [owner, admin, surveyor] = demoAccounts;
+const draft = { ...sampleReports[0], status: 'Draf' };
+
+test('only three account roles exist and legacy building pages remain owner-only', () => {
   assert.deepEqual(
-    actorRoles.map((actor) => actor.id),
-    ['owner', 'assessor', 'expert', 'government', 'provider', 'finance'],
+    actorRoles.map((role) => role.id),
+    ['owner', 'admin', 'surveyor'],
   );
-  for (const role of actorRoles) {
-    for (const page of ['dashboard', 'guide', 'access'])
-      assert.equal(canOpenPage(role.id, page), true);
-    for (const [page] of role.actions)
-      assert.equal(canOpenPage(role.id, page), true);
+  for (const account of demoAccounts) {
+    assert.equal(canOpenPage(account.role, 'dashboard'), true);
+    assert.equal(
+      canOpenPage(account.role, 'profile', true),
+      account.role === 'owner',
+    );
+    assert.equal(canManageBuildings(account.role), account.role === 'owner');
   }
+  assert.equal(canOpenPage('expert', 'dashboard'), false);
 });
-test('only the owner can manage, export, reset or open building details in this demo', () => {
-  for (const actor of actorRoles) {
-    assert.equal(canManageBuildings(actor.id), actor.id === 'owner');
-    for (const page of ['buildings', 'new', 'profile', 'data', 'qr'])
-      assert.equal(canOpenPage(actor.id, page), actor.id === 'owner');
-    assert.equal(canOpenPage(actor.id, 'profile', true), actor.id === 'owner');
-  }
+
+test('a report can go through admin assignment, requested revision, and administrative closure', () => {
+  const submitted = advanceReport(draft, owner, 'submit');
+  const queued = advanceReport(submitted, admin, 'verify');
+  const assignment = assignReport(
+    queued,
+    admin,
+    surveyor,
+    'Kunjungan contoh dengan supervisi.',
+  );
+  const assigned = advanceReport(assignment, surveyor, 'start');
+  const visited = advanceReport(assigned, surveyor, 'visit', {
+    date: '2026-11-11',
+    note: 'Kunjungan tercatat.',
+  });
+  const revision = advanceReport(visited, admin, 'revise', {
+    note: 'Lengkapi catatan kunjungan.',
+  });
+  const revised = advanceReport(revision, surveyor, 'visit', {
+    date: '2026-11-11',
+    note: 'Catatan dilengkapi.',
+  });
+  const closed = advanceReport(revised, admin, 'close', {
+    note: 'Catatan diterima.',
+  });
+  assert.deepEqual(
+    [submitted, queued, assigned, visited, revision, revised, closed].map(
+      (report) => report.status,
+    ),
+    [
+      'Dikirim',
+      'Siap disurvei',
+      'Dalam survei',
+      'Ditinjau',
+      'Perlu revisi',
+      'Ditinjau',
+      'Selesai',
+    ],
+  );
+  assert.equal(advanceReport(closed, surveyor, 'visit'), null);
 });
-test('assessors and experts have distinct professional areas', () => {
-  assert.equal(canOpenPage('assessor', 'screening'), true);
-  assert.equal(canOpenPage('assessor', 'retrofit'), false);
-  assert.equal(canOpenPage('assessor', 'referrals'), false);
-  for (const page of ['screening', 'referrals', 'retrofit'])
-    assert.equal(canOpenPage('expert', page), true);
-});
-test('retrofit providers cannot assess screening or access financing pages', () => {
-  assert.equal(canOpenPage('provider', 'retrofit'), true);
-  for (const page of ['screening', 'referrals', 'support'])
-    assert.equal(canOpenPage('provider', page), false);
-});
-test('government and financial partners receive only the coordination/support area', () => {
-  for (const role of ['government', 'finance']) {
-    assert.equal(canOpenPage(role, 'support'), true);
-    for (const page of ['screening', 'referrals', 'retrofit', 'buildings'])
-      assert.equal(canOpenPage(role, page), false);
-  }
-});
-test('unknown actors, unknown pages and invalid edit actions are rejected', () => {
-  for (const actor of [null, undefined, '', 'admin', '__proto__']) {
-    assert.equal(isActorRole(actor), false);
-    assert.equal(canOpenPage(actor, 'dashboard'), false);
-    assert.equal(canManageBuildings(actor), false);
-  }
-  for (const actor of actorRoles) {
-    assert.equal(canOpenPage(actor.id, 'not-found'), false);
-    assert.equal(canOpenPage(actor.id, 'dashboard', true), false);
-  }
+
+test('report visibility and updates respect ownership, assignment and status', () => {
+  const other = { ...owner, id: 'another-reporter' };
+  assert.deepEqual(visibleReports([draft], other), []);
+  assert.deepEqual(visibleReports([draft], surveyor), []);
+  assert.deepEqual(visibleReports([draft], admin), []);
+  assert.equal(advanceReport(draft, other, 'submit'), null);
+  const sent = advanceReport(draft, owner, 'submit');
+  assert.equal(advanceReport(sent, surveyor, 'claim'), null);
+  assert.equal(advanceReport(sent, admin, 'return'), null);
+  const returned = advanceReport(sent, admin, 'return', {
+    note: 'Lengkapi lokasi.',
+  });
+  assert.equal(returned.status, 'Perlu dilengkapi');
+  assert.equal(advanceReport(returned, owner, 'submit').status, 'Dikirim');
+  const queued = advanceReport(sent, admin, 'verify');
+  assert.deepEqual(visibleReports([queued], surveyor), []);
+  assert.equal(advanceReport(queued, admin, 'claim'), null);
+  const assignment = assignReport(
+    queued,
+    admin,
+    surveyor,
+    'Kunjungan contoh dengan supervisi.',
+  );
+  const assigned = advanceReport(assignment, surveyor, 'start');
+  const anotherSurveyor = { ...surveyor, id: 'other-surveyor' };
+  assert.equal(advanceReport(assigned, anotherSurveyor, 'claim'), null);
+  assert.deepEqual(visibleReports([assigned], anotherSurveyor), []);
+  assert.deepEqual(visibleReports([assigned], surveyor), [assigned]);
+  assert.equal(
+    advanceReport(assigned, { ...surveyor, id: 'other-surveyor' }, 'visit', {
+      date: '2026-11-11',
+      note: 'Catatan',
+    }),
+    null,
+  );
+  assert.equal(
+    advanceReport(assigned, surveyor, 'visit', {
+      date: '2026-11-11',
+      note: ' ',
+    }),
+    null,
+  );
 });
