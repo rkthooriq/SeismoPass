@@ -414,14 +414,3 @@
 .account-errors a {
   text-decoration: underline;
 }
-
-.account-fill {
-  margin-block: 4px;
-  padding: 4px 8px;
-  color: inherit;
-  background: white;
-  border: 1px solid currentColor;
-  border-radius: 6px;
-  font: inherit;
-  cursor: pointer;
-}

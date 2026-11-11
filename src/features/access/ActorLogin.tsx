@@ -3,8 +3,7 @@ import type { FormEvent } from 'react';
 import BuildingScene from '../../components/BuildingScene';
 import { professionalRoles, validateAccountForm } from '../../lib/accountFlow';
 import type { AccountForm, AccountPage } from '../../lib/accountFlow';
-import type { DemoAccount } from '../../lib/reportDemo';
-import { demoAccounts, demoPassword } from '../../lib/reportDemo';
+import { demoPassword } from '../../lib/reportDemo';
 import './access.css';
 
 const copy: Record<
@@ -58,14 +57,12 @@ export default function ActorLogin({
   onSignIn,
   onRegister,
   onRequest,
-  availableAccounts = demoAccounts,
 }: {
   page?: AccountPage;
   onExplore: () => void;
   onSignIn: (data: AccountForm) => string;
   onRegister: (data: AccountForm) => string;
   onRequest: (data: AccountForm) => string;
-  availableAccounts?: DemoAccount[];
 }) {
   const [data, setData] = useState<AccountForm>({
     ...empty,
@@ -220,38 +217,6 @@ export default function ActorLogin({
               >
                 {accountError}
               </div>
-            )}
-            {page === 'login' && (
-              <details className="account-info">
-                <summary>Akun uji SeismoPass</summary>
-                <ul>
-                  {availableAccounts.slice(0, 10).map((account) => (
-                    <li key={account.id}>
-                      <span>
-                        {account.name} · {account.email}
-                      </span>{' '}
-                      <button
-                        type="button"
-                        className="account-fill"
-                        onClick={() => {
-                          setData((previous) => ({
-                            ...previous,
-                            email: account.email,
-                            password: account.password,
-                          }));
-                          setErrors({});
-                          setAccountError('');
-                        }}
-                      >
-                        Isi akun {account.name.replace(' Demo', '')}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-                <p>
-                  Kata sandi fiktif bersama: <code>{demoPassword}</code>
-                </p>
-              </details>
             )}
             {Object.keys(errors).length > 0 && (
               <div

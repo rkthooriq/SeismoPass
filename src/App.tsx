@@ -176,7 +176,6 @@ export default function App() {
       <ActorLogin
         key={page}
         page={page}
-        availableAccounts={workflow.accounts}
         onExplore={() =>
           enter(workflow.accounts.find((person) => person.id === 'owner-demo')!)
         }

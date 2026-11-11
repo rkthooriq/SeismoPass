@@ -18,7 +18,6 @@ Tiga peran demo:
 | Pesurvei | Mengajukan akses, mengerjakan penugasan admin, dan mencatat kunjungan |
 
 
-Akun uji tampil di halaman masuk: `http://localhost:5173/#/login`. Gunakan satu tab saat berganti akun.
 
 
 ## Menjalankan
