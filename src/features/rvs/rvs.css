@@ -1,0 +1,103 @@
+.rvs-editor {
+  padding: clamp(16px, 3vw, 28px);
+  border: 1px solid var(--ws-line);
+  border-radius: 14px;
+  background: #fff;
+  margin: 20px 0;
+}
+.rvs-editor fieldset {
+  border: 1px solid var(--ws-line);
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 0;
+}
+.rvs-editor legend {
+  font-weight: 650;
+  padding: 0 8px;
+}
+.rvs-editor select,
+.rvs-editor input,
+.rvs-editor textarea {
+  width: 100%;
+  min-width: 0;
+}
+.rvs-editor .report-checkbox input {
+  width: 18px;
+}
+.rvs-editor summary,
+.rvs-saved summary {
+  cursor: pointer;
+  font-weight: 650;
+  padding: 14px 0;
+}
+.rvs-result {
+  margin: 24px 0;
+  padding: clamp(16px, 3vw, 28px);
+  background: #f3f7fb;
+  border: 1px solid #d3dfe9;
+  border-radius: 14px;
+}
+.rvs-score {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin: 20px 0;
+}
+.rvs-score > strong {
+  font-size: clamp(44px, 7vw, 68px);
+  line-height: 1;
+  color: #244d6a;
+}
+.rvs-calculation {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.rvs-calculation caption {
+  text-align: left;
+  font-weight: 600;
+  margin-bottom: 12px;
+}
+.rvs-calculation th,
+.rvs-calculation td {
+  padding: 10px;
+  border-bottom: 1px solid #d3dfe9;
+  text-align: left;
+}
+.rvs-calculation th {
+  font-weight: 500;
+}
+.rvs-calculation td {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.rvs-alert {
+  padding: 16px 16px 16px 32px;
+  background: #fff7e6;
+  border-radius: 10px;
+}
+.rvs-alert li + li {
+  margin-top: 8px;
+}
+.rvs-qr svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 16px 0;
+}
+.rvs-qr label {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.rvs-qr input {
+  width: 100%;
+}
+.rvs-saved {
+  margin: 16px 0;
+}
+.rvs-observations {
+  border: 1px solid var(--ws-line);
+  border-radius: 12px;
+  padding: 16px;
+}

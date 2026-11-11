@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import BuildingScene from '../components/BuildingScene';
+import landscapeImage from '../assets/landscape.png';
+import './landing.css';
 
 const steps = [
   [
@@ -40,7 +41,7 @@ function Brand() {
         <path
           d="M7 19h7l3-9 5 17 3-8h4"
           fill="none"
-          stroke="#d4e7b2"
+          stroke="#ffffff"
           strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
@@ -56,11 +57,41 @@ function Brand() {
 
 export default function LandingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [view, setView] = useState<'ilustrasi' | 'profil'>('ilustrasi');
+  const [activeTab, setActiveTab] = useState(0);
+  const highlights = [
+    {
+      label: 'Kenali bangunan',
+      eyebrow: 'PASPOR DIGITAL BANGUNAN',
+      title: 'Kenali bangunanmu. Siapkan langkahmu.',
+      description:
+        'Mulai dari data yang tertata. Pahami penyaringan awal dan alur tindak lanjut bersama ahli.',
+      action: 'Jelajahi demo',
+      href: '#/login',
+    },
+    {
+      label: 'Screening awal RVS',
+      eyebrow: 'PAHAMI SEBELUM MELANGKAH',
+      title: 'Langkah awal untuk lebih peduli.',
+      description:
+        'RVS membantu penyaringan awal kerentanan bangunan. Pemeriksaan mengikuti protokol dan supervisi ahli struktur.',
+      action: 'Pahami batas RVS',
+      href: '#batasan',
+    },
+    {
+      label: 'Tindak lanjut bersama',
+      eyebrow: 'DARI DATA KE TINDAKAN',
+      title: 'Terhubung dalam satu alur.',
+      description:
+        'Kenali rencana alur dari pencatatan, rujukan ahli, hingga perkuatan dan evaluasi. Fitur profesional masih dalam pengembangan.',
+      action: 'Lihat cara kerja',
+      href: '#alur',
+    },
+  ];
+  const highlight = highlights[activeTab];
   const closeMenu = () => setMenuOpen(false);
 
   return (
-    <>
+    <div className="adobe-landing">
       <a className="skip-link" href="#main">
         Lewati ke konten
       </a>
@@ -94,155 +125,168 @@ export default function LandingPage() {
           <a href="#alur" onClick={closeMenu}>
             Cara kerja
           </a>
+          <a href="#/rvs-lab" onClick={closeMenu}>
+            Latihan RVS & QR
+          </a>
           <a href="#pertanyaan" onClick={closeMenu}>
             Pertanyaan
           </a>
           <a className="button button-small" href="#/login" onClick={closeMenu}>
-            Masuk demo <Arrow />
+            Masuk / Daftar <Arrow />
           </a>
         </nav>
       </header>
 
       <main id="main">
-        <section className="hero shell" aria-labelledby="hero-title">
-          <a className="announcement" href="#tentang">
-            <span className="status-dot" /> Langkah kecil untuk kesiapsiagaan{' '}
-            <Arrow />
-          </a>
-          <h1 id="hero-title">
-            Kenali bangunanmu.
-            <br />
-            <span>Mulai langkahmu.</span>
-          </h1>
-          <p className="hero-description">
-            Satu paspor digital untuk mengenal bangunan,
-            <br className="desktop-break" /> memahami screening awal, dan
-            terhubung dengan ahli.
-          </p>
-          <div className="hero-actions">
-            <a className="button" href="#/login">
-              Jelajahi SeismoPass <Arrow />
-            </a>
-            <a className="text-link" href="#alur">
-              Lihat cara kerjanya <span aria-hidden="true">↓</span>
-            </a>
-          </div>
-          <p className="hero-note">
-            Dalam pengembangan <span aria-hidden="true">·</span> Demo
-            pengenalan, bukan layanan penilaian
-          </p>
-
-          <div className="showcase" id="jelajahi">
-            <div className="showcase-toolbar">
-              <span className="scene-label">
-                <span className="status-dot" /> Ruang kenal bangunan
-              </span>
-              <div
-                className="view-switch"
-                role="group"
-                aria-label="Pilih tampilan demo"
-              >
-                <button
-                  type="button"
-                  aria-pressed={view === 'ilustrasi'}
-                  onClick={() => setView('ilustrasi')}
-                >
-                  Ilustrasi
-                </button>
-                <button
-                  type="button"
-                  aria-pressed={view === 'profil'}
-                  onClick={() => setView('profil')}
-                >
-                  Contoh profil
-                </button>
-              </div>
-              <span className="demo-tag">DEMO</span>
-            </div>
-            {view === 'ilustrasi' ? (
-              <div className="scene-content">
-                <div className="scene-copy">
-                  <span className="eyebrow">SETIAP BANGUNAN PUNYA CERITA</span>
-                  <h2>
-                    Awali dengan
-                    <br />
-                    mengenalnya.
-                  </h2>
-                  <p>
-                    Data yang tercatat adalah awal dari tindak lanjut yang lebih
-                    terarah.
-                  </p>
-                  <button
-                    className="round-link"
-                    type="button"
-                    onClick={() => setView('profil')}
-                  >
-                    Buka contoh profil <Arrow />
-                  </button>
-                </div>
-                <div className="scene-art">
-                  <BuildingScene />
-                  <span className="scene-caption">
-                    LINGKUNGAN ILUSTRATIF / BUKAN DATA LAPANGAN
-                  </span>
-                </div>
-                <div className="floating-note">
-                  <span className="note-icon" aria-hidden="true">
-                    ⌂
-                  </span>
-                  <div>
-                    <strong>Bangunan, lebih dikenal.</strong>
-                    <span>Langkah awal, bukan kesimpulan aman.</span>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="profile-demo">
-                <div>
-                  <span className="eyebrow">CONTOH TAMPILAN PROFIL</span>
-                  <h2>Rumah Contoh A</h2>
-                  <p>
-                    Data fiktif untuk mengenal tampilan. Tidak mewakili bangunan
-                    nyata.
-                  </p>
-                </div>
-                <div className="profile-card">
-                  <div className="profile-card-heading">
-                    <span>Profil bangunan</span>
-                    <span className="profile-status">Belum dinilai</span>
-                  </div>
-                  <dl>
-                    <div>
-                      <dt>Fungsi</dt>
-                      <dd>Rumah tinggal (contoh)</dd>
-                    </div>
-                    <div>
-                      <dt>Lokasi</dt>
-                      <dd>Tidak ditampilkan pada demo</dd>
-                    </div>
-                    <div>
-                      <dt>Hasil screening</dt>
-                      <dd>Belum tersedia</dd>
-                    </div>
-                  </dl>
-                  <p>
-                    Belum ada pemeriksaan atau rekomendasi teknis. Status ini
-                    bukan kategori risiko.
-                  </p>
-                </div>
-              </div>
-            )}
-            <div className="showcase-bottom">
-              <span>
-                <span className="tiny-cross" aria-hidden="true">
-                  ✳
-                </span>{' '}
-                Dibangun untuk langkah yang lebih terarah.
-              </span>
-              <a href="#batasan">
-                Pahami batas screening <Arrow />
+        <section className="adobe-hero" aria-labelledby="hero-title">
+          <div className="adobe-hero-copy shell">
+            <span className="hero-kicker">{highlight.eyebrow}</span>
+            <h1 id="hero-title">{highlight.title}</h1>
+            <p>{highlight.description}</p>
+            <div className="hero-actions">
+              <a className="button" href={highlight.href}>
+                {highlight.action} <Arrow />
+              </a>
+              <a className="hero-secondary" href="#tentang">
+                Tentang SeismoPass <Arrow />
               </a>
             </div>
+            <span className="hero-disclaimer">
+              Demo pengembangan · Bukan layanan penilaian RVS
+            </span>
+          </div>
+          <div className="hero-bento">
+            <div className="bento-photo">
+              <img
+                src={landscapeImage}
+                alt="Tebing dan permukiman di sekitarnya, gambar pengantar"
+                width={1200}
+                height={764}
+              />
+              <span aria-hidden="true">↗</span>
+            </div>
+            <div className="bento-number">
+              <strong>
+                06<span>↗</span>
+              </strong>
+              <p>
+                Tahap yang terhubung.
+                <br />
+                Dari data ke tindak lanjut.
+              </p>
+              <div className="bento-rule" />
+            </div>
+            <a className="bento-dark" href="#batasan">
+              <span>KENALI BATAS SCREENING</span>
+              <strong>
+                Langkah awal.
+                <br />
+                Bukan sertifikat aman.
+              </strong>
+              <span className="bento-arrow" aria-hidden="true">
+                ↗
+              </span>
+            </a>
+          </div>
+          <div
+            className="hero-topics"
+            role="group"
+            aria-label="Pilih topik pengantar"
+          >
+            {highlights.map((item, index) => (
+              <button
+                type="button"
+                key={item.label}
+                aria-pressed={activeTab === index}
+                onClick={() => setActiveTab(index)}
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        <section
+          className="feature-section shell"
+          aria-labelledby="features-title"
+        >
+          <div className="feature-heading">
+            <h2 id="features-title">
+              Bangunan lebih dikenal. Langkah lebih terarah.
+            </h2>
+            <p>Mulai dari pencatatan, lanjutkan dengan pemahaman.</p>
+          </div>
+          <div className="feature-grid">
+            <article className="feature-tile tile-blue">
+              <span className="tile-kicker">PENCATATAN BANGUNAN</span>
+              <h3>Satu tempat untuk cerita bangunanmu.</h3>
+              <p>
+                Catat data dasar dan temukan kembali profil bangunan dalam
+                dashboard demo.
+              </p>
+              <a className="tile-link" href="#/login">
+                Coba pencatatan <Arrow />
+              </a>
+              <div
+                className="mini-record"
+                aria-label="Contoh profil fiktif, belum dinilai"
+              >
+                <span className="record-icon" aria-hidden="true">
+                  ⌂
+                </span>
+                <div>
+                  <strong>Rumah Contoh A</strong>
+                  <span>Profil demonstrasi</span>
+                </div>
+                <span className="record-status">Belum dinilai</span>
+                <div className="record-line">
+                  <span>Fungsi bangunan</span>
+                  <strong>Rumah tinggal</strong>
+                </div>
+                <div className="record-line">
+                  <span>Hasil screening</span>
+                  <strong>Belum tersedia</strong>
+                </div>
+              </div>
+            </article>
+            <article className="feature-tile tile-lilac">
+              <span className="tile-kicker">SCREENING AWAL RVS</span>
+              <h3>Kenali batasnya. Pahami prosesnya.</h3>
+              <p>
+                Penyaringan awal bukan sertifikat aman dan tidak menggantikan
+                evaluasi ahli struktur.
+              </p>
+              <a className="tile-link" href="#batasan">
+                Pelajari screening awal <Arrow />
+              </a>
+              <div className="screening-graphic" aria-hidden="true">
+                <span>RVS</span>
+                <span>Penyaringan awal</span>
+                <span>Evaluasi ahli →</span>
+              </div>
+            </article>
+            <article className="feature-tile tile-peach">
+              <span className="tile-kicker">ALUR SEISMOPASS</span>
+              <h3>Langkah berikutnya, lebih jelas.</h3>
+              <p>
+                Kenali enam tahap yang direncanakan, dari registrasi hingga
+                dukungan dan evaluasi.
+              </p>
+              <a className="tile-link" href="#alur">
+                Jelajahi alurnya <Arrow />
+              </a>
+              <ol className="tile-steps">
+                <li>
+                  <span>01</span> Catat bangunan
+                </li>
+                <li>
+                  <span>02</span> Screening oleh petugas
+                </li>
+                <li>
+                  <span>03</span> Profil digital
+                </li>
+              </ol>
+            </article>
           </div>
         </section>
 
@@ -324,8 +368,9 @@ export default function LandingPage() {
               menggantikan evaluasi teknis oleh ahli struktur.
             </p>
             <p className="safety-footnote">
-              Demo ini tidak menghitung skor, menentukan kategori risiko, atau
-              menghasilkan hasil RVS.
+              Demo menyediakan latihan input dan simulasi aritmetika tabel FEMA.
+              Hasil belum divalidasi ahli dan tidak menentukan kategori risiko
+              atau menyatakan bangunan aman.
             </p>
           </div>
           <span className="safety-art" aria-hidden="true">
@@ -354,8 +399,8 @@ export default function LandingPage() {
               <p>
                 Kamu bisa mencoba pencatatan bangunan fiktif di dashboard demo.
                 Data hanya disimpan selama tab terbuka; akun nyata dan
-                penyimpanan server belum tersedia. Pilih peran demo untuk
-                menjelajahi alurnya.
+                penyimpanan server belum tersedia. Masuk dengan akun demo
+                pelapor untuk mencoba alurnya.
               </p>
             </details>
             <details>
@@ -392,6 +437,6 @@ export default function LandingPage() {
           Demo pengembangan <span aria-hidden="true">↗</span>
         </span>
       </footer>
-    </>
+    </div>
   );
 }
