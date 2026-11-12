@@ -1,3 +1,4 @@
+import Brand from '../../components/Brand';
 import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import BuildingScene from '../../components/BuildingScene';
@@ -126,10 +127,12 @@ export default function ActorLogin({
     <main className="actor-login">
       <section className="actor-intro">
         <a className="actor-brand" href="#">
-          ▥ seismopass.
+          <Brand />
         </a>
         <div>
-          <span className="actor-eyebrow">MENGENAL. MENCATAT. MELANGKAH.</span>
+          <span className="actor-eyebrow">
+            Catatan bangunan, langkah yang terarah.
+          </span>
           <h1>
             Bangunan punya cerita.
             <br />
@@ -152,7 +155,7 @@ export default function ActorLogin({
           ← Kembali ke beranda
         </a>
         <span className="actor-demo-label">
-          AKUN DEMO · GUNAKAN DATA FIKTIF
+          Akun demo — gunakan data fiktif
         </span>
         <h2>{details.title}</h2>
         <p className="actor-subtitle">{details.subtitle}</p>

@@ -1,15 +1,15 @@
 .rvs-editor {
-  padding: clamp(16px, 3vw, 28px);
   border: 1px solid var(--ws-line);
   border-radius: 14px;
-  background: #fff;
+  background: var(--paper);
   margin: 20px 0;
+  padding: var(--space-panel);
 }
 .rvs-editor fieldset {
   border: 1px solid var(--ws-line);
   border-radius: 12px;
-  padding: 20px;
   min-width: 0;
+  padding: var(--space-panel);
 }
 .rvs-editor legend {
   font-weight: 650;
@@ -28,14 +28,14 @@
 .rvs-saved summary {
   cursor: pointer;
   font-weight: 650;
-  padding: 14px 0;
+  padding: var(--padding-control);
 }
 .rvs-result {
   margin: 24px 0;
-  padding: clamp(16px, 3vw, 28px);
-  background: #f3f7fb;
-  border: 1px solid #d3dfe9;
+  background: var(--surface);
+  border: 1px solid var(--line);
   border-radius: 14px;
+  padding: var(--space-panel);
 }
 .rvs-score {
   display: flex;
@@ -46,7 +46,7 @@
 .rvs-score > strong {
   font-size: clamp(44px, 7vw, 68px);
   line-height: 1;
-  color: #244d6a;
+  color: var(--ink);
 }
 .rvs-calculation {
   width: 100%;
@@ -60,9 +60,9 @@
 }
 .rvs-calculation th,
 .rvs-calculation td {
-  padding: 10px;
-  border-bottom: 1px solid #d3dfe9;
+  border-bottom: 1px solid var(--line);
   text-align: left;
+  padding: var(--padding-control);
 }
 .rvs-calculation th {
   font-weight: 500;
@@ -72,9 +72,10 @@
   font-variant-numeric: tabular-nums;
 }
 .rvs-alert {
-  padding: 16px 16px 16px 32px;
-  background: #fff7e6;
+  background: var(--surface);
   border-radius: 10px;
+  padding: var(--space-panel) var(--space-panel) var(--space-panel)
+    calc(var(--space-panel) * 2);
 }
 .rvs-alert li + li {
   margin-top: 8px;
@@ -99,5 +100,5 @@
 .rvs-observations {
   border: 1px solid var(--ws-line);
   border-radius: 12px;
-  padding: 16px;
+  padding: var(--space-panel);
 }

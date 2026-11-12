@@ -351,7 +351,6 @@ export default function ReportWorkspace({
       </div>
       <div className="role-page-heading">
         <div>
-          <span className="role-eyebrow">SEISMOPASS WORKSPACE</span>
           <h1>{title}</h1>
           <p>{intro}</p>
         </div>
@@ -449,7 +448,7 @@ export default function ReportWorkspace({
               )}
             </section>
             <aside className="role-next-step">
-              <span className="ws-badge">LANGKAH BERIKUTNYA</span>
+              <span className="ws-badge">Langkah berikutnya</span>
               <h2>
                 {account.role === 'admin'
                   ? 'Daftarkan pesurvei yang tepat.'

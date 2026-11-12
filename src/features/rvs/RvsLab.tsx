@@ -12,7 +12,7 @@ export default function RvsLab({ path }: { path: string }) {
     <div className="workspace report-workspace">
       <header className="report-top">
         <a href="#" className="ws-logo">
-          seismopass.
+          SeismoPass
         </a>
         <a href="#/dashboard" className="ws-secondary">
           Dashboard

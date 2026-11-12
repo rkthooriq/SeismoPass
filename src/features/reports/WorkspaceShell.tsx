@@ -1,3 +1,4 @@
+import Brand from '../../components/Brand';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { getActor } from '../../lib/actorAccess';
@@ -37,8 +38,7 @@ export default function WorkspaceShell({
       <div className="role-layout">
         <aside className={`role-sidebar ${menuOpen ? 'is-open' : ''}`}>
           <a className="role-brand" href="#">
-            seismo<strong>pass</strong>
-            <span>.</span>
+            <Brand />
           </a>
           <div className="role-context">
             <span className="role-context-icon">{role.symbol}</span>
@@ -56,7 +56,7 @@ export default function WorkspaceShell({
             {menuOpen ? 'Tutup menu' : 'Buka menu'} <span>☰</span>
           </button>
           <nav id="role-navigation" aria-label={`Menu ${role.shortName}`}>
-            <span className="role-nav-label">RUANG KERJA</span>
+            <span className="role-nav-label">Ruang kerja</span>
             {workflowMenus[account.role].map(([id, label, icon]) => (
               <a
                 key={id}
@@ -69,7 +69,7 @@ export default function WorkspaceShell({
                 {!!counts[id] && <small>{counts[id]}</small>}
               </a>
             ))}
-            <span className="role-nav-label">PELAJARI</span>
+            <span className="role-nav-label">Pelajari</span>
             <a href="#/rvs-lab">
               <span aria-hidden="true">▥</span>
               <span>Latihan RVS & QR</span>
@@ -77,7 +77,7 @@ export default function WorkspaceShell({
             </a>
           </nav>
           <div className="role-sidebar-bottom">
-            <span className="ws-badge">DATA DEMO</span>
+            <span className="ws-badge">Data demo</span>
             <p>RVS adalah penyaringan awal, bukan sertifikat aman.</p>
             <a href="#">Kembali ke beranda ↗</a>
           </div>

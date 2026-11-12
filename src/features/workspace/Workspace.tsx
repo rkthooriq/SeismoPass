@@ -142,10 +142,7 @@ export default function Workspace({
       </a>
       <aside className={`ws-sidebar ${menuOpen ? 'open' : ''}`}>
         <a className="ws-logo" href="#">
-          ▥{' '}
-          <span>
-            seismo<strong>pass.</strong>
-          </span>
+          <span>SeismoPass</span>
         </a>
         <div className="ws-space">
           <span className="ws-avatar">S</span>
@@ -857,7 +854,7 @@ export default function Workspace({
           )}
           <footer className="ws-footer">
             <span>
-              seismopass. <span>Kenali bangunan. Siapkan langkah.</span>
+              SeismoPass <span>Kenali bangunan. Siapkan langkah.</span>
             </span>
             <span>Demo pengembangan · Tanpa penilaian RVS</span>
           </footer>

@@ -195,8 +195,10 @@ export default function App() {
   }
   useEffect(() => {
     const change = () => {
-      setHash(window.location.hash);
-      window.scrollTo(0, 0);
+      const nextHash = window.location.hash;
+      setHash(nextHash);
+      // Section anchors keep native scrolling; only app routes start at the top.
+      if (!nextHash || nextHash.startsWith('#/')) window.scrollTo(0, 0);
     };
     window.addEventListener('hashchange', change);
     return () => window.removeEventListener('hashchange', change);
@@ -210,7 +212,7 @@ export default function App() {
       <div className="workspace report-workspace">
         <header className="report-top">
           <a href="#" className="ws-logo">
-            seismopass.
+            SeismoPass
           </a>
           <a href="#/dashboard">Buka dashboard →</a>
         </header>

@@ -47,7 +47,7 @@ export default function AccountPortal({
     <div className="workspace report-workspace">
       <header className="report-top">
         <a href="#" className="ws-logo">
-          seismopass.
+          SeismoPass
         </a>
         <button className="ws-secondary" onClick={onLeave}>
           Keluar demo
