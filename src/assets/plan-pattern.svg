@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" fill="none">
-  <g stroke="#141414" stroke-opacity=".045" stroke-width="1">
+  <g stroke="#2b211b" stroke-opacity=".045" stroke-width="1">
     <path d="M0 40h320M40 0v320M0 280h320M280 0v320"/>
     <path d="M80 90h150v130H80V90Zm0 80h90V90m0 80h60m-90 0v50"/>
     <path d="M62 90H50v130h12m18 18v12h150v-12M102 90v-8m0 16V82m55 8v-8m0 16V82m55 8v-8m0 16V82"/>

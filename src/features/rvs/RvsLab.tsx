@@ -1,3 +1,4 @@
+import Brand from '../../components/Brand';
 import RvsForm from './RvsForm';
 import QrPanel from './QrPanel';
 import RvsResult from './RvsResult';
@@ -11,8 +12,8 @@ export default function RvsLab({ path }: { path: string }) {
   return (
     <div className="workspace report-workspace">
       <header className="report-top">
-        <a href="#" className="ws-logo">
-          SeismoPass
+        <a href="#" className="ws-logo" aria-label="SeismoPass, beranda">
+          <Brand />
         </a>
         <a href="#/dashboard" className="ws-secondary">
           Dashboard

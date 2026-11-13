@@ -13,7 +13,7 @@
   letter-spacing: -0.045em;
 }
 .workspace h1 {
-  font-size: clamp(27px, 3vw, 37px);
+  font-size: clamp(22px, 2.4vw, 30px);
   line-height: 1.2;
 }
 .workspace h2 {
@@ -63,7 +63,7 @@
   padding: var(--space-panel);
 }
 .ws-logo {
-  font-size: 28px;
+  font-size: 22px;
   letter-spacing: -1.4px;
   display: flex;
   align-items: center;
@@ -152,7 +152,7 @@
 
 .ws-sidebar nav small {
   margin-left: auto;
-  background: white;
+  background: var(--paper);
   border-radius: 4px;
   padding: 0 6px;
 }
@@ -170,7 +170,7 @@
 }
 .ws-tip > span {
   float: right;
-  font-size: 42px;
+  font-size: 34px;
   color: var(--muted);
   line-height: 1;
 }
@@ -298,13 +298,13 @@
   padding: var(--padding-control);
 }
 .ws-primary {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--action);
+  color: var(--on-action);
   border: 1px solid var(--line);
 }
 
 .ws-secondary {
-  background: white;
+  background: var(--paper);
   border: 1px solid var(--line);
   color: var(--ink);
 }
@@ -348,7 +348,7 @@
   letter-spacing: 1.5px;
 }
 .ws-welcome h2 {
-  font-size: clamp(29px, 3vw, 42px);
+  font-size: clamp(23px, 2.4vw, 34px);
   line-height: 1.14;
   margin: 16px 0;
 }
@@ -370,8 +370,9 @@
   overflow: hidden;
   background: transparent;
 }
-.ws-illustration svg {
-  width: 125%;
+.ws-illustration .building-scene {
+  width: 100%;
+  height: auto;
   max-height: 320px;
   flex-shrink: 0;
 }
@@ -389,7 +390,7 @@
   margin-bottom: 24px;
 }
 .ws-stat {
-  background: white;
+  background: var(--paper);
   border: 1px solid var(--ws-line);
   border-radius: 12px;
   position: relative;
@@ -412,7 +413,7 @@
   margin-top: 2px;
 }
 .ws-stat strong {
-  font-size: 34px;
+  font-size: 27px;
   font-weight: 500;
   letter-spacing: -1.5px;
   display: block;
@@ -508,7 +509,7 @@
   background: var(--surface);
 }
 .ws-next h2 {
-  font-size: 29px;
+  font-size: 23px;
   margin: 13px 0;
 }
 .ws-next > p:not(.ws-eyebrow) {
@@ -628,7 +629,7 @@
   max-width: 430px;
 }
 .ws-search > span {
-  font-size: 25px;
+  font-size: 20px;
   color: var(--muted);
 }
 .ws-search input {
@@ -688,7 +689,7 @@
   padding: 45px 25px;
 }
 .ws-empty-icon {
-  font-size: 32px;
+  font-size: 26px;
   background: var(--surface);
   width: 60px;
   height: 60px;
@@ -699,7 +700,7 @@
   color: var(--muted);
 }
 .ws-empty h2 {
-  font-size: 24px;
+  font-size: 19px;
 }
 .ws-empty p {
   font-size: 12px;
@@ -714,7 +715,7 @@
   align-items: start;
 }
 .ws-form .ws-section-head h2 {
-  font-size: 28px;
+  font-size: 22px;
   margin-top: 16px;
 }
 .ws-fields {
@@ -752,7 +753,7 @@
   margin: 25px 0 12px;
 }
 .ws-consent input {
-  accent-color: var(--green);
+  accent-color: var(--accent);
   margin-top: 4px;
   flex-shrink: 0;
   width: 16px;
@@ -774,7 +775,7 @@
   background: var(--surface);
 }
 .ws-form-tip h2 {
-  font-size: 30px;
+  font-size: 24px;
   margin: 20px 0;
 }
 .ws-form-tip p {
@@ -790,7 +791,7 @@
   place-items: center;
   width: 56px;
   height: 56px;
-  font-size: 32px;
+  font-size: 26px;
   background: var(--surface);
   border-radius: 14px;
   color: var(--muted);
@@ -857,13 +858,13 @@
   overflow: hidden;
   flex-shrink: 0;
 }
-.ws-profile-art svg {
+.ws-profile-art .building-scene {
   width: 100%;
   height: 100%;
   object-fit: contain;
 }
 .ws-profile-hero h2 {
-  font-size: 33px;
+  font-size: 26px;
   margin: 15px 0 9px;
 }
 .ws-profile-hero p {
@@ -905,7 +906,7 @@
   position: relative;
 }
 .ws-feature-hero h2 {
-  font-size: clamp(29px, 4vw, 43px);
+  font-size: clamp(23px, 3.2vw, 34px);
   margin: 17px 0;
 }
 .ws-feature-hero p {
@@ -917,7 +918,7 @@
   float: right;
   width: 75px;
   height: 75px;
-  font-size: 44px;
+  font-size: 35px;
   margin-left: 20px;
 }
 .ws-step-num {
@@ -979,7 +980,7 @@
   max-width: 650px;
   margin: 30px auto;
   text-align: center;
-  background: white;
+  background: var(--paper);
   border: 1px solid var(--ws-line);
   padding: 40px;
   border-radius: 15px;
@@ -988,7 +989,7 @@
   margin: 25px auto;
 }
 .ws-public-preview h2 {
-  font-size: 30px;
+  font-size: 24px;
 }
 .ws-public-preview > p {
   font-size: 13px;
@@ -1017,7 +1018,7 @@
   .ws-welcome > div:first-child {
     padding: 40px;
   }
-  .ws-illustration svg {
+  .ws-illustration .building-scene {
     max-height: 370px;
   }
 }
@@ -1088,7 +1089,7 @@
     padding: 0 var(--space-page);
   }
   .ws-logo {
-    font-size: 24px;
+    font-size: 19px;
   }
   .ws-space {
     gap: 6px;
@@ -1107,7 +1108,7 @@
     padding: 25px 0 25px 25px;
   }
   .ws-welcome h2 {
-    font-size: 30px;
+    font-size: 24px;
   }
   .ws-stats {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1151,7 +1152,7 @@
     padding: var(--space-panel);
   }
   .ws-profile-hero h2 {
-    font-size: 28px;
+    font-size: 22px;
   }
   .ws-footer {
     flex-direction: column;
@@ -1220,7 +1221,7 @@
     margin-bottom: 23px;
   }
   .ws-page-heading h1 {
-    font-size: 29px;
+    font-size: 23px;
   }
   .ws-eyebrow {
     font-size: 8px;
@@ -1236,7 +1237,7 @@
     padding: 26px;
   }
   .ws-welcome h2 {
-    font-size: 35px;
+    font-size: 28px;
   }
   .ws-welcome p {
     max-width: 100%;
@@ -1250,7 +1251,7 @@
     height: 200px;
     margin-top: -5px;
   }
-  .ws-illustration svg {
+  .ws-illustration .building-scene {
     max-height: 240px;
     width: 100%;
   }
@@ -1276,7 +1277,7 @@
     font-size: 8px;
   }
   .ws-stat strong {
-    font-size: 31px;
+    font-size: 25px;
   }
   .ws-panel {
     margin-bottom: 18px;
@@ -1358,7 +1359,7 @@
     width: 200px;
   }
   .ws-profile-hero h2 {
-    font-size: 29px;
+    font-size: 23px;
   }
   .ws-feature-hero {
     padding: 25px;
@@ -1366,10 +1367,10 @@
   .ws-feature-hero .ws-feature-icon {
     width: 45px;
     height: 45px;
-    font-size: 28px;
+    font-size: 22px;
   }
   .ws-feature-hero h2 {
-    font-size: 30px;
+    font-size: 24px;
   }
   .ws-feature-hero p {
     font-size: 12px;
@@ -1382,7 +1383,7 @@
     margin-left: 0;
   }
   .ws-form .ws-section-head h2 {
-    font-size: 25px;
+    font-size: 20px;
   }
   .ws-three-col {
     gap: 0;

@@ -8,27 +8,27 @@ export const workflowMenus = {
     ['review', 'Tinjauan catatan', '✓'],
     ['reports', 'Semua laporan', '▤'],
     ['pilot', 'Rencana pilot', '◇'],
-    ['flow', 'Panduan alur', '→'],
   ],
   // Pelapor hanya mencatat lalu menunggu, jadi tanpa halaman Ringkasan.
   // Halaman awalnya "Laporan saya" yang memuat langkah berikutnya.
   owner: [
     ['reports', 'Laporan saya', '▤'],
     ['new', 'Buat laporan', '＋'],
-    ['flow', 'Panduan alur', '→'],
   ],
   surveyor: [
     ['overview', 'Ringkasan', '◫'],
     ['tasks', 'Penugasan saya', '◎'],
     ['history', 'Riwayat survei', '✓'],
-    ['flow', 'Panduan alur', '→'],
   ],
 } as const;
-export type WorkflowPage = (typeof workflowMenus)[ActorRole][number][0];
+export type WorkflowPage =
+  | (typeof workflowMenus)[ActorRole][number][0]
+  | 'profile';
 export function resolveWorkflowPage(
   role: ActorRole,
   route: string,
 ): WorkflowPage | null {
+  if (!Object.hasOwn(workflowMenus, role)) return null;
   const page =
     route === 'dashboard'
       ? role === 'owner'
@@ -37,6 +37,7 @@ export function resolveWorkflowPage(
       : route.startsWith('dashboard/')
         ? route.slice(10)
         : '';
+  if (page === 'profile') return 'profile';
   return workflowMenus[role].some(([id]) => id === page)
     ? (page as WorkflowPage)
     : null;

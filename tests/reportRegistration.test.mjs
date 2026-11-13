@@ -170,3 +170,53 @@ test('session rejects corrupt fields, unknown statuses, duplicate IDs and other 
   );
   assert.deepEqual(restoreReports('[]', fallback), []);
 });
+
+test('sending a report requires a full visit address; landmark and phone are optional but phone is validated', () => {
+  assert.ok(
+    validateReportRegistration({ ...complete, address: '   ' }).address,
+  );
+  assert.equal(
+    advanceReport({ ...complete, address: '' }, owner, 'submit'),
+    null,
+  );
+  // A draft may still lack the address.
+  assert.equal(
+    validateReportRegistration({ ...complete, address: '' }, true).address,
+    undefined,
+  );
+  assert.deepEqual(
+    validateReportRegistration({ ...complete, landmark: '', contactPhone: '' }),
+    {},
+  );
+  for (const contactPhone of [
+    'abc',
+    '12345',
+    '0812-3456-7890x',
+    '1'.repeat(16),
+  ])
+    assert.ok(
+      validateReportRegistration({ ...complete, contactPhone }).contactPhone,
+    );
+  for (const contactPhone of ['0812 3456 7890', '+62 812-3456-7890'])
+    assert.equal(
+      validateReportRegistration({ ...complete, contactPhone }).contactPhone,
+      undefined,
+    );
+  assert.ok(
+    validateReportRegistration({ ...complete, address: 'a'.repeat(301) })
+      .address,
+  );
+});
+
+test('session keeps address, landmark and phone; older reports without them stay blocked from the queue', () => {
+  const withVisit = {
+    ...complete,
+    landmark: 'Pagar biru',
+    contactPhone: '0812 3456 7890',
+  };
+  assert.deepEqual(restoreReports(JSON.stringify([withVisit]), []), [
+    withVisit,
+  ]);
+  const old = { ...complete, status: 'Dikirim', address: undefined };
+  assert.equal(advanceReport(old, admin, 'verify'), null);
+});

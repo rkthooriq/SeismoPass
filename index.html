@@ -3,12 +3,130 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#f7f8f2" />
+    <meta name="theme-color" content="#fbf6ef" />
     <meta name="description" content="Kenali bangunanmu, pahami proses screening awal RVS, dan pelajari tindak lanjut bersama ahli melalui SeismoPass." />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=3" />
     <title>SeismoPass — Kenali bangunanmu, mulai langkahmu.</title>
+    <style>
+      /* Loader shared by the first-load splash and page changes.
+         Soil layers slide past each other like strata along a fault. */
+      .sp-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 1000;
+        display: grid;
+        place-content: center;
+        justify-items: center;
+        gap: 18px;
+        background: #fbf6ef;
+        color: #3b2a1e;
+        font-family: 'Figtree', 'Inter', system-ui, sans-serif;
+        transition: opacity 260ms ease;
+      }
+      .sp-loader.is-done {
+        opacity: 0;
+        pointer-events: none;
+      }
+      .sp-loader-word {
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+      }
+      .sp-loader-core {
+        position: relative;
+        width: 220px;
+        height: 118px;
+        overflow: hidden;
+        border-radius: 26px;
+        background: #f6ecdf;
+        box-shadow: 0 14px 34px -18px rgb(59 42 30 / 0.45);
+        animation: sp-tremor 1.8s ease-in-out infinite;
+      }
+      .sp-loader-layer {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-repeat: repeat-x;
+        background-size: 120px 120px;
+        background-position: 0 0;
+        animation-timing-function: linear;
+        animation-iteration-count: infinite;
+      }
+      .sp-loader-layer:nth-child(1) {
+        height: 100px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M0 14 Q30 2 60 14 T120 14 V120 H0Z' fill='%23e3c9a3'/%3E%3C/svg%3E");
+        animation-duration: 7s;
+        animation-name: sp-soil-left;
+      }
+      .sp-loader-layer:nth-child(2) {
+        height: 74px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M0 14 Q30 2 60 14 T120 14 V120 H0Z' fill='%23cfae88'/%3E%3C/svg%3E");
+        animation-duration: 5.2s;
+        animation-name: sp-soil-right;
+      }
+      .sp-loader-layer:nth-child(3) {
+        height: 50px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M0 14 Q30 2 60 14 T120 14 V120 H0Z' fill='%23b8865c'/%3E%3C/svg%3E");
+        animation-duration: 6.4s;
+        animation-name: sp-soil-left;
+      }
+      .sp-loader-layer:nth-child(4) {
+        height: 26px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M0 14 Q30 2 60 14 T120 14 V120 H0Z' fill='%238a5a3b'/%3E%3C/svg%3E");
+        animation-duration: 4.6s;
+        animation-name: sp-soil-right;
+      }
+      .sp-loader-house {
+        position: absolute;
+        left: 50%;
+        top: 9px;
+        width: 34px;
+        margin-left: -17px;
+        transform-origin: 50% 100%;
+        animation: sp-sway 1.8s ease-in-out infinite;
+      }
+      .sp-loader-text {
+        font-family: 'Inter', system-ui, sans-serif;
+        font-size: 13px;
+        color: #76604f;
+      }
+      @keyframes sp-soil-left {
+        to { background-position-x: -120px; }
+      }
+      @keyframes sp-soil-right {
+        to { background-position-x: 120px; }
+      }
+      @keyframes sp-tremor {
+        0%, 62%, 100% { transform: translate(0, 0); }
+        66% { transform: translate(-1.5px, 0.5px); }
+        70% { transform: translate(1.5px, -0.5px); }
+        74% { transform: translate(-1px, 0); }
+        78% { transform: translate(1px, 0); }
+      }
+      @keyframes sp-sway {
+        0%, 60%, 100% { transform: rotate(0); }
+        68% { transform: rotate(-4deg); }
+        76% { transform: rotate(3deg); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .sp-loader-core,
+        .sp-loader-layer,
+        .sp-loader-house {
+          animation: none;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div id="boot" class="sp-loader" role="status" aria-live="polite">
+      <span class="sp-loader-word">SeismoPass</span>
+      <div class="sp-loader-core" aria-hidden="true">
+        <span class="sp-loader-layer"></span><span class="sp-loader-layer"></span><span class="sp-loader-layer"></span><span class="sp-loader-layer"></span>
+        <svg class="sp-loader-house" viewBox="0 0 34 30" aria-hidden="true"><polygon points="2,14 17,2 32,14" fill="#a35f3f"/><rect x="6" y="13" width="22" height="16" fill="#a35f3f"/><rect x="14" y="19" width="6" height="10" fill="#f6ecdf"/></svg>
+      </div>
+      <span class="sp-loader-text">Memuat SeismoPass…</span>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>

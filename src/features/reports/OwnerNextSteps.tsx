@@ -27,7 +27,7 @@ export default function OwnerNextSteps({ reports }: { reports: Report[] }) {
               <span
                 className={`ws-badge owner-turn ${step.turn === 'owner' ? 'is-you' : ''}`}
               >
-                {step.turn === 'owner' ? 'GILIRANMU' : 'MENUNGGU'}
+                {step.turn === 'owner' ? 'Giliranmu' : 'Menunggu'}
               </span>
               <div>
                 <strong>{report.title}</strong>

@@ -1,11 +1,6 @@
 .sp-landing {
-  --focus-ring: var(--paper);
-  --muted: var(--muted-on-dark);
-  --line: #444444;
-  --action: var(--green);
-  --surface: #262626;
-  color: var(--on-dark);
-  background: var(--ink);
+  color: var(--ink);
+  background: var(--canvas);
 }
 .sp-landing .sp-brand {
   color: inherit;
@@ -13,10 +8,12 @@
 .sp-passport-sheet,
 .sp-roles-section {
   --focus-ring: var(--ink);
-  --muted: #515151;
-  --line: #d5d5d5;
+  --muted: #5f4b3e;
+  --line: #d4bfa8;
   --action: var(--ink);
-  --surface: #eeeeee;
+  --surface: #eee1cf;
+  --hover-surface: #f1dbc9;
+  --hover-ink: var(--ink);
   color: var(--ink);
 }
 .sp-shell {
@@ -24,7 +21,13 @@
   margin-inline: auto;
 }
 .sp-header {
-  min-height: 100px;
+  /* Only the nav pieces stay on screen while scrolling; no bar behind them.
+     The header itself lets clicks pass through to the content underneath. */
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  pointer-events: none;
+  min-height: 88px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -44,13 +47,13 @@
   white-space: nowrap;
 }
 .sp-nav-capsule {
-  --focus-ring: var(--ink);
   display: flex;
   align-items: center;
   gap: 4px;
   padding: 6px;
   border-radius: 999px;
   background: var(--paper);
+  border: 1px solid var(--line);
   color: var(--ink);
 }
 .sp-nav-capsule a {
@@ -58,7 +61,7 @@
   border-radius: 999px;
 }
 .sp-nav-capsule a[aria-current='location'] {
-  background: var(--green);
+  background: var(--accent);
   color: var(--ink);
 }
 .sp-nav-account {
@@ -70,6 +73,23 @@
   border-radius: 10px;
   min-width: 86px;
 }
+@media (min-width: 1300px) {
+  /* Logo kiri, kapsul menu tepat di tengah, akun kanan. */
+  .sp-header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+  .sp-header .sp-nav {
+    display: contents;
+  }
+  .sp-header .sp-nav-capsule {
+    grid-column: 2;
+  }
+  .sp-header .sp-nav-account {
+    grid-column: 3;
+    justify-self: end;
+  }
+}
 .sp-text-link:hover {
   text-decoration: underline;
   text-underline-offset: 5px;
@@ -78,11 +98,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 48px;
-  border: 1px solid var(--green);
+  min-height: 42px;
+  border: 1px solid var(--accent);
   border-radius: var(--radius-control);
   color: var(--ink);
-  background: var(--green);
+  background: var(--accent);
   font-size: 14px;
   font-weight: 600;
   text-align: center;
@@ -91,7 +111,7 @@
 
 .sp-button-outline {
   background: transparent;
-  border-color: var(--green);
+  border-color: var(--accent);
   color: var(--on-dark);
   min-width: 96px;
 }
@@ -105,15 +125,11 @@
   gap: clamp(32px, 5vw, 76px);
   align-items: center;
   margin-block: 24px 0;
-  border: 1px solid var(--ink);
+  border: 1px solid var(--line);
   border-radius: var(--radius-panel);
-  background: var(--ink);
-  color: var(--on-dark);
+  background: var(--paper);
+  color: var(--ink);
   padding: calc(var(--space-panel) * 2) var(--space-page);
-}
-.sp-hero :focus-visible,
-.sp-safety :focus-visible {
-  outline-color: var(--green);
 }
 
 .sp-demo-tag {
@@ -127,10 +143,10 @@
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--green);
+  background: var(--accent);
 }
 .sp-hero h1 {
-  font-size: clamp(40px, 4.2vw, 60px);
+  font-size: clamp(32px, 3.36vw, 48px);
   letter-spacing: -0.05em;
   line-height: 1.06;
   margin: 23px 0;
@@ -188,14 +204,20 @@
   background: transparent;
   margin-block: 12px;
 }
-.sp-building-art svg {
+.sp-building-art .building-scene {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 330px;
+  max-height: 390px;
+}
+.sp-art-note {
+  margin-bottom: var(--space-panel);
+  color: var(--muted-on-dark);
+  font-size: 11px;
+  text-align: center;
 }
 .sp-passport-sheet {
-  background: white;
+  background: var(--paper);
   color: var(--ink);
   border-radius: 10px;
   border: 1px solid var(--line);
@@ -264,7 +286,7 @@
 .sp-section-heading h2,
 .sp-faq h2,
 .sp-safety h2 {
-  font-size: clamp(30px, 3vw, 40px);
+  font-size: clamp(24px, 2.4vw, 32px);
   line-height: 1.15;
   font-weight: 600;
   letter-spacing: -0.045em;
@@ -275,7 +297,7 @@
   font-size: 15px;
 }
 .sp-roles-section {
-  background: var(--green);
+  background: var(--sand);
   margin-top: 56px;
   padding-block: 64px;
 }
@@ -303,7 +325,8 @@
   height: 40px;
   border-radius: var(--radius-control);
   background: var(--surface);
-  font-size: 25px;
+  color: var(--action);
+  font-size: 20px;
 }
 .sp-role-heading h3 {
   font-size: 18px;
@@ -388,16 +411,17 @@
   grid-template-columns: 1fr 1fr;
   align-items: center;
   gap: 56px;
-  background: var(--ink);
-  border: 1px solid var(--green);
+  background: var(--sand);
+  border: 1px solid var(--line);
   border-radius: var(--radius-panel);
-  color: white;
+  color: var(--ink);
   padding: calc(var(--space-panel) * 2) var(--space-page);
 }
 .sp-safety-label {
   display: block;
   font-size: 13px;
-  color: var(--green);
+  font-weight: 600;
+  color: var(--action);
   margin-bottom: 20px;
 }
 .sp-safety p {
@@ -411,8 +435,8 @@
   color: var(--muted-on-dark);
 }
 .sp-button-light {
-  background: var(--green);
-  border-color: var(--green);
+  background: var(--accent);
+  border-color: var(--accent);
   color: var(--ink);
 }
 
@@ -428,11 +452,20 @@
   max-width: 30ch;
   margin-top: 18px;
 }
-.sp-faq details {
-  border-bottom: 1px solid var(--line);
+.sp-faq-items {
+  display: grid;
+  gap: 10px;
+  align-content: start;
 }
-.sp-faq details:first-child {
-  border-top: 1px solid var(--line);
+/* Each question is its own rounded glass card, like the rest of the page. */
+.sp-faq details {
+  overflow: hidden;
+  border: 1px solid var(--glass-line);
+  border-radius: var(--radius-panel);
+  box-shadow: var(--glass-shadow);
+}
+.sp-faq details[open] {
+  border-color: var(--accent);
 }
 .sp-faq summary {
   display: flex;
@@ -484,7 +517,7 @@
     gap: 30px;
   }
   .sp-hero h1 {
-    font-size: 44px;
+    font-size: 35px;
   }
   .sp-passport-preview {
     padding: 0;
@@ -541,12 +574,12 @@
     padding: calc(var(--space-panel) * 2) var(--space-page);
   }
   .sp-hero h1 {
-    font-size: clamp(36px, 7vw, 50px);
+    font-size: clamp(29px, 5.6vw, 40px);
   }
   .sp-hero-copy > p {
     max-width: 55ch;
   }
-  .sp-building-art svg {
+  .sp-building-art .building-scene {
     max-height: 300px;
   }
   .sp-section-heading {
@@ -624,4 +657,350 @@
   .sp-safety {
     padding: calc(var(--space-panel) * 2) var(--space-page);
   }
+}
+
+/* Only the explanatory card moves; the building illustration stays still. */
+.sp-showcase {
+  align-self: center;
+}
+.sp-showcase .building-scene {
+  max-height: 280px;
+}
+.sp-rotation-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: var(--padding-control);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted-on-dark);
+  font-size: 12px;
+}
+.sp-slide-sheet {
+  border-radius: var(--radius-panel);
+}
+.sp-slide-sheet .sp-preview-tag {
+  display: inline-block;
+  border-color: var(--line);
+  color: var(--muted);
+}
+.sp-slide-stack {
+  display: grid;
+  margin-top: var(--space-panel);
+}
+.sp-showcase-slide {
+  grid-area: 1 / 1;
+  min-width: 0;
+  visibility: hidden;
+  opacity: 0;
+  transform: translateX(8px);
+  transition:
+    opacity 280ms ease,
+    transform 280ms ease,
+    visibility 280ms;
+}
+.sp-showcase-slide.is-active {
+  visibility: visible;
+  opacity: 1;
+  transform: translateX(0);
+}
+.sp-showcase-slide h2 {
+  font-size: clamp(18px, 1.76vw, 22px);
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+}
+.sp-showcase-slide > p {
+  margin-top: 12px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+  max-width: 48ch;
+}
+.sp-showcase-slide dl {
+  margin-bottom: 0;
+}
+.sp-slide-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-panel);
+  margin-top: var(--space-control-y);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.sp-slide-footer > div {
+  display: flex;
+  gap: 8px;
+}
+.sp-slide-footer button {
+  min-width: 48px;
+  min-height: 42px;
+  padding: var(--padding-control);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ink);
+  line-height: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sp-showcase-slide {
+    transform: none;
+  }
+}
+
+/* ---------- Header: wordmark, liquid-glass nav, account (no bar behind) ---------- */
+.sp-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+}
+.sp-header > a,
+.sp-header .nimbus-nav,
+.sp-header .sp-nav-account > a {
+  pointer-events: auto;
+}
+.sp-wordmark {
+  justify-self: start;
+  font-family: var(--font-heading);
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  text-shadow: 0 0 14px rgb(255 255 255 / 0.9);
+}
+.sp-header .sp-nav-account {
+  justify-self: end;
+  gap: 10px;
+}
+.sp-account-filter {
+  position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+}
+.sp-header .nimbus-nav {
+  --n-fg: var(--ink);
+  --n-fg-soft: var(--muted);
+  --n-tint: rgb(255 255 255 / 0.55);
+  font-family: var(--font-body);
+}
+.sp-header .nimbus-item {
+  font-weight: 600;
+}
+.sp-header .nimbus-item:focus-visible {
+  outline-color: var(--ink);
+}
+.sp-header .sp-nav-account .sp-button {
+  border-radius: 999px;
+  box-shadow: 0 6px 18px rgb(59 42 30 / 0.1);
+}
+/* ---------- Hero: intro + BMKG earthquake left, historical data board right ---------- */
+.sp-landing .sp-hero {
+  display: block;
+  margin: -88px 0 0;
+  padding: 120px 0 56px;
+  border: 0;
+  border-radius: 0;
+  background: none;
+}
+.sp-hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 24px;
+  align-items: start;
+}
+.sp-page-title {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.sp-report-channel {
+  margin-top: 14px;
+  padding: 18px;
+  border-radius: var(--radius-panel);
+}
+.sp-report-channel h2 {
+  font-size: 17px;
+  font-weight: 650;
+  color: var(--action);
+}
+.sp-report-channel p {
+  margin: 6px 0 14px;
+  color: #4d3a2c;
+  font-size: 14px;
+  line-height: 1.6;
+}
+.sp-report-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sp-button-solid {
+  background: var(--action);
+  border-color: var(--action);
+  color: var(--on-action);
+}
+.sp-landing .sp-hero-note {
+  margin-top: 14px;
+  font-size: 12px;
+  color: #4d3a2c;
+}
+
+@media (max-width: 1000px) {
+  .sp-hero-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 1000px) {
+  .sp-header {
+    grid-template-columns: minmax(0, 1fr) auto;
+    row-gap: 10px;
+  }
+  .sp-header .nimbus-nav {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    justify-self: center;
+  }
+  .sp-landing .sp-hero {
+    margin-top: -140px;
+    padding-top: 160px;
+  }
+}
+
+/* Phone screens keep account access; the section navbar is unnecessary here. */
+@media (max-width: 767px) {
+  .sp-header .sp-liquid-nav {
+    display: none;
+  }
+  .sp-landing .sp-hero {
+    margin-top: 0;
+    padding-top: 16px;
+  }
+  /* Wordmark and account buttons slide away while scrolling down. */
+  .sp-header .sp-wordmark,
+  .sp-header .sp-nav-account {
+    transition:
+      transform 320ms cubic-bezier(0.2, 0.7, 0.2, 1),
+      opacity 240ms ease;
+  }
+  .sp-header.is-hidden .sp-wordmark,
+  .sp-header.is-hidden .sp-nav-account {
+    transform: translateY(calc(-100% - 32px));
+    opacity: 0;
+  }
+  .sp-header.is-hidden .sp-nav-account,
+  .sp-header.is-hidden .sp-nav-account > * {
+    pointer-events: none;
+  }
+  /* Keyboard users tabbing into the buttons bring the header back. */
+  .sp-header.is-hidden:focus-within .sp-wordmark,
+  .sp-header.is-hidden:focus-within .sp-nav-account {
+    transform: none;
+    opacity: 1;
+  }
+  .sp-header.is-hidden:focus-within .sp-nav-account,
+  .sp-header.is-hidden:focus-within .sp-nav-account > * {
+    pointer-events: auto;
+  }
+}
+@media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+  .sp-header .sp-wordmark,
+  .sp-header .sp-nav-account {
+    transition: opacity 120ms linear;
+  }
+  .sp-header.is-hidden .sp-wordmark,
+  .sp-header.is-hidden .sp-nav-account {
+    transform: none;
+  }
+}
+
+@media (max-width: 380px) {
+  .sp-header {
+    gap: 10px;
+  }
+  .sp-header .sp-wordmark {
+    font-size: 18px;
+  }
+  .sp-header .sp-nav-account {
+    gap: 6px;
+  }
+  .sp-header .sp-nav-account .sp-button {
+    min-width: 70px;
+    padding-inline: 10px;
+    font-size: 13px;
+  }
+}
+
+/* Sections over the fixed photo: frosted instead of solid. */
+.sp-landing .sp-roles-section {
+  background: rgb(243 231 214 / 0.72);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.sp-landing .sp-safety,
+.sp-landing .sp-development-note,
+.sp-landing .sp-faq details {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+
+/* Anchor jumps land below the floating navbar, not under it. */
+.sp-landing :is(#data-bencana, #tentang, #alur, #pertanyaan) {
+  scroll-margin-top: 104px;
+}
+
+/* Wordmark is plain text, not a link: no hover colour, no pointer. */
+.sp-landing .sp-wordmark {
+  cursor: default;
+  user-select: none;
+}
+
+/* ---------- Workflow steps: rounded cards, number in a soil badge ----------
+   The six steps are a real sequence, so the numbers stay; each sits in a small
+   round badge so the title and text share one clean left edge. */
+.sp-landing .sp-workflow .sp-steps {
+  gap: 16px;
+}
+.sp-landing .sp-workflow .sp-steps li {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  column-gap: 14px;
+  height: 100%;
+  padding: 20px 22px 22px;
+  border-radius: var(--radius-panel);
+}
+.sp-landing .sp-workflow .sp-step-number {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-radius: 50%;
+  background: var(--sand);
+  color: var(--action);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.sp-landing .sp-workflow .sp-steps h3 {
+  margin: 4px 0 6px;
+  line-height: 1.3;
+}
+.sp-landing .sp-workflow .sp-steps p {
+  margin: 0;
+  line-height: 1.65;
+}
+.sp-landing .sp-workflow .sp-development-note {
+  margin-top: 16px;
+  padding: 18px 22px;
+  border-radius: var(--radius-panel);
 }

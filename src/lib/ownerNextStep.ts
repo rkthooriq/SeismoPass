@@ -64,7 +64,8 @@ export function ownerStep(status: ReportStatus): OwnerStep {
 export function sortByOwnerTurn<T extends { status: ReportStatus }>(
   reports: T[],
 ): T[] {
-  const rank = (report: T) => (ownerStep(report.status).turn === 'owner' ? 0 : 1);
+  const rank = (report: T) =>
+    ownerStep(report.status).turn === 'owner' ? 0 : 1;
   return reports
     .map((report, index) => ({ report, index }))
     .sort((a, b) => rank(a.report) - rank(b.report) || a.index - b.index)

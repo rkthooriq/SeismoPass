@@ -1,0 +1,122 @@
+/* Fixed landscape behind the landing page. Sits above the sky gradient
+   (.sp-landing::before) and below all content. */
+.sp-earth-scene {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  pointer-events: none;
+  contain: layout paint;
+}
+.sp-earth-scene svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1600 / 420;
+  /* Phones: keep the hills tall enough to read; the sides are cropped. */
+  min-height: 170px;
+}
+
+/* Clouds drift right across the sky and wrap around. Units are SVG units. */
+.sp-cloud {
+  animation: sp-cloud-drift linear infinite;
+  will-change: transform;
+}
+.sp-cloud-a {
+  animation-duration: 95s;
+  animation-delay: -20s;
+}
+.sp-cloud-b {
+  animation-duration: 130s;
+  animation-delay: -85s;
+}
+.sp-cloud-c {
+  animation-duration: 75s;
+  animation-delay: -50s;
+}
+.sp-cloud-d {
+  animation-duration: 160s;
+  animation-delay: -10s;
+}
+@keyframes sp-cloud-drift {
+  from {
+    transform: translateX(-180px);
+  }
+  to {
+    transform: translateX(1780px);
+  }
+}
+
+/* Soil strata flow sideways like layers along a fault, in opposite directions. */
+.sp-strata-a {
+  stroke-dasharray: 46 16;
+}
+.sp-strata-b {
+  stroke-dasharray: 10 12;
+}
+
+/* The whole soil band rocks gently, with a short tremor now and then. */
+.sp-soil {
+  animation: sp-soil-tremor 9s ease-in-out infinite;
+  will-change: transform;
+}
+@keyframes sp-soil-tremor {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  40% {
+    transform: translate(-14px, 1px);
+  }
+  80% {
+    transform: translate(14px, 0);
+  }
+  84% {
+    transform: translate(11px, 1.5px);
+  }
+  86% {
+    transform: translate(16px, -1px);
+  }
+  88% {
+    transform: translate(12px, 1px);
+  }
+  90% {
+    transform: translate(14px, 0);
+  }
+}
+
+.sp-pebbles {
+  animation: sp-pebble-roll 12s ease-in-out infinite alternate;
+  will-change: transform;
+}
+@keyframes sp-pebble-roll {
+  to {
+    transform: translateX(24px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sp-cloud,
+  .sp-strata-a,
+  .sp-strata-b,
+  .sp-soil,
+  .sp-pebbles {
+    animation: none;
+  }
+}
+/* Without motion, spread the clouds across the sky instead of the left edge. */
+@media (prefers-reduced-motion: reduce) {
+  .sp-cloud-a {
+    transform: translateX(300px);
+  }
+  .sp-cloud-b {
+    transform: translateX(1200px);
+  }
+  .sp-cloud-c {
+    transform: translateX(760px);
+  }
+  .sp-cloud-d {
+    transform: translateX(520px);
+  }
+}

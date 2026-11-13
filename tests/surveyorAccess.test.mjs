@@ -246,6 +246,9 @@ test('new owner/applicant metadata and reports persist together without persisti
   );
 });
 test('sidebar destinations are restricted by role including direct URL access', () => {
+  for (const role of ['owner', 'admin', 'surveyor']) {
+    assert.equal(resolveWorkflowPage(role, 'dashboard/flow'), null);
+  }
   // Pesurvei didaftarkan admin, jadi tidak ada lagi halaman pengajuan publik.
   assert.equal(resolveWorkflowPage('admin', 'dashboard/applications'), null);
   assert.equal(

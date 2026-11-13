@@ -7,13 +7,12 @@ import {
   saveBuildingSession,
 } from './lib/buildingSession';
 import type { Building } from './types/building';
+import { signInEvent } from './components/RouteLoader';
 import ActorLogin from './features/access/ActorLogin';
 import ReportWorkspace from './features/reports/ReportWorkspace';
-import {
-  demoPassword,
-  sampleReports,
-  releaseSurveyorAssignments,
-} from './lib/reportDemo';
+import { updateOwnProfile } from './lib/userProfile';
+import type { ProfileInput } from './lib/userProfile';
+import { sampleReports, releaseSurveyorAssignments } from './lib/reportDemo';
 import type { DemoAccount, Report } from './lib/reportDemo';
 import type { AccountForm } from './lib/accountFlow';
 import { isAccountPage, validateAccountForm } from './lib/accountFlow';
@@ -33,11 +32,11 @@ import {
   generateTemporaryPassword,
 } from './lib/surveyorAccess';
 import type { NewSurveyorInput } from './lib/surveyorAccess';
+import { createSurveyorBatch } from './lib/surveyorImport';
 import { demoId } from './lib/demoId';
 import RvsLab from './features/rvs/RvsLab';
 import AccountPortal from './features/onboarding/AccountPortal';
 import type { ReviewAction } from './features/onboarding/SurveyorManagement';
-import RoleFlowGuide from './features/reports/RoleFlowGuide';
 
 export default function App() {
   const [hash, setHash] = useState(window.location.hash);
@@ -58,7 +57,20 @@ export default function App() {
       setStorageFailed(true);
     }
   }
+  function saveProfile(input: ProfileInput) {
+    const result = updateOwnProfile(account, input);
+    if ('error' in result) return result.error;
+    updateWorkflow(
+      workflow.accounts.map((person) =>
+        person.id === result.account.id ? result.account : person,
+      ),
+      workflow.reports,
+    );
+    return '';
+  }
   function enter(person: DemoAccount) {
+    // Only signing in, registering, or opening the sample shows the loader.
+    window.dispatchEvent(new Event(signInEvent));
     setAccountId(person.id);
     window.location.hash = '/dashboard';
   }
@@ -82,26 +94,25 @@ export default function App() {
     if (Object.keys(errors).length) return Object.values(errors).join(' ');
     const email = data.email.trim().toLowerCase();
     if (!/^[^\s@]+@example\.com$/.test(email))
-      return 'Gunakan alamat fiktif dengan domain example.com.';
+      return 'Untuk saat ini pendaftaran hanya menerima alamat @example.com.';
     if (workflow.accounts.some((person) => person.email === email))
-      return 'Email demo sudah digunakan. Masuk dengan akun tersebut.';
+      return 'Email sudah terdaftar. Masuk dengan akun tersebut.';
     if (workflow.accounts.length >= 500)
-      return 'Batas akun demo sesi ini tercapai.';
-    if (data.password !== demoPassword)
-      return `Gunakan kata sandi demo bersama: ${demoPassword}`;
+      return 'Batas jumlah akun pada sesi ini tercapai.';
     const person: DemoAccount = {
       id: demoId(),
       name: data.name.trim(),
       email,
       role: 'owner',
-      password: demoPassword,
+      // Kata sandi pilihan pengguna hanya disimpan di memori tab, tidak di sesi.
+      password: data.password,
       status: 'pending-email',
       emailVerified: false,
       history: [
         {
           action: 'submitted',
           by: 'pemohon',
-          note: 'Pendaftaran pelapor demo dibuat.',
+          note: 'Pendaftaran pelapor dibuat.',
           at: new Date().toISOString(),
         },
       ],
@@ -129,6 +140,15 @@ export default function App() {
       email: result.account.email,
       password,
     };
+  }
+  function importSurveyors(inputs: NewSurveyorInput[]) {
+    if (!account) return { error: 'Masuk sebagai admin terlebih dahulu.' };
+    const result = createSurveyorBatch(account, inputs, workflow.accounts, () => ({
+      id: demoId(), password: generateTemporaryPassword(),
+    }));
+    if ('error' in result) return result;
+    updateWorkflow(result.accounts, workflow.reports);
+    return { issued: result.issued };
   }
   function reissuePassword(id: string) {
     const person = workflow.accounts.find((candidate) => candidate.id === id);
@@ -207,19 +227,15 @@ export default function App() {
   const path = hash.slice(2);
   if (path === 'rvs-lab' || path === 'rvs-demo' || path.startsWith('rvs-demo?'))
     return <RvsLab key={path} path={path} />;
-  if (path === 'flows')
+  if (path === 'flows' || path === 'dashboard/flow') return <RetiredFlowPage />;
+  // #/contoh opens the sample owner workspace straight from the landing page.
+  if (path === 'contoh')
     return (
-      <div className="workspace report-workspace">
-        <header className="report-top">
-          <a href="#" className="ws-logo">
-            SeismoPass
-          </a>
-          <a href="#/dashboard">Buka dashboard →</a>
-        </header>
-        <main className="ws-main">
-          <RoleFlowGuide />
-        </main>
-      </div>
+      <OpenSample
+        onOpen={() =>
+          enter(workflow.accounts.find((person) => person.id === 'owner-demo')!)
+        }
+      />
     );
   if (isAccountPage(path) || !account) {
     const page = isAccountPage(path) ? path : 'login';
@@ -227,9 +243,6 @@ export default function App() {
       <ActorLogin
         key={page}
         page={page}
-        onExplore={() =>
-          enter(workflow.accounts.find((person) => person.id === 'owner-demo')!)
-        }
         onSignIn={signIn}
         onRegister={registerOwner}
       />
@@ -272,14 +285,16 @@ export default function App() {
   )
     return (
       <ReportWorkspace
-        key={`${account.id}-${path}`}
+        key={account.id}
         route={path}
         account={account}
         accounts={workflow.accounts}
         reports={workflow.reports}
         onChange={(reports) => updateWorkflow(workflow.accounts, reports)}
+        onProfileSave={saveProfile}
         onReview={review}
         onAddSurveyor={addSurveyor}
+        onImportSurveyors={importSurveyors}
         onReissuePassword={reissuePassword}
         onLeave={leave}
         storageFailed={storageFailed}
@@ -308,4 +323,20 @@ function loadWorkflow() {
   } catch {
     return restoreDemoSession(null, sampleReports);
   }
+}
+
+function RetiredFlowPage() {
+  useEffect(() => {
+    window.location.replace('#');
+  }, []);
+  return null;
+}
+
+function OpenSample({ onOpen }: { onOpen: () => void }) {
+  useEffect(() => {
+    onOpen();
+    // Run once on arrival; onOpen changes the route away from #/contoh.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  return null;
 }

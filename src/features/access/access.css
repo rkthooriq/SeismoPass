@@ -14,7 +14,7 @@
   padding: var(--space-page);
 }
 .actor-brand {
-  font-size: 30px;
+  font-size: 24px;
   letter-spacing: -1.5px;
   font-weight: 600;
   margin-bottom: 65px;
@@ -25,7 +25,7 @@
   color: var(--muted);
 }
 .actor-intro h1 {
-  font-size: clamp(40px, 4.5vw, 66px);
+  font-size: clamp(32px, 3.6vw, 53px);
   line-height: 1.1;
   margin: 20px 0;
 }
@@ -41,7 +41,7 @@
   overflow: hidden;
   margin: 20px -20px;
 }
-.actor-art svg {
+.actor-art .building-scene {
   width: 100%;
   height: 100%;
 }
@@ -72,7 +72,7 @@
   display: inline-block;
 }
 .actor-entry h2 {
-  font-size: clamp(30px, 3vw, 42px);
+  font-size: clamp(24px, 2.4vw, 34px);
   margin: 18px 0 14px;
 }
 .actor-subtitle {
@@ -113,7 +113,7 @@
   position: absolute;
   right: 10px;
   top: 10px;
-  accent-color: var(--green);
+  accent-color: var(--accent);
   width: 13px;
   height: 13px;
 }
@@ -149,7 +149,7 @@
   line-height: 1.8;
 }
 .actor-consent input {
-  accent-color: var(--green);
+  accent-color: var(--accent);
   margin-top: 5px;
   flex-shrink: 0;
 }
@@ -224,7 +224,7 @@
     grid-template-columns: 1fr;
   }
   .actor-intro h1 {
-    font-size: 42px;
+    font-size: 34px;
   }
 }
 @media (max-width: 680px) {
@@ -235,11 +235,11 @@
     padding: var(--space-page);
   }
   .actor-brand {
-    font-size: 26px;
+    font-size: 21px;
     margin-bottom: 25px;
   }
   .actor-intro h1 {
-    font-size: 36px;
+    font-size: 29px;
     margin: 15px 0;
   }
   .actor-intro p {
@@ -292,7 +292,7 @@
     grid-template-columns: 1fr;
   }
   .actor-entry h2 {
-    font-size: 29px;
+    font-size: 23px;
   }
 }
 @media (max-width: 680px) {
@@ -409,4 +409,256 @@
 }
 .account-errors a {
   text-decoration: underline;
+}
+
+/* Login: split layout after SITABA, brown and white only. Prefixed with
+   main.actor-login to win over shared theme.css rules for the same classes. */
+main.actor-login {
+  --lg-brown: var(--ink);
+  --lg-action: var(--action);
+  --lg-action-deep: var(--action-hover);
+  --lg-brown-soft: var(--muted);
+  --lg-panel: #f1e3cf;
+  --lg-rim: #f8efe3;
+  --lg-line: var(--line);
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+  min-height: 100vh;
+  overflow: hidden;
+  background: #fff;
+  background-image: none;
+  color: var(--lg-brown);
+}
+/* Left: a solid brown field with one large curved edge and a pale rim. */
+.actor-login .actor-intro {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  padding: 48px 12% 48px 8%;
+  background: var(--lg-panel);
+  background-image: none;
+  border-radius: 0 50% 50% 0 / 0 62% 62% 0;
+  box-shadow: 22px 0 0 var(--lg-rim);
+}
+.actor-login .actor-art {
+  display: block;
+  justify-self: stretch;
+  width: 100%;
+  max-width: 500px;
+  margin-inline: auto;
+  height: auto;
+  margin: 0;
+  overflow: visible;
+}
+.actor-login .actor-art .surveyor-scene {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Right: a narrow, centered column. */
+.actor-login .actor-entry {
+  position: relative;
+  z-index: 1;
+  box-sizing: border-box;
+  align-self: center;
+  justify-self: center;
+  width: 100%;
+  max-width: 480px;
+  margin: 0;
+  padding: 48px 24px;
+  background: transparent;
+}
+.actor-login .account-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--lg-brown);
+  text-decoration: none;
+}
+.actor-login .account-logo-mark {
+  display: flex;
+}
+.actor-login .account-logo-text {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+.actor-login .account-title {
+  margin: 0 0 6px;
+  font-size: clamp(27px, 2.56vw, 35px);
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--lg-brown);
+}
+.actor-login .actor-subtitle {
+  margin: 0 0 32px;
+  font-size: 18px;
+  line-height: 1.5;
+  color: var(--lg-brown-soft);
+}
+.actor-login .account-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 20px;
+  color: var(--lg-brown);
+}
+.actor-login .account-field label {
+  font-size: 15px;
+  font-weight: 500;
+}
+.actor-login .account-field input {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 42px;
+  background: #fff;
+  border: 1px solid var(--lg-line);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgb(74 47 33 / 0.06);
+  color: var(--lg-brown);
+  font-size: 16px;
+}
+.actor-login .account-field input[readonly] {
+  background: #faf6f3;
+}
+.actor-login .account-password {
+  position: relative;
+}
+.actor-login .account-password input {
+  padding-right: 52px;
+}
+.actor-login .account-eye {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 48px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: transparent;
+  color: var(--lg-brown-soft);
+  border-radius: 0 6px 6px 0;
+  cursor: pointer;
+}
+.actor-login .account-eye:hover {
+  color: var(--lg-brown);
+}
+.actor-login .account-hint {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--lg-brown-soft);
+}
+.actor-login .actor-consent {
+  margin: 4px 0 8px;
+  font-size: 14px;
+  color: var(--lg-brown-soft);
+}
+.actor-login .actor-consent input {
+  accent-color: var(--lg-action);
+}
+.actor-login .account-actions {
+  display: grid;
+  gap: 14px;
+  margin-top: 32px;
+}
+.actor-login .actor-enter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 42px;
+  margin: 0;
+  border: 0;
+  border-radius: 6px;
+  background: var(--lg-action);
+  color: var(--on-action);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.actor-login .actor-enter:hover {
+  background: var(--lg-action-deep);
+}
+.actor-login .account-links {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  gap: 12px 24px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  padding: 0;
+  border: 0;
+}
+.actor-login .account-links a {
+  padding: 0;
+  color: var(--lg-brown);
+  font-size: 16px;
+  font-weight: 700;
+}
+.actor-login .account-errors,
+.actor-login .account-result {
+  margin-bottom: 20px;
+  background: #faf6f3;
+  border: 1px solid var(--lg-line);
+  border-radius: 8px;
+  color: var(--lg-brown);
+}
+.actor-login .account-result h2 {
+  font-size: 20px;
+  font-weight: 700;
+}
+.actor-login .account-result p {
+  margin: 10px 0 18px;
+  color: var(--lg-brown-soft);
+}
+.actor-login .actor-error {
+  color: var(--lg-action-deep);
+  font-weight: 600;
+  margin: 0;
+}
+@media (max-width: 900px) {
+  main.actor-login {
+    display: block;
+  }
+  .actor-login .actor-intro {
+    position: static;
+    height: auto;
+    padding: 28px 24px 36px;
+    border-radius: 0 0 50% 50% / 0 0 40px 40px;
+    box-shadow: 0 12px 0 var(--lg-rim);
+  }
+  .actor-login .actor-art {
+    width: min(70%, 320px);
+  }
+  .actor-login .actor-entry {
+    padding: 40px 20px 56px;
+  }
+}
+.actor-login .account-links.is-single {
+  justify-content: center;
+}
+
+/* A strip of the same earth hills used elsewhere, along the bottom of the
+   form side. The curved left panel (z-index 1) sits over its left part. */
+main.actor-login::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Same proportions as the lower part of the drawing, so the ridge line is
+     shown whole instead of being cut flat. */
+  aspect-ratio: 1600 / 330;
+  background: url('../../assets/earth-hills.svg') center bottom / 100% auto
+    no-repeat;
+  opacity: 0.9;
+  pointer-events: none;
 }

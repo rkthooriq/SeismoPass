@@ -35,7 +35,7 @@ test('a single login form requires email and password without a role choice', ()
   assert.ok(errors.email);
   assert.ok(errors.password);
 });
-test('owner registration requires a name, matching example password and demo acknowledgement', () => {
+test('owner registration requires a name and a matching password of at least 12 characters, without a consent box', () => {
   assert.deepEqual(validateAccountForm('register', input), {});
   const errors = validateAccountForm('register', {
     ...input,
@@ -44,8 +44,9 @@ test('owner registration requires a name, matching example password and demo ack
     confirmPassword: 'different',
     consent: false,
   });
-  for (const field of ['name', 'password', 'confirmPassword', 'consent'])
+  for (const field of ['name', 'password', 'confirmPassword'])
     assert.ok(errors[field]);
+  assert.equal(errors.consent, undefined);
 });
 test('invitation preview requires an email and a code but never returns an account or role', () => {
   assert.deepEqual(validateAccountForm('invitation', input), {});

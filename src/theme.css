@@ -14,25 +14,31 @@
 }
 /* Shared SeismoPass tokens. Page files own layout; this file owns the visual theme. */
 :root {
-  --ink: #141414;
-  --muted: #515151;
-  --green: #94e130;
-  --on-dark: #ffffff;
-  --muted-on-dark: #d3d3d3;
-  --line: #d5d5d5;
-  --action: #141414;
-  --focus-ring: #141414;
-  --control-border: #777777;
-  --canvas: #f7f7f7;
+  /* Light earth: cream and white surfaces, brown soil for text and actions. */
+  --ink: #3b2a1e;
+  --muted: #76604f;
+  --accent: #dcbc98;
+  --sand: #f3e7d6;
+  --on-dark: #3b2a1e;
+  --muted-on-dark: #76604f;
+  --line: #e6d8c6;
+  --action: #8a5a3b;
+  --action-hover: #714a30;
+  --on-action: #ffffff;
+  --focus-ring: #3b2a1e;
+  --control-border: #b89a80;
+  --canvas: #fbf6ef;
   --paper: #ffffff;
-  --surface: #eeeeee;
-  --space-control-y: 14px;
-  --space-control-x: 18px;
+  --surface: #f4eadc;
+  --hover-surface: #efe1cd;
+  --hover-ink: #3b2a1e;
+  --space-control-y: 11px;
+  --space-control-x: 16px;
   --space-panel: 18px;
-  --space-page: clamp(18px, 3vw, 36px);
+  --space-page: clamp(16px, 2.4vw, 28px);
   --padding-control: var(--space-control-y) var(--space-control-x);
   --radius-panel: 16px;
-  --radius-control: 5px;
+  --radius-control: 10px;
   --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --font-heading: 'Figtree', 'Inter', Arial, sans-serif;
   --plan-pattern: url('./assets/plan-pattern.svg');
@@ -61,11 +67,16 @@ textarea:focus-visible {
   align-items: center;
   gap: 10px;
   color: var(--ink);
-  font-size: 27px;
+  font-size: 22px;
   font-weight: 650;
   letter-spacing: -1.5px;
   white-space: nowrap;
   line-height: 1.2;
+}
+.building-scene {
+  display: block;
+  max-width: 100%;
+  object-fit: contain;
 }
 .actor-login {
   background: var(--canvas) var(--plan-pattern);
@@ -73,13 +84,13 @@ textarea:focus-visible {
 }
 .actor-intro {
   background: var(--ink);
-  color: white;
+  color: var(--on-dark);
 }
 .actor-intro .sp-brand {
-  color: white;
+  color: var(--on-dark);
 }
 .actor-intro .actor-eyebrow {
-  color: var(--green);
+  color: var(--accent);
 }
 .actor-eyebrow {
   font-size: 13px;
@@ -133,10 +144,10 @@ textarea:focus-visible {
   border-radius: 5px;
 }
 .actor-enter {
-  background: var(--ink);
-  color: white;
+  background: var(--action);
+  color: var(--on-action);
   border-radius: var(--radius-control);
-  min-height: 48px;
+  min-height: 42px;
   font-size: 15px;
   margin-top: 24px;
 }
@@ -214,16 +225,16 @@ textarea:focus-visible {
   letter-spacing: -0.035em;
 }
 .workspace .ws-primary {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: white;
+  background: var(--action);
+  border-color: var(--action);
+  color: var(--on-action);
   border-radius: var(--radius-control);
   min-height: 44px;
   font-size: 14px;
 }
 
 .workspace .ws-secondary {
-  background: white;
+  background: var(--paper);
   color: var(--ink);
   border: 1px solid var(--line);
   border-radius: var(--radius-control);
@@ -257,7 +268,7 @@ textarea:focus-visible {
   color: var(--ink);
 }
 .workspace .ws-sidebar {
-  background: white;
+  background: var(--paper);
   border-color: var(--line);
 }
 .workspace .ws-sidebar nav a[aria-current='page'] {
@@ -265,8 +276,8 @@ textarea:focus-visible {
   color: var(--ink);
 }
 .workspace .ws-welcome {
-  background: var(--ink);
-  color: white;
+  background: var(--sand);
+  color: var(--ink);
   border: 0;
   border-radius: var(--radius-panel);
 }
@@ -275,7 +286,7 @@ textarea:focus-visible {
 }
 .workspace .ws-welcome .ws-badge,
 .workspace .ws-welcome .ws-inline-link {
-  color: var(--green);
+  color: var(--accent);
   background: transparent;
 }
 .workspace .ws-demo-strip {
@@ -287,7 +298,7 @@ textarea:focus-visible {
   color: var(--action);
 }
 .role-workspace .role-sidebar {
-  background: white;
+  background: var(--paper);
 }
 .role-sidebar .role-brand {
   padding: 0 10px;
@@ -317,14 +328,14 @@ textarea:focus-visible {
   padding: var(--padding-control);
 }
 .role-page-heading h1 {
-  font-size: clamp(29px, 3vw, 38px);
+  font-size: clamp(23px, 2.4vw, 30px);
 }
 .role-stat-grid {
   gap: 0;
   border: 1px solid var(--line);
   border-radius: var(--radius-panel);
   overflow: hidden;
-  background: white;
+  background: var(--paper);
 }
 .role-stat-grid > a {
   border: 0;
@@ -341,7 +352,7 @@ textarea:focus-visible {
 }
 .role-stat-grid strong {
   color: var(--ink);
-  font-size: 36px;
+  font-size: 29px;
 }
 .role-workspace .role-next-step {
   background: var(--surface);
@@ -450,8 +461,8 @@ button {
 }
 .actor-intro {
   background-image:
-    linear-gradient(90deg, #ffffff06 1px, transparent 1px),
-    linear-gradient(#ffffff06 1px, transparent 1px);
+    linear-gradient(90deg, #fff9f006 1px, transparent 1px),
+    linear-gradient(#fff9f006 1px, transparent 1px);
   background-size: 64px 64px;
 }
 .account-info,
@@ -527,7 +538,7 @@ button {
   border: 1px solid var(--line);
   border-radius: var(--radius-panel);
   font: inherit;
-  background: white;
+  background: var(--paper);
   color: var(--ink);
   padding: var(--padding-control);
 }
@@ -562,19 +573,12 @@ button {
   margin-top: 12px;
 }
 
-/* Dark navigation surrounds white work surfaces across every demo role. */
+/* White navigation beside cream work surfaces for every role. */
 .workspace
-  :is(.role-sidebar, .ws-sidebar, .role-topbar, .ws-topbar, .report-top),
-.actor-intro {
-  --muted: var(--muted-on-dark);
-  --ws-muted: var(--muted-on-dark);
-  --line: #444444;
+  :is(.role-sidebar, .ws-sidebar, .role-topbar, .ws-topbar, .report-top) {
   --ws-line: var(--line);
-  --surface: #262626;
-  --action: var(--green);
-  --focus-ring: var(--paper);
-  background-color: var(--ink);
-  color: var(--paper);
+  background-color: var(--paper);
+  color: var(--ink);
   border-color: var(--line);
 }
 .workspace
@@ -584,20 +588,20 @@ button {
     .ws-sidebar .ws-logo,
     .report-top .ws-logo
   ) {
-  color: var(--paper);
+  color: var(--ink);
 }
 .workspace .role-context {
   background: var(--surface);
 }
 .workspace :is(.role-avatar, .role-context-icon, .ws-avatar) {
-  background: var(--green);
+  background: var(--sand);
   color: var(--ink);
 }
 .workspace :is(.role-sidebar, .ws-sidebar) nav a[aria-current='page'],
 .workspace .report-view-switch [aria-pressed='true'] {
   --muted: var(--ink);
   --ws-muted: var(--ink);
-  background: var(--green);
+  background: var(--accent);
   color: var(--ink);
   box-shadow: none;
 }
@@ -605,26 +609,18 @@ button {
   color: inherit;
 }
 .workspace :is(.role-sidebar, .ws-sidebar) nav a small {
-  background: var(--paper);
+  background: var(--surface);
   color: var(--ink);
 }
 .workspace .role-next-step {
-  --ws-muted: var(--muted-on-dark);
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
+  background: var(--sand);
+  color: var(--ink);
+  border-color: var(--line);
 }
-.workspace .role-next-step :is(h2, a:last-child) {
+.workspace .role-next-step h2 {
   color: inherit;
 }
-.workspace .role-next-step .ws-primary {
-  background: var(--paper);
-  color: var(--ink);
-}
-.workspace .role-next-step,
-.workspace .ws-welcome {
-  --focus-ring: var(--paper);
-}
+
 .workspace .ws-welcome .ws-illustration > span {
   color: var(--muted-on-dark);
 }
@@ -638,8 +634,9 @@ button {
   font-weight: 650;
 }
 .workspace .status-progress {
-  background: var(--ink);
-  color: var(--paper);
+  background: var(--action);
+  color: var(--on-action);
+  border-color: var(--action);
 }
 .workspace .rvs-result {
   background: var(--surface);
@@ -651,7 +648,7 @@ button {
 .workspace :is(input, select, textarea),
 .actor-login :is(input, select, textarea) {
   border-color: var(--control-border);
-  accent-color: var(--green);
+  accent-color: var(--accent);
 }
 .workspace :is(input, select, textarea)::placeholder,
 .actor-login :is(input, select, textarea)::placeholder {

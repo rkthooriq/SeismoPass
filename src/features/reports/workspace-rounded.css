@@ -1,0 +1,151 @@
+/* Admin and surveyor surfaces share a rounded hierarchy: panels, cards,
+   controls, then pill-shaped statuses. Keep the public and owner UI scoped out. */
+.workspace:is(.admin-workspace, .surveyor-workspace) {
+  --radius-panel: 22px;
+  --radius-card: 18px;
+  --radius-control: 14px;
+}
+
+.workspace:is(.admin-workspace, .surveyor-workspace)
+  :is(.ws-panel, .role-next-step, .role-sidebar, .directory-dialog) {
+  border-radius: var(--radius-panel);
+}
+
+.workspace:is(.admin-workspace, .surveyor-workspace) .role-stat-grid {
+  gap: 14px;
+  border: 0;
+  border-radius: 0;
+  overflow: visible;
+  background: transparent;
+}
+.workspace:is(.admin-workspace, .surveyor-workspace) .role-stat-grid > a {
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--glass-line);
+  border-radius: var(--radius-card);
+}
+
+.workspace:is(.admin-workspace, .surveyor-workspace) .report-item {
+  margin-block: 14px;
+  border-radius: var(--radius-card);
+  box-shadow: inset 0 1px 0 var(--glass-edge);
+}
+.workspace:is(.admin-workspace, .surveyor-workspace) .report-item:last-child {
+  margin-bottom: 0;
+}
+.workspace:is(.admin-workspace, .surveyor-workspace) .report-item > summary {
+  padding: 14px 18px;
+  border-radius: calc(var(--radius-card) - 1px);
+}
+.workspace:is(.admin-workspace, .surveyor-workspace)
+  .report-item[open]
+  > summary {
+  border-radius: calc(var(--radius-card) - 1px) calc(var(--radius-card) - 1px) 0
+    0;
+}
+.workspace:is(.admin-workspace, .surveyor-workspace) .report-detail {
+  border-radius: 0 0 var(--radius-card) var(--radius-card);
+}
+
+.workspace:is(.admin-workspace, .surveyor-workspace)
+  :is(
+    .role-context,
+    .role-assignment-form,
+    .role-assignment-note,
+    .report-passport,
+    .report-visit-fields,
+    .report-visit-info,
+    .pilot-phases li,
+    .pilot-indicators article,
+    .directory-filters,
+    .directory-table-wrap,
+    .directory-preview,
+    .directory-file
+  ) {
+  border-radius: var(--radius-card);
+}
+
+.workspace:is(.admin-workspace, .surveyor-workspace)
+  :is(
+    .ws-primary,
+    .ws-secondary,
+    .ws-search,
+    .ws-disclaimer,
+    .ws-notice,
+    .role-mobile-menu,
+    .report-building-icon,
+    .role-sidebar nav a,
+    input:not([type='checkbox']):not([type='radio']):not(.ws-search input),
+    select,
+    textarea
+  ) {
+  border-radius: var(--radius-control);
+}
+
+.workspace:is(.admin-workspace, .surveyor-workspace)
+  :is(.ws-badge, .directory-status, .role-sidebar nav small) {
+  border-radius: 999px;
+}
+.workspace:is(.admin-workspace, .surveyor-workspace) .ws-badge {
+  padding: 5px 10px;
+}
+
+/* Clip table fills at the outer corners without clipping the focusable wrapper. */
+.workspace:is(.admin-workspace, .surveyor-workspace) .directory-table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.workspace:is(.admin-workspace, .surveyor-workspace)
+  .directory-table
+  thead
+  th:first-child {
+  border-top-left-radius: calc(var(--radius-card) - 1px);
+}
+.workspace:is(.admin-workspace, .surveyor-workspace)
+  .directory-table
+  thead
+  th:last-child {
+  border-top-right-radius: calc(var(--radius-card) - 1px);
+}
+.workspace:is(.admin-workspace, .surveyor-workspace)
+  .directory-table
+  tbody
+  tr:last-child
+  > :first-child {
+  border-bottom-left-radius: calc(var(--radius-card) - 1px);
+}
+.workspace:is(.admin-workspace, .surveyor-workspace)
+  .directory-table
+  tbody
+  tr:last-child
+  > :last-child {
+  border-bottom-right-radius: calc(var(--radius-card) - 1px);
+}
+
+@media (max-width: 600px) {
+  .workspace:is(.admin-workspace, .surveyor-workspace) .report-item > summary {
+    display: grid;
+    grid-template-columns: 37px minmax(0, 1fr) 18px;
+    gap: 10px 14px;
+  }
+  .workspace:is(.admin-workspace, .surveyor-workspace) .report-building-icon {
+    grid-column: 1;
+    grid-row: 1 / 3;
+  }
+  .workspace:is(.admin-workspace, .surveyor-workspace) .report-summary-name {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .workspace:is(.admin-workspace, .surveyor-workspace)
+    .report-item
+    summary
+    .ws-badge {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+  .workspace:is(.admin-workspace, .surveyor-workspace) .report-summary-arrow {
+    grid-column: 3;
+    grid-row: 1 / 3;
+  }
+}

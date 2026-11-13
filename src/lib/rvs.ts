@@ -98,7 +98,7 @@ export const observationFields = [
   ['exterior', 'Cakupan eksterior: partial / all sides / aerial', 'text'],
   ['interior', 'Cakupan interior: none / visible / entered', 'text'],
   ['drawings', 'Gambar ditinjau: yes / no / DNK', 'text'],
-  ['contact', 'Kontak fiktif (opsional)', 'text'],
+  ['contact', 'Kontak (opsional)', 'text'],
   ['level2', 'Level 2: belum dilakukan / referensi hasil ahli', 'text'],
   [
     'action',

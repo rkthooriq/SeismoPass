@@ -61,12 +61,34 @@ export default function ReportCard({
             'Akun contoh'}
         </p>
         <p>{report.description || 'Catatan belum diisi.'}</p>
+        <dl className="report-visit-info">
+          <div>
+            <dt>Alamat kunjungan</dt>
+            <dd>
+              {report.address || 'Belum diisi. Minta pelapor melengkapi.'}
+            </dd>
+          </div>
+          {report.landmark && (
+            <div>
+              <dt>Patokan</dt>
+              <dd>{report.landmark}</dd>
+            </div>
+          )}
+          {report.contactPhone && (
+            <div>
+              <dt>Nomor yang bisa dihubungi</dt>
+              <dd>
+                <a href={`tel:${report.contactPhone.replace(/[^\d+]/g, '')}`}>
+                  {report.contactPhone}
+                </a>
+              </dd>
+            </div>
+          )}
+        </dl>
         {surveyor && (
           <div className="role-assignment-note">
             <strong>Pesurvei: {surveyor.name}</strong>
-            <p>
-              {report.assignmentNote || 'Penugasan dari sesi demo sebelumnya.'}
-            </p>
+            <p>{report.assignmentNote || 'Penugasan dari sesi sebelumnya.'}</p>
           </div>
         )}
         {report.visitDate && (

@@ -10,9 +10,7 @@ export function ActorDashboard({ role }: { role: ActorRole }) {
         <span className="ws-feature-icon" aria-hidden="true">
           {actor.symbol}
         </span>
-        <span className="ws-badge">
-          RUANG {actor.shortName.toUpperCase()} · DEMONSTRASI
-        </span>
+        <span className="ws-badge">RUANG {actor.shortName.toUpperCase()}</span>
         <h2>{actor.focus}</h2>
         <p>{actor.description}</p>
       </section>
@@ -36,7 +34,7 @@ export function ActorDashboard({ role }: { role: ActorRole }) {
         </span>
         <h2>Belum ada {noun}</h2>
         <p>
-          Demo ini belum memiliki penugasan, keputusan, atau layanan
+          Ruang ini belum memiliki penugasan, keputusan, atau layanan
           operasional. Data bangunan pemilik tidak otomatis dibagikan ke peran
           ini.
         </p>
@@ -54,7 +52,7 @@ export function ActorDashboard({ role }: { role: ActorRole }) {
               <span>{i + 1}</span>
               <div>
                 <strong>{text}</strong>
-                <p>Belum diterapkan pada demo</p>
+                <p>Belum tersedia</p>
               </div>
             </li>
           ))}
@@ -85,7 +83,7 @@ export function AccessMatrix({ role }: { role: ActorRole }) {
             <thead>
               <tr>
                 <th>Aktor</th>
-                <th>Ruang kerja demo</th>
+                <th>Ruang kerja</th>
                 <th>Batas akses yang diusulkan</th>
               </tr>
             </thead>
@@ -107,7 +105,7 @@ export function AccessMatrix({ role }: { role: ActorRole }) {
       <aside className="ws-disclaimer">
         <p>
           <strong>Pembatasan UI bukan perlindungan data.</strong> Simulasi hanya
-          menyaring halaman dan data fiktif di browser. Identitas, penugasan,
+          menyaring halaman dan data di browser. Identitas, penugasan,
           persetujuan, dan otorisasi per bangunan harus diverifikasi di server
           sebelum layanan nyata.
         </p>

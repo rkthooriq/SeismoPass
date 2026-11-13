@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { FormEvent } from 'react';
+import type { ComponentProps, FormEvent } from 'react';
 import {
   advanceReport,
   assignReport,
@@ -24,21 +24,24 @@ import ReportCard from './ReportCard';
 import ReportRegistrationForm from './ReportRegistrationForm';
 import PilotOverview from './PilotOverview';
 import OwnerNextSteps from './OwnerNextSteps';
-import RoleFlowGuide from './RoleFlowGuide';
+import UserProfilePage from '../profile/UserProfilePage';
+import { toUserProfile } from '../../lib/userProfile';
+import type { ProfileInput } from '../../lib/userProfile';
 import '../workspace/workspace.css';
 import './reports.css';
 import '../rvs/rvs.css';
 
-export default function ReportWorkspace({
+function ReportWorkspaceContent({
   route = 'dashboard',
   account,
   accounts,
   reports,
   onChange,
+  onProfileSave,
   onReview,
   onAddSurveyor,
+  onImportSurveyors,
   onReissuePassword,
-  onLeave,
   storageFailed,
   invalidSession = false,
 }: {
@@ -47,6 +50,7 @@ export default function ReportWorkspace({
   accounts: DemoAccount[];
   reports: Report[];
   onChange: (reports: Report[]) => void;
+  onProfileSave: (input: ProfileInput) => string;
   onReview: (
     id: string,
     action: ReviewAction,
@@ -57,6 +61,7 @@ export default function ReportWorkspace({
     input: NewSurveyorInput,
   ) => IssuedPassword | { error: string };
   onReissuePassword: (id: string) => IssuedPassword | { error: string };
+  onImportSurveyors: (inputs: NewSurveyorInput[]) => { issued: IssuedPassword[] } | { error: string };
   onLeave: () => void;
   storageFailed: boolean;
   invalidSession?: boolean;
@@ -85,28 +90,17 @@ export default function ReportWorkspace({
     (report) =>
       matchesPage(report) &&
       (!status || report.status === status) &&
-      [report.id, report.title, report.location].some((value) =>
-        value.toLowerCase().includes(search.trim().toLowerCase()),
+      [report.id, report.title, report.location, report.address ?? ''].some(
+        (value) => value.toLowerCase().includes(search.trim().toLowerCase()),
       ),
   );
   const count = (statuses: string[]) =>
     visible.filter((report) => statuses.includes(report.status)).length;
-  const counts: Partial<Record<WorkflowPage, number>> = {
-    incoming: count(['Dikirim']),
-    assignments: count(['Siap disurvei', 'Ditugaskan']),
-    review: count(['Ditinjau']),
-    tasks: count(['Ditugaskan', 'Dalam survei', 'Perlu revisi']),
-    reports: visible.length,
-  };
   const title =
-    workflowMenus[account.role].find(([id]) => id === page)?.[1] ??
-    'Halaman tidak tersedia';
-  const intro =
-    account.role === 'admin'
-      ? 'Kelola akses pesurvei, atur penugasan, dan pantau tindak lanjut bangunan.'
-      : account.role === 'surveyor'
-        ? 'Kerjakan penugasan dari admin dan catat hasil kunjungan secara tertata.'
-        : 'Catat bangunanmu dan ikuti setiap langkah tindak lanjutnya.';
+    page === 'profile'
+      ? 'Profil saya'
+      : (workflowMenus[account.role].find(([id]) => id === page)?.[1] ??
+        'Halaman tidak tersedia');
   function saveDraft(draft: Report, send: boolean) {
     if (account.role !== 'owner' || draft.reporterId !== account.id) return;
     const original = editing
@@ -190,7 +184,7 @@ export default function ReportWorkspace({
             {
               mode: 'DEMONSTRASI',
               description:
-                'Catatan demo dan simulasi belum divalidasi. RVS bukan sertifikat aman.',
+                'Catatan dan simulasi belum divalidasi. RVS bukan sertifikat aman.',
               reports: filtered,
             },
             null,
@@ -202,7 +196,7 @@ export default function ReportWorkspace({
     );
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'seismopass-laporan-demo.json';
+    link.download = 'seismopass-laporan.json';
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
@@ -335,31 +329,7 @@ export default function ReportWorkspace({
             },
           ];
   return (
-    <WorkspaceShell
-      account={account}
-      page={page}
-      counts={counts}
-      onLeave={onLeave}
-    >
-      <div className="role-demo-notice">
-        <span className="role-live-dot" />
-        <span>
-          Demo lokal · Data fiktif · Berganti akun di tab yang sama untuk
-          mencoba alur
-        </span>
-        <a href="#/flows">Lihat alur ↗</a>
-      </div>
-      <div className="role-page-heading">
-        <div>
-          <h1>{title}</h1>
-          <p>{intro}</p>
-        </div>
-        {account.role === 'owner' && page !== 'new' && (
-          <a className="ws-primary" href="#/dashboard/new">
-            ＋ Buat laporan
-          </a>
-        )}
-      </div>
+    <>
       {storageFailed && (
         <p role="status" className="ws-disclaimer">
           Penyimpanan tab tidak tersedia. Perubahan hanya bertahan selama
@@ -368,7 +338,7 @@ export default function ReportWorkspace({
       )}
       {invalidSession && (
         <p role="status" className="ws-disclaimer">
-          Sesi demo tidak dapat dipulihkan; data contoh dipakai. Simpan
+          Sesi sebelumnya tidak dapat dipulihkan; data contoh dipakai. Simpan
           perubahan untuk memulai sesi baru.
         </p>
       )}
@@ -376,6 +346,13 @@ export default function ReportWorkspace({
         <p role="status" className="ws-notice">
           {message}
         </p>
+      )}
+      {page === 'profile' && (
+        <UserProfilePage
+          profile={toUserProfile(account)}
+          onSave={onProfileSave}
+          storageFailed={storageFailed}
+        />
       )}
       {!page && (
         <section className="ws-panel">
@@ -474,7 +451,6 @@ export default function ReportWorkspace({
                     : 'Lihat penugasan'}{' '}
                 →
               </a>
-              <a href="#/dashboard/flow">Pelajari alur peranmu ↗</a>
             </aside>
           </div>
         </>
@@ -486,6 +462,7 @@ export default function ReportWorkspace({
           mode="surveyors"
           onReview={onReview}
           onAdd={onAddSurveyor}
+          onImport={onImportSurveyors}
           onReissue={onReissuePassword}
         />
       )}
@@ -499,7 +476,6 @@ export default function ReportWorkspace({
           }}
         />
       )}
-      {page === 'flow' && <RoleFlowGuide />}
       {page === 'pilot' && <PilotOverview />}
       {page === 'reports' && account.role === 'owner' && (
         <OwnerNextSteps reports={visible} />
@@ -509,7 +485,7 @@ export default function ReportWorkspace({
           <section className="ws-panel role-report-list">
             <div className="ws-section-head">
               <div>
-                <h2>{title}</h2>
+                <h2>{account.role === 'owner' ? 'Daftar laporan' : title}</h2>
                 <p>{filtered.length} laporan dalam daftar ini.</p>
               </div>
               {account.role === 'admin' && (
@@ -568,6 +544,35 @@ export default function ReportWorkspace({
           </section>
         </>
       )}
+    </>
+  );
+}
+
+// Keep the shell mounted so the liquid indicator can travel between destinations.
+// Route-local forms and filters still reset through the keyed content below.
+export default function ReportWorkspace(
+  props: ComponentProps<typeof ReportWorkspaceContent>,
+) {
+  const { account, reports, route = 'dashboard', onLeave } = props;
+  const page = resolveWorkflowPage(account.role, route);
+  const visible = visibleReports(reports, account);
+  const count = (statuses: string[]) =>
+    visible.filter((report) => statuses.includes(report.status)).length;
+  const counts: Partial<Record<WorkflowPage, number>> = {
+    incoming: count(['Dikirim']),
+    assignments: count(['Siap disurvei', 'Ditugaskan']),
+    review: count(['Ditinjau']),
+    tasks: count(['Ditugaskan', 'Dalam survei', 'Perlu revisi']),
+    reports: visible.length,
+  };
+  return (
+    <WorkspaceShell
+      account={account}
+      page={page}
+      counts={counts}
+      onLeave={onLeave}
+    >
+      <ReportWorkspaceContent key={route} {...props} />
     </WorkspaceShell>
   );
 }

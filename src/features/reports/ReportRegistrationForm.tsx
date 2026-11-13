@@ -33,6 +33,9 @@ export default function ReportRegistrationForm({
       reporterId,
       title: read('title'),
       location: read('location'),
+      address: read('address'),
+      landmark: read('landmark'),
+      contactPhone: read('contactPhone'),
       description: read('description'),
       function: read('function'),
       year: read('year'),
@@ -53,7 +56,7 @@ export default function ReportRegistrationForm({
   }
   const inputs = [
     ['title', 'Nama bangunan'],
-    ['location', 'Lokasi contoh'],
+    ['location', 'Kawasan (desa/kelurahan, kecamatan)'],
     ...reportBuildingFields,
   ] as const;
   return (
@@ -110,7 +113,7 @@ export default function ReportRegistrationForm({
               }
               placeholder={
                 key === 'location'
-                  ? 'Lokasi fiktif, tanpa alamat pribadi'
+                  ? 'Contoh: Desa Jambudipa, Kecamatan Cisarua'
                   : key === 'year'
                     ? 'Kosongkan jika belum diketahui'
                     : undefined
@@ -126,6 +129,67 @@ export default function ReportRegistrationForm({
           </label>
         ))}
       </div>
+      <fieldset className="report-visit-fields">
+        <legend>Alamat untuk kunjungan survei</legend>
+        <label htmlFor="report-address">
+          Alamat lengkap *
+          <textarea
+            id="report-address"
+            name="address"
+            rows={2}
+            maxLength={300}
+            defaultValue={initial?.address ?? ''}
+            placeholder="Nama jalan atau gang, nomor, RT/RW, desa/kelurahan, kecamatan"
+            aria-invalid={!!errors.address}
+            aria-describedby={
+              errors.address ? 'report-error-address' : 'report-visit-privacy'
+            }
+          />
+          {errors.address && (
+            <small className="ws-error" id="report-error-address">
+              {errors.address}
+            </small>
+          )}
+        </label>
+        <label htmlFor="report-landmark">
+          Patokan (opsional)
+          <input
+            id="report-landmark"
+            name="landmark"
+            maxLength={150}
+            defaultValue={initial?.landmark ?? ''}
+            placeholder="Contoh: pagar biru, seberang masjid, tanya Pak RT"
+          />
+        </label>
+        <label htmlFor="report-contactPhone">
+          Nomor yang bisa dihubungi pesurvei (opsional)
+          <input
+            id="report-contactPhone"
+            name="contactPhone"
+            type="tel"
+            inputMode="tel"
+            maxLength={20}
+            defaultValue={initial?.contactPhone ?? ''}
+            placeholder="Contoh: 0812 3456 7890"
+            aria-invalid={!!errors.contactPhone}
+            aria-describedby={
+              errors.contactPhone
+                ? 'report-error-contactPhone'
+                : 'report-visit-privacy'
+            }
+          />
+          {errors.contactPhone && (
+            <small className="ws-error" id="report-error-contactPhone">
+              {errors.contactPhone}
+            </small>
+          )}
+        </label>
+        <p className="ws-muted" id="report-visit-privacy">
+          Alamat, patokan, dan nomor hanya terlihat oleh admin dan pesurvei yang
+          ditugaskan ke laporan ini. Data ini tidak tampil di profil bangunan
+          maupun QR. Nomor boleh milik penghuni atau pengelola bangunan.
+        </p>
+      </fieldset>
       <datalist id="options-function">
         {[
           'Rumah tinggal',
@@ -176,15 +240,14 @@ export default function ReportRegistrationForm({
         </small>
       )}
       <p className="ws-muted">
-        * Wajib saat mengirim. Draf cukup berisi nama dan konfirmasi data
-        fiktif. Pilihan isian adalah bantuan pencatatan, bukan formulir
-        penilaian RVS.
+        * Wajib saat mengirim. Draf cukup berisi nama dan persetujuan data.
+        Pilihan isian adalah bantuan pencatatan, bukan formulir penilaian RVS.
       </p>
       {(
         [
           [
             'demoConsent',
-            'Saya menggunakan data fiktif dan memahami bahwa laporan demo tidak didaftarkan ke layanan nyata.',
+            'Saya setuju data laporan ini dipakai untuk pencatatan dan penugasan survei.',
           ],
           [
             'understandsRvs',

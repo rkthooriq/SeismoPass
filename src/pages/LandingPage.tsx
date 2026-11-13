@@ -1,20 +1,75 @@
-import { useEffect, useRef, useState } from 'react';
-import Brand from '../components/Brand';
-import BuildingScene from '../components/BuildingScene';
+import { useEffect, useId, useRef, useState } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
+import {
+  LiquidNavbar,
+  supportsRefraction,
+} from '../components/ui/liquid-glass-navbar';
+import type { LiquidNavItem } from '../components/ui/liquid-glass-navbar';
+import EarthScene from '../components/EarthScene';
+import DisasterBoard from '../features/disaster/DisasterData';
+import LatestEarthquake from '../features/disaster/LatestEarthquake';
 import './landing.css';
 
-const navigation = [
-  ['#beranda', 'Beranda'],
-  ['#tentang', 'Tentang'],
-  ['#alur', 'Cara kerja'],
-  ['#/rvs-lab', 'Latihan RVS & QR'],
-  ['#pertanyaan', 'Bantuan'],
+const icon = (path: ReactNode) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="18"
+    height="18"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.8"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    {path}
+  </svg>
+);
+
+const navigation: LiquidNavItem[] = [
+  {
+    label: 'Data',
+    href: '#data-bencana',
+    fx: 'pop',
+    icon: icon(<path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />),
+  },
+  {
+    label: 'Tentang',
+    href: '#tentang',
+    fx: 'spin',
+    icon: icon(
+      <>
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M12 11v5M12 8h.01" />
+      </>,
+    ),
+  },
+  {
+    label: 'Cara kerja',
+    href: '#alur',
+    fx: 'wave',
+    icon: icon(
+      <path d="M5 6h9a3 3 0 0 1 0 6H10a3 3 0 0 0 0 6h9M5 6l2-2M5 6l2 2M19 18l-2-2M19 18l-2 2" />,
+    ),
+  },
+  {
+    label: 'Bantuan',
+    href: '#pertanyaan',
+    fx: 'pop',
+    icon: icon(
+      <>
+        <circle cx="12" cy="12" r="8.5" />
+        <path d="M9.5 9.5a2.5 2.5 0 0 1 4.6 1.3c0 1.7-2.1 2-2.1 3.4M12 17h.01" />
+      </>,
+    ),
+  },
 ];
 
 function currentSection() {
-  return navigation.some(([href]) => href === window.location.hash)
-    ? window.location.hash
-    : '#beranda';
+  const index = navigation.findIndex(
+    (item) => item.href === window.location.hash,
+  );
+  return index < 0 ? 0 : index;
 }
 
 const steps = [
@@ -44,6 +99,25 @@ const steps = [
   ],
 ];
 
+// Person icons for the three role cards.
+const roleIcon = (extra: ReactNode) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="22"
+    height="22"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.7"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <circle cx="9" cy="8" r="3.2" />
+    <path d="M3 20c0-3.6 2.7-6 6-6s6 2.4 6 6" />
+    {extra}
+  </svg>
+);
+
 const roles = [
   {
     name: 'Pelapor',
@@ -51,15 +125,22 @@ const roles = [
     description:
       'Buat laporan, lengkapi data bangunan, dan pantau catatan serta langkah berikutnya.',
     detail: 'Daftar mandiri sebagai pemilik atau pengelola',
-    icon: '⌂',
+    // Person with a house: the owner reporting a building.
+    icon: roleIcon(<path d="M16 20v-5.5l3-2.5 3 2.5V20Zm2.2 0v-2.4h1.6V20" />),
   },
   {
     name: 'Admin',
     action: 'Atur tindak lanjutnya.',
     description:
       'Periksa laporan masuk, kelola akun pesurvei, tetapkan penugasan, dan tinjau catatan.',
-    detail: 'Akses melalui akun admin demo',
-    icon: '▤',
+    detail: 'Akses melalui akun admin',
+    // Person with a checked clipboard: reviewing and assigning.
+    icon: roleIcon(
+      <>
+        <rect x="16" y="10.5" width="6" height="9" rx="1.2" />
+        <path d="m17.4 15.2 1.3 1.3 2-2.4" />
+      </>,
+    ),
   },
   {
     name: 'Pesurvei',
@@ -67,146 +148,166 @@ const roles = [
     description:
       'Buka penugasan dari admin, catat kunjungan, dan kirim catatan untuk ditinjau.',
     detail: 'Akun dan penugasan disiapkan admin',
-    icon: '▥',
+    // Person beside a survey tripod: the field visit.
+    icon: roleIcon(
+      <>
+        <rect x="17" y="7" width="3.6" height="2.6" rx=".6" />
+        <path d="M18.8 9.6 16.4 20M18.8 9.6V20M18.8 9.6l2.4 10.4" />
+      </>,
+    ),
   },
 ];
 
 export default function LandingPage() {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState(currentSection);
-  const menuButton = useRef<HTMLButtonElement>(null);
-  const closeMenu = () => setMenuOpen(false);
+  const accountFilterId = `account-glass-${useId().replace(/:/g, '')}`;
+  const [accountRefraction] = useState(supportsRefraction);
+  // While a nav click scrolls the page, ignore scroll-spy so the drop does not
+  // stop at every section on the way.
+  const lockUntil = useRef(0);
 
   useEffect(() => {
-    const syncSection = () => {
-      setActiveSection(currentSection());
-      setMenuOpen(false);
+    let frame = 0;
+    const spy = () => {
+      frame = 0;
+      if (Date.now() < lockUntil.current) return;
+      // The last section whose top has passed ~35% of the screen; Data at the top.
+      const line = window.innerHeight * 0.35;
+      let next = 0;
+      navigation.forEach((item, index) => {
+        const target = item.href ? document.querySelector(item.href) : null;
+        if (index > 0 && target && target.getBoundingClientRect().top <= line)
+          next = index;
+      });
+      // At the very bottom the last short section may never reach the line.
+      if (
+        window.innerHeight + window.scrollY >=
+        document.documentElement.scrollHeight - 4
+      )
+        next = navigation.length - 1;
+      setActiveSection(next);
     };
-    window.addEventListener('hashchange', syncSection);
-    return () => window.removeEventListener('hashchange', syncSection);
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(spy);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    spy();
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      cancelAnimationFrame(frame);
+    };
   }, []);
+
+  // Phone header: slide away while scrolling down so it does not cover the
+  // content, and come back on scroll up or near the top. CSS limits the
+  // effect to phone widths.
+  const [headerHidden, setHeaderHidden] = useState(false);
+  useEffect(() => {
+    let lastY = window.scrollY;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const y = Math.max(window.scrollY, 0);
+      const delta = y - lastY;
+      if (y < 80) setHeaderHidden(false);
+      else if (delta > 8) setHeaderHidden(true);
+      else if (delta < -8) setHeaderHidden(false);
+      if (Math.abs(delta) > 8 || y < 80) lastY = y;
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  const goTo = (index: number) => {
+    lockUntil.current = Date.now() + 900;
+    setActiveSection(index);
+  };
 
   return (
     <div className="sp-landing">
+      <EarthScene />
       <a className="skip-link" href="#main">
         Lewati ke konten
       </a>
-      <header id="beranda" className="sp-header sp-shell">
-        <a href="#" aria-label="SeismoPass, beranda" onClick={closeMenu}>
-          <Brand />
-        </a>
-        <button
-          ref={menuButton}
-          className="sp-menu"
-          type="button"
-          aria-expanded={menuOpen}
-          aria-label={menuOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi'}
-          aria-controls="navigation"
-          onClick={() => setMenuOpen(!menuOpen)}
+      <header
+        id="beranda"
+        className={`sp-header sp-shell${headerHidden ? ' is-hidden' : ''}`}
+      >
+        <span className="sp-wordmark">SeismoPass</span>
+        <LiquidNavbar
+          className="sp-liquid-nav"
+          tone="light"
+          items={navigation}
+          active={activeSection}
+          onChange={goTo}
+        />
+        <div
+          className="sp-nav-account"
+          data-refract={accountRefraction ? 'on' : 'off'}
+          style={
+            {
+              '--account-refraction': `url(#${accountFilterId})`,
+            } as CSSProperties
+          }
         >
-          Menu <span aria-hidden="true">{menuOpen ? '−' : '+'}</span>
-        </button>
-        <nav
-          id="navigation"
-          className={`sp-nav ${menuOpen ? 'is-open' : ''}`}
-          aria-label="Navigasi utama"
-          onKeyDown={(event) => {
-            if (event.key === 'Escape' && menuOpen) {
-              closeMenu();
-              menuButton.current?.focus();
-            }
-          }}
-        >
-          <div className="sp-nav-capsule">
-            {navigation.map(([href, label]) => (
-              <a
-                key={href}
-                href={href}
-                aria-current={activeSection === href ? 'location' : undefined}
-                onClick={closeMenu}
+          <svg
+            className="sp-account-filter"
+            width="0"
+            height="0"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <defs>
+              <filter
+                id={accountFilterId}
+                x="0"
+                y="0"
+                width="100%"
+                height="100%"
+                colorInterpolationFilters="sRGB"
               >
-                {label}
-              </a>
-            ))}
-          </div>
-          <div className="sp-nav-account">
-            <a
-              className="sp-button sp-button-outline"
-              href="#/login"
-              onClick={closeMenu}
-            >
-              Masuk
-            </a>
-            <a className="sp-button" href="#/register" onClick={closeMenu}>
-              Daftar
-            </a>
-          </div>
-        </nav>
+                <feTurbulence
+                  type="fractalNoise"
+                  baseFrequency="0.006 0.02"
+                  numOctaves="2"
+                  seed="7"
+                  result="noise"
+                />
+                <feGaussianBlur in="noise" stdDeviation="2" result="soft" />
+                <feDisplacementMap
+                  in="SourceGraphic"
+                  in2="soft"
+                  scale="60"
+                  xChannelSelector="R"
+                  yChannelSelector="G"
+                />
+              </filter>
+            </defs>
+          </svg>
+          <a className="sp-button sp-button-outline" href="#/login">
+            Masuk
+          </a>
+          <a className="sp-button" href="#/register">
+            Daftar
+          </a>
+        </div>
       </header>
       <main id="main">
-        <section className="sp-hero sp-shell" aria-labelledby="hero-title">
-          <div className="sp-hero-copy">
-            <span className="sp-demo-tag">
-              <span aria-hidden="true" />
-              Paspor digital bangunan
-            </span>
-            <h1 id="hero-title">
-              Kenali bangunanmu.
-              <br />
-              Siapkan langkah berikutnya.
-            </h1>
-            <p>
-              Mulai dari catatan yang tertata. SeismoPass menghubungkan laporan
-              bangunan, penugasan survei, dan tindak lanjut dalam satu ruang
-              kerja.
-            </p>
-            <div className="sp-actions">
-              <a className="sp-button sp-button-light" href="#/register">
-                Daftar sebagai pelapor
-              </a>
-              <a className="sp-text-link" href="#/login">
-                Jelajahi demo <span aria-hidden="true">↗</span>
-              </a>
-            </div>
-            <p className="sp-hero-note">
-              Demo pengembangan dengan data fiktif.
-              <br />
-              RVS adalah penyaringan awal, bukan sertifikat aman.
-            </p>
-          </div>
-          <div
-            className="sp-passport-preview"
-            aria-label="Ilustrasi paspor bangunan fiktif, belum dinilai"
-          >
-            <div className="sp-preview-heading">
-              <span>Bangunan & catatannya</span>
-              <span className="sp-preview-tag">Contoh demo</span>
-            </div>
-            <div className="sp-building-art">
-              <BuildingScene />
-            </div>
-            <div className="sp-passport-sheet">
-              <div className="sp-passport-title">
-                <div>
-                  <span>Profil bangunan</span>
-                  <h2>Rumah Contoh A</h2>
-                </div>
-                <span className="sp-status">Belum dinilai</span>
-              </div>
-              <dl>
-                <div>
-                  <dt>Fungsi</dt>
-                  <dd>Rumah tinggal</dd>
-                </div>
-                <div>
-                  <dt>Hasil screening resmi</dt>
-                  <dd>Belum tersedia</dd>
-                </div>
-              </dl>
-              <a href="#/login">
-                Lihat alur pencatatan <span aria-hidden="true">↗</span>
-              </a>
-            </div>
+        <section className="sp-hero" aria-labelledby="hero-title">
+          <h1 id="hero-title" className="sp-page-title">
+            SeismoPass untuk Bandung Raya dan Sesar Lembang
+          </h1>
+          <div className="sp-shell sp-hero-grid">
+            <LatestEarthquake />
+            <DisasterBoard />
           </div>
         </section>
 
@@ -223,7 +324,7 @@ export default function LandingPage() {
                 Peran yang jelas.
               </h2>
               <p>
-                Demo saat ini menghubungkan pelapor, admin, dan pesurvei. Setiap
+                SeismoPass menghubungkan pelapor, admin, dan pesurvei. Setiap
                 akun memiliki tugas dan tampilan sesuai perannya.
               </p>
             </div>
@@ -240,9 +341,6 @@ export default function LandingPage() {
                 </article>
               ))}
             </div>
-            <a className="sp-text-link" href="#/flows">
-              Lihat panduan alur tiga peran <span aria-hidden="true">↗</span>
-            </a>
           </div>
         </section>
 
@@ -258,9 +356,8 @@ export default function LandingPage() {
               ke tindak lanjut.
             </h2>
             <p>
-              Enam tahap arah pengembangan SeismoPass. Demo menyediakan
-              pencatatan dan simulasi alur; layanan profesional masih dalam
-              pengembangan.
+              Enam tahap dari pencatatan hingga evaluasi. Rujukan, retrofit, dan
+              dukungan bergantung pada mitra dan program yang tersedia.
             </p>
           </div>
           <ol className="sp-steps">
@@ -304,13 +401,10 @@ export default function LandingPage() {
               evaluasi teknis ahli struktur.
             </p>
             <p className="sp-safety-note">
-              Latihan FEMA P-154 dan QR di demo bersifat pendidikan, belum
-              divalidasi ahli, serta tidak menetapkan kategori risiko atau
+              Simulasi FEMA P-154 dan QR di dalam aplikasi bersifat pendidikan,
+              belum divalidasi ahli, serta tidak menetapkan kategori risiko atau
               rujukan otomatis.
             </p>
-            <a className="sp-button sp-button-light" href="#/rvs-lab">
-              Buka latihan RVS & QR
-            </a>
           </div>
         </section>
 
@@ -321,16 +415,18 @@ export default function LandingPage() {
         >
           <div>
             <h2 id="faq-title">Sebelum mulai.</h2>
-            <p>Beberapa hal yang perlu kamu ketahui tentang demo ini.</p>
+            <p>
+              Beberapa hal yang perlu kamu ketahui sebelum memakai SeismoPass.
+            </p>
           </div>
           <div className="sp-faq-items">
             <details>
               <summary>Bagaimana cara mencoba pencatatan bangunan?</summary>
               <p>
-                Daftar sebagai pelapor atau pilih “Jelajahi contoh bangunan” di
-                halaman masuk. Gunakan data fiktif. Catatan disimpan selama sesi
-                tab jika penyimpanan browser tersedia; layanan akun nyata dan
-                penyimpanan server belum tersedia.
+                Daftar sebagai pelapor, lalu tambahkan bangunan dari ruang
+                kerjamu. Contoh profil bangunan juga dapat dibuka dari halaman
+                masuk. Untuk saat ini catatan tersimpan di browser selama tab
+                terbuka.
               </p>
             </details>
             <details>
@@ -353,19 +449,17 @@ export default function LandingPage() {
               <summary>Apakah bantuan retrofit otomatis didapatkan?</summary>
               <p>
                 Tidak. Insentif fiskal, pembiayaan, dan asuransi bergantung pada
-                ketentuan program serta kerja sama yang disepakati. Demo tidak
-                menjanjikan bantuan tersebut.
+                ketentuan program serta kerja sama yang disepakati. SeismoPass
+                tidak menjanjikan bantuan tersebut.
               </p>
             </details>
           </div>
         </section>
       </main>
       <footer className="sp-footer sp-shell">
-        <a href="#" aria-label="SeismoPass, kembali ke atas">
-          <Brand />
-        </a>
+        <span className="sp-wordmark">SeismoPass</span>
         <p>Mengenal bangunan. Menyiapkan langkah.</p>
-        <span>Demo pengembangan</span>
+        <span>© 2026 SeismoPass</span>
       </footer>
     </div>
   );

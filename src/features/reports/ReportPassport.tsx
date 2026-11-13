@@ -49,7 +49,7 @@ export default function ReportPassport({ report }: { report: Report }) {
     >
       <div className="ws-section-head">
         <div>
-          <span className="ws-badge">PROFIL DIGITAL DEMO</span>
+          <span className="ws-badge">PROFIL DIGITAL</span>
           <h3>Perjalanan bangunan</h3>
         </div>
         <span className="ws-badge">

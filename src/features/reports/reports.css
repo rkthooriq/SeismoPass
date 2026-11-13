@@ -4,15 +4,24 @@
 .report-top {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
+  min-height: 64px;
   border-bottom: 1px solid var(--ws-line);
-  background: white;
-  padding: var(--space-page);
+  background: var(--paper);
+  padding: 10px var(--space-page);
 }
 .report-top .ws-logo {
   margin: 0 auto 0 0;
   padding: 0;
+  font-size: 20px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+.report-top :is(.ws-secondary, .ws-primary, a.ws-secondary) {
+  min-height: 38px;
+  padding: 8px 16px;
+  font-size: 14px;
 }
 .report-top > span {
   font-size: 14px;
@@ -95,8 +104,8 @@
   margin-bottom: 24px;
 }
 .report-view-switch [aria-pressed='true'] {
-  background: var(--ink);
-  color: white;
+  background: var(--accent);
+  color: var(--ink);
 }
 .report-passport {
   margin: 12px 0;
@@ -130,7 +139,7 @@
   display: flex;
   align-items: flex-start;
   gap: 12px;
-  background: white;
+  background: var(--paper);
   border: 1px solid var(--ws-line);
   border-radius: 12px;
   padding: var(--space-panel);
@@ -157,7 +166,7 @@
 }
 .report-qr-preview {
   margin-top: 16px;
-  background: white;
+  background: var(--paper);
   border: 1px dashed var(--line);
   border-radius: 12px;
   padding: var(--space-panel);
@@ -226,7 +235,7 @@
 }
 .role-brand {
   color: var(--ink);
-  font-size: 29px;
+  font-size: 23px;
   letter-spacing: -1.8px;
   font-weight: 650;
   padding: 0 13px;
@@ -420,7 +429,7 @@
   color: var(--ws-muted);
 }
 .role-page-heading h1 {
-  font-size: clamp(27px, 3vw, 36px);
+  font-size: clamp(22px, 2.4vw, 29px);
   margin: 6px 0 8px;
   color: var(--ink);
 }
@@ -455,7 +464,7 @@
   font-size: 12px;
 }
 .role-stat-grid strong {
-  font-size: 34px;
+  font-size: 27px;
   line-height: 1;
   letter-spacing: -1px;
   margin: 17px 0 12px;
@@ -508,7 +517,7 @@
   padding: var(--space-panel);
 }
 .role-next-step h2 {
-  font-size: 25px;
+  font-size: 20px;
   line-height: 1.2;
   margin: 0;
   color: var(--ink);
@@ -518,7 +527,7 @@
   margin: 0;
   color: var(--ws-muted);
 }
-.role-next-step > a:last-child {
+.role-next-step > a:not(.ws-primary):last-child {
   font-size: 13px;
   color: var(--muted);
 }
@@ -528,7 +537,7 @@
   padding: 45px 18px;
 }
 .role-empty > span {
-  font-size: 35px;
+  font-size: 28px;
   color: var(--muted);
 }
 .role-empty h3 {
@@ -650,7 +659,7 @@
   margin-bottom: 26px;
 }
 .role-section-title h2 {
-  font-size: 28px;
+  font-size: 22px;
   margin: 12px 0;
 }
 .role-section-title p {
@@ -753,18 +762,58 @@
   color: var(--ws-muted);
 }
 .access-status-panel {
-  max-width: 780px;
-  margin: 30px auto;
+  max-width: 520px;
+  margin: 48px auto;
+  padding: 28px;
 }
+.workspace .access-status-panel h1 {
+  margin: 14px 0 4px;
+  font-size: 21px;
+  line-height: 1.2;
+}
+.access-status-panel > p,
+.access-status-panel form > p {
+  font-size: 15px;
+  line-height: 1.6;
+}
+.access-status-panel > p:first-of-type {
+  color: var(--ws-muted);
+  font-size: 14px;
+  overflow-wrap: anywhere;
+}
+.access-status-panel .ws-primary {
+  margin-top: 12px;
+}
+/* Account steps: a short numbered sequence on one line, wrapping on phones. */
 .access-progress {
+  counter-reset: step;
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-  border-radius: 12px;
+  gap: 8px 18px;
+  margin: 20px 0;
+  padding: 12px 14px;
+  list-style: none;
+  border-radius: 10px;
   background: var(--surface);
-  font-size: 14px;
-  padding: var(--space-panel) var(--space-panel) var(--space-panel)
-    calc(var(--space-panel) * 2);
+  font-size: 13px;
+}
+.access-progress li {
+  counter-increment: step;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.access-progress li::before {
+  content: counter(step);
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  font-size: 11px;
+  font-weight: 600;
 }
 .role-report-list .ws-toolbar {
   margin-top: 24px;
@@ -920,6 +969,139 @@
   font-size: 14px;
 }
 .owner-turn.is-you {
-  background: var(--green);
+  background: var(--accent);
   color: var(--ink);
+}
+
+/* Visit address block in the report form, and the read-only block on report cards. */
+.report-visit-fields {
+  display: grid;
+  gap: 14px;
+  margin: 18px 0;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.report-visit-fields legend {
+  padding: 0 6px;
+  font-size: 14px;
+  font-weight: 650;
+}
+.report-visit-fields textarea {
+  width: 100%;
+  min-height: 72px;
+  resize: vertical;
+}
+.report-visit-info {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--surface);
+  font-size: 14px;
+}
+.report-visit-info dt {
+  font-size: 12px;
+  color: var(--ws-muted, var(--muted));
+}
+.report-visit-info dd {
+  margin: 2px 0 0;
+  font-weight: 550;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Pelapor: top navigation instead of a sidebar ---------- */
+.owner-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border-bottom: 1px solid var(--line);
+  background: rgb(255 255 255 / 0.82);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+}
+.owner-top-inner {
+  display: flex;
+  align-items: center;
+  gap: 16px 28px;
+  flex-wrap: wrap;
+  width: min(1120px, calc(100% - 32px));
+  min-height: 64px;
+  margin-inline: auto;
+  padding-block: 8px;
+}
+.owner-nav {
+  display: flex;
+  gap: 4px;
+  margin-right: auto;
+}
+.owner-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+}
+.owner-nav a[aria-current='page'] {
+  background: var(--sand);
+  color: var(--ink);
+}
+.owner-nav a:not([aria-current='page']):is(:hover, :focus-visible) {
+  background: var(--surface);
+  color: var(--ink);
+}
+.owner-nav small {
+  min-width: 20px;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12px;
+  text-align: center;
+}
+.owner-account {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.owner-account .ws-secondary {
+  min-height: 38px;
+  padding: 8px 16px;
+}
+.owner-main {
+  width: min(1120px, calc(100% - 32px));
+  margin-inline: auto;
+  padding-block: 24px 32px;
+}
+.owner-main:focus {
+  outline: none;
+}
+.owner-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px 20px;
+  margin-top: 32px;
+  font-size: 13px;
+}
+@media (max-width: 640px) {
+  .owner-top-inner {
+    gap: 10px 12px;
+  }
+  .owner-nav {
+    order: 3;
+    width: 100%;
+    margin-right: 0;
+  }
+  .owner-account {
+    margin-left: auto;
+  }
+  .owner-account strong {
+    display: none;
+  }
 }

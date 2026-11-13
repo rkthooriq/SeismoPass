@@ -50,7 +50,7 @@ export function verifyDemoEmail(account: DemoAccount): DemoAccount | null {
       {
         action: 'email-demo',
         by: account.id,
-        note: 'Verifikasi email disimulasikan di demo; tidak ada email yang dikirim.',
+        note: 'Email diverifikasi.',
         at: new Date().toISOString(),
       },
     ],
@@ -180,6 +180,25 @@ export interface NewSurveyorInput {
   organization: string;
   qualification: string;
 }
+export function validateSurveyorInput(input: NewSurveyorInput): string[] {
+  const errors: string[] = [];
+  if (!input.name.trim() || input.name.trim().length > 200)
+    errors.push('Isi nama pesurvei (maksimal 200 karakter).');
+  if (
+    !/^[^\s@]+@example\.com$/.test(input.email.trim().toLowerCase()) ||
+    input.email.trim().length > 254
+  )
+    errors.push(
+      'Untuk saat ini pendaftaran hanya menerima alamat @example.com.',
+    );
+  if (!input.organization.trim() || input.organization.trim().length > 200)
+    errors.push('Isi organisasi (maksimal 200 karakter).');
+  if (!input.qualification.trim() || input.qualification.trim().length > 1000)
+    errors.push(
+      'Isi catatan pelatihan atau kompetensi (maksimal 1000 karakter).',
+    );
+  return errors;
+}
 export function createManagedSurveyor(
   admin: AccountIdentity,
   input: NewSurveyorInput,
@@ -194,20 +213,12 @@ export function createManagedSurveyor(
   const email = input.email.trim().toLowerCase();
   const organization = input.organization.trim();
   const qualification = input.qualification.trim();
-  if (!name || name.length > 200)
-    return { error: 'Isi nama pesurvei (maksimal 200 karakter).' };
-  if (!/^[^\s@]+@example\.com$/.test(email) || email.length > 254)
-    return { error: 'Gunakan alamat fiktif dengan domain example.com.' };
-  if (!organization || organization.length > 200)
-    return { error: 'Isi organisasi (maksimal 200 karakter).' };
-  if (!qualification || qualification.length > 1000)
-    return {
-      error: 'Isi catatan pelatihan atau kompetensi (maksimal 1000 karakter).',
-    };
-  if (existing.some((person) => person.email === email))
+  const errors = validateSurveyorInput(input);
+  if (errors.length) return { error: errors[0] };
+  if (existing.some((person) => person.email.trim().toLowerCase() === email))
     return { error: 'Email ini sudah terdaftar.' };
   if (existing.length >= 500)
-    return { error: 'Batas akun demo sesi ini tercapai.' };
+    return { error: 'Batas jumlah akun pada sesi ini tercapai.' };
   if (temporaryPassword.length < minPasswordLength)
     return { error: 'Sandi sementara terlalu pendek.' };
   return {

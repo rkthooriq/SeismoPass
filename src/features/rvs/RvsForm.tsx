@@ -27,7 +27,7 @@ const labels: Record<string, string> = {
 export default function RvsForm({
   initial,
   stories = '',
-  screener = 'Pesurvei demo',
+  screener = 'Pesurvei',
   onSave,
 }: {
   initial?: RvsRecord;
@@ -56,7 +56,7 @@ export default function RvsForm({
     event.preventDefault();
     if (!acknowledged) {
       setMessage(
-        'Konfirmasi penggunaan simulasi dan data fiktif terlebih dahulu.',
+        'Konfirmasi bahwa kamu memahami batas simulasi ini terlebih dahulu.',
       );
       return;
     }
@@ -124,9 +124,8 @@ export default function RvsForm({
       <span className="ws-badge">FEMA P-154 · LEVEL 1 · HIGH SEISMICITY</span>
       <h2>Input RVS dari formulir</h2>
       <p>
-        Gunakan data fiktif untuk mencoba formulir yang kamu kirim. HIGH adalah
-        tabel referensi yang dipilih, bukan hasil penetapan zona lokasi
-        bangunan. Identitas, lokasi, fungsi, dan tahun bangunan mengikuti
+        HIGH adalah tabel referensi yang dipilih, bukan hasil penetapan zona
+        lokasi bangunan. Identitas, lokasi, fungsi, dan tahun bangunan mengikuti
         laporan induk.
       </p>
       <p>
@@ -239,8 +238,8 @@ export default function RvsForm({
             onChange={(event) => setAcknowledged(event.target.checked)}
           />
           <span>
-            Saya memakai data fiktif dan memahami bahwa hasil ini simulasi belum
-            divalidasi, bukan sertifikat aman.
+            Saya memahami bahwa hasil ini simulasi yang belum divalidasi, bukan
+            sertifikat aman.
           </span>
         </label>
         <button className="ws-primary" type="submit">

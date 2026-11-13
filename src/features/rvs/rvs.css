@@ -44,7 +44,7 @@
   margin: 20px 0;
 }
 .rvs-score > strong {
-  font-size: clamp(44px, 7vw, 68px);
+  font-size: clamp(35px, 5.6vw, 54px);
   line-height: 1;
   color: var(--ink);
 }

@@ -31,15 +31,14 @@ export function validateAccountForm(
   if (page === 'register') {
     if (!data.name.trim()) errors.name = 'Isi nama untuk akunmu.';
     if (data.password.length < 12)
-      errors.password =
-        'Gunakan setidaknya 12 karakter untuk contoh kata sandi.';
+      errors.password = 'Gunakan setidaknya 12 karakter.';
     if (data.confirmPassword !== data.password)
       errors.confirmPassword = 'Konfirmasi kata sandi belum sama.';
   }
   if (page === 'invitation' && !data.reference.trim())
     errors.reference = 'Isi kode undangan.';
-  if (page !== 'login' && page !== 'forgot-password' && !data.consent)
-    errors.consent = 'Konfirmasi penggunaan data contoh pada pratinjau ini.';
+  if (page === 'invitation' && !data.consent)
+    errors.consent = 'Centang persetujuan untuk melanjutkan.';
   for (const key of ['name', 'reference'] as const)
     if (data[key].length > 1000) errors[key] = 'Maksimal 1000 karakter.';
   return errors;

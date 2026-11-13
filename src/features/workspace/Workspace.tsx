@@ -1,3 +1,4 @@
+import Brand from '../../components/Brand';
 import { useEffect, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import BuildingScene from '../../components/BuildingScene';
@@ -22,7 +23,7 @@ const navigation = [
   ['referrals', '↗', 'Rujukan ahli'],
   ['retrofit', '▧', 'Rencana retrofit'],
   ['support', '◇', 'Dukungan & evaluasi'],
-  ['data', '▤', 'Data demo'],
+  ['data', '▤', 'Data contoh'],
   ['access', '⊞', 'Peran & hak akses'],
 ];
 const emptyBuilding: Building = {
@@ -86,7 +87,7 @@ export default function Workspace({
     heading.current?.focus();
   }, [route]);
   const title = denied
-    ? 'Halaman di luar peran demo'
+    ? 'Halaman di luar peranmu'
     : isForm
       ? isEdit
         ? 'Perbarui bangunan'
@@ -103,7 +104,7 @@ export default function Workspace({
     if (!canManageBuildings(actor)) return;
     if (!building.id && buildings.length >= 500) {
       setNotice(
-        'Batas demo 500 catatan per sesi tercapai. Unduh catatan dan reset data demo sebelum menambah catatan baru.',
+        'Batas 500 catatan per sesi tercapai. Unduh catatan dan reset data contoh sebelum menambah catatan baru.',
       );
       return;
     }
@@ -117,7 +118,7 @@ export default function Workspace({
         : [...buildings, entry],
     );
     setNotice(
-      'Catatan demo diperbarui. Status penyimpanan tersedia pada halaman Data demo.',
+      'Catatan diperbarui. Status penyimpanan tersedia pada halaman Data contoh.',
     );
     window.location.hash = `/profile/${entry.id}`;
   }
@@ -141,16 +142,16 @@ export default function Workspace({
         Lewati ke konten
       </a>
       <aside className={`ws-sidebar ${menuOpen ? 'open' : ''}`}>
-        <a className="ws-logo" href="#">
-          <span>SeismoPass</span>
+        <a className="ws-logo" href="#" aria-label="SeismoPass, beranda">
+          <Brand />
         </a>
         <div className="ws-space">
           <span className="ws-avatar">S</span>
           <div>
             <strong>Ruang {actorInfo.shortName}</strong>
-            <small>Workspace demonstrasi</small>
+            <small>Contoh ruang kerja</small>
           </div>
-          <span className="ws-live">DEMO</span>
+          <span className="ws-live">CONTOH</span>
         </div>
         <p className="ws-nav-label">RUANG KERJA</p>
         <nav id="workspace-navigation" aria-label="Navigasi dashboard">
@@ -212,7 +213,7 @@ export default function Workspace({
           </div>
           <div className="actor-session-buttons">
             <a href="#/access">Hak akses</a>
-            <button onClick={onLeave}>Keluar demo</button>
+            <button onClick={onLeave}>Keluar</button>
           </div>
           <a href="#/guide" className="ws-help">
             ⓘ <span>Pusat bantuan</span>
@@ -221,12 +222,8 @@ export default function Workspace({
         <main id="workspace-main" tabIndex={-1} className="ws-main">
           <div className="ws-demo-strip">
             <span>
-              <span className="ws-dot" /> Mode demonstrasi
+              <span className="ws-dot" /> Contoh profil bangunan
             </span>
-            <p>
-              Gunakan data fiktif. Catatan tersimpan lokal selama sesi tab jika
-              penyimpanan browser tersedia.
-            </p>
           </div>
           <div className="ws-page-heading">
             <div>
@@ -256,7 +253,7 @@ export default function Workspace({
               <p>
                 <strong>Penyimpanan sesi tidak tersedia.</strong> Catatan hanya
                 bertahan selama aplikasi terbuka dan dapat hilang saat refresh.
-                Unduh salinan dari halaman Data demo.
+                Unduh salinan dari halaman Data contoh.
               </p>
             </aside>
           )}
@@ -265,7 +262,7 @@ export default function Workspace({
               <p>
                 <strong>Catatan sesi tidak dapat dibaca.</strong> Data contoh
                 digunakan untuk melanjutkan. Data lama belum ditimpa; simpan
-                perubahan baru atau reset demo untuk menggantinya.
+                perubahan baru atau reset data contoh untuk menggantinya.
               </p>
             </aside>
           )}
@@ -328,15 +325,12 @@ export default function Workspace({
                   <span>ILUSTRASI · BUKAN DATA LAPANGAN</span>
                 </div>
               </section>
-              <section
-                className="ws-stats"
-                aria-label="Ringkasan data demonstrasi"
-              >
+              <section className="ws-stats" aria-label="Ringkasan data contoh">
                 {[
                   [
                     String(buildings.length),
                     'Bangunan tercatat',
-                    'Seluruh catatan demonstrasi',
+                    'Seluruh catatan contoh',
                     '⌂',
                   ],
                   [
@@ -494,7 +488,7 @@ export default function Workspace({
                 )}
                 <p className="ws-table-footer">
                   {visible.length} dari {buildings.length} bangunan · Seluruh
-                  data berlabel demonstrasi
+                  data berlabel contoh
                 </p>
               </section>
               <Disclaimer />
@@ -522,7 +516,7 @@ export default function Workspace({
                     <BuildingScene />
                   </div>
                   <div>
-                    <Badge>DATA DEMONSTRASI · {selected.id}</Badge>
+                    <Badge>DATA CONTOH · {selected.id}</Badge>
                     <h2>{selected.name}</h2>
                     <p>{selected.location}</p>
                     <div className="ws-profile-tags">
@@ -541,7 +535,7 @@ export default function Workspace({
                   <section className="ws-panel">
                     <div className="ws-section-head">
                       <h2>Identitas bangunan</h2>
-                      <span className="ws-muted">Data fiktif</span>
+                      <span className="ws-muted">Data contoh</span>
                     </div>
                     <dl className="ws-details">
                       {[
@@ -584,7 +578,7 @@ export default function Workspace({
             ) : (
               <Empty
                 title="Bangunan tidak ditemukan"
-                text="Catatan demo mungkin sudah direset. Pilih bangunan dari daftar."
+                text="Catatan mungkin sudah direset. Pilih bangunan dari daftar."
               />
             ))}
           {section === 'screening' && (
@@ -630,7 +624,7 @@ export default function Workspace({
               </div>
               <Empty
                 title="Belum ada screening"
-                text="Demo tidak melakukan perhitungan atau menghasilkan hasil RVS. Kamu dapat melengkapi data bangunan terlebih dahulu."
+                text="Penilaian RVS dilakukan petugas terlatih dengan supervisi ahli. Kamu dapat melengkapi data bangunan terlebih dahulu."
               />
               <Disclaimer />
             </>
@@ -691,7 +685,7 @@ export default function Workspace({
               </section>
               <Empty
                 title="Rencana retrofit belum tersedia"
-                text="Rekomendasi teknis harus disusun ahli struktur. Demo ini tidak membuat metode perkuatan atau estimasi biaya."
+                text="Rekomendasi teknis harus disusun ahli struktur. SeismoPass tidak membuat metode perkuatan atau estimasi biaya."
               />
               <section className="ws-panel">
                 <h2>Dari rencana hingga verifikasi</h2>
@@ -730,7 +724,7 @@ export default function Workspace({
                 </h2>
                 <p>
                   Ketersediaan program mengikuti kebijakan dan kerja sama yang
-                  disepakati. Belum ada program aktif atau pengajuan pada demo.
+                  disepakati. Belum ada program aktif yang dapat diajukan.
                 </p>
               </section>
               <div className="ws-three-col">
@@ -772,8 +766,8 @@ export default function Workspace({
                 <h2>Mulai dari mengenal bangunan</h2>
                 {[
                   [
-                    'Bagaimana mencoba demo?',
-                    'Buka Bangunan saya, pilih Tambah bangunan, lalu gunakan data fiktif. Simpan draf atau lengkapi semua data dasar. Catatan bertahan saat refresh selama sesi tab, jika penyimpanan browser tersedia. Kelola catatan di halaman Data demo.',
+                    'Bagaimana mencatat bangunan?',
+                    'Buka Bangunan saya, lalu pilih Tambah bangunan. Simpan draf atau lengkapi semua data dasar. Catatan bertahan saat refresh selama tab terbuka. Kelola catatan di halaman Data contoh.',
                   ],
                   [
                     'Apa arti status data?',
@@ -781,11 +775,11 @@ export default function Workspace({
                   ],
                   [
                     'Siapa yang menilai bangunan?',
-                    'Petugas terlatih dengan supervisi ahli, mengikuti protokol yang disahkan. Demo tidak menghasilkan penilaian.',
+                    'Petugas terlatih dengan supervisi ahli, mengikuti protokol yang disahkan. SeismoPass tidak menghasilkan penilaian otomatis.',
                   ],
                   [
                     'Apakah data saya dipublikasikan?',
-                    'Demo menyimpan catatan dalam sesi tab browser, tidak mengirimnya ke server, dan tidak membuat QR aktif. Hindari data pribadi. Kebijakan berbagi data untuk layanan nyata belum diputuskan.',
+                    'Tidak. Catatan tersimpan di browser selama sesi, tidak dikirim ke server, dan tidak membuat QR aktif. Hindari data pribadi. Kebijakan berbagi data belum diputuskan.',
                   ],
                   [
                     'Apakah bantuan otomatis tersedia?',
@@ -856,7 +850,7 @@ export default function Workspace({
             <span>
               SeismoPass <span>Kenali bangunan. Siapkan langkah.</span>
             </span>
-            <span>Demo pengembangan · Tanpa penilaian RVS</span>
+            <span>© 2026 SeismoPass · Tanpa penilaian RVS otomatis</span>
           </footer>
         </main>
       </div>
@@ -917,7 +911,7 @@ function BuildingForm({
     [
       'location',
       'Lokasi bangunan',
-      'Gunakan lokasi fiktif, tanpa alamat pribadi',
+      'Desa/kelurahan dan kecamatan, tanpa alamat rumah',
     ],
     ['year', 'Tahun pembangunan', 'Kosongkan jika belum diketahui'],
     ['floors', 'Jumlah lantai', 'Contoh: 2'],
@@ -949,7 +943,7 @@ function BuildingForm({
           <div>
             <Badge>TAHAP 01 · DATA DASAR</Badge>
             <h2>Kenalkan bangunanmu.</h2>
-            <p>Gunakan data fiktif untuk mencoba alur pencatatan.</p>
+            <p>Lengkapi data dasar bangunanmu.</p>
           </div>
         </div>
         {Object.keys(errors).length > 0 && (
@@ -1061,7 +1055,7 @@ function BuildingForm({
         </div>
         <p className="ws-muted">
           * Wajib untuk mencatat data lengkap. Draf cukup berisi nama dan
-          konfirmasi demo. Pilihan formulir adalah usulan UI, bukan protokol
+          persetujuan data. Pilihan formulir adalah usulan UI, bukan protokol
           RVS.
         </p>
         <label className="ws-consent">
@@ -1074,8 +1068,8 @@ function BuildingForm({
             aria-describedby={errors.consent ? 'error-consent' : undefined}
           />
           <span>
-            Saya menggunakan data fiktif dan memahami bahwa catatan demo tidak
-            didaftarkan ke layanan nyata.
+            Saya setuju data ini dipakai untuk pencatatan bangunan di
+            SeismoPass.
           </span>
         </label>
         {errors.consent && (
@@ -1111,8 +1105,7 @@ function BuildingForm({
           <div className="ws-separator" />
           <strong>Privasi dimulai di sini.</strong>
           <p>
-            Jangan masukkan nama pemilik, nomor telepon, atau alamat pribadi
-            pada demo.
+            Jangan masukkan nama pemilik, nomor telepon, atau alamat pribadi.
           </p>
         </section>
         <Disclaimer />
@@ -1141,7 +1134,7 @@ function DemoData({
       );
       const link = document.createElement('a');
       link.href = url;
-      link.download = 'seismopass-data-demonstrasi.json';
+      link.download = 'seismopass-data.json';
       document.body.appendChild(link);
       link.click();
       link.remove();
@@ -1160,8 +1153,8 @@ function DemoData({
   return (
     <>
       <section className="ws-panel">
-        <Badge>PENYIMPANAN LOKAL · DATA FIKTIF</Badge>
-        <h2 className="ws-data-title">Catatanmu selama sesi demo.</h2>
+        <Badge>PENYIMPANAN LOKAL</Badge>
+        <h2 className="ws-data-title">Catatanmu selama sesi ini.</h2>
         <p className="ws-muted">
           {buildings.length} bangunan dalam workspace.{' '}
           {storageStatus === 'restored'
@@ -1184,20 +1177,19 @@ function DemoData({
             <h3>Tanpa sinkronisasi</h3>
             <p>
               Catatan tidak dikirim ke server atau dibagikan ke kolaborator.
-              Penyimpanan browser bukan akun atau kontrol akses. Gunakan data
-              fiktif saja.
+              Penyimpanan browser bukan akun atau kontrol akses.
             </p>
           </div>
           <div>
-            <h3>Simpan salinan demo</h3>
+            <h3>Simpan salinan</h3>
             <p>
-              Unduh JSON untuk meninjau catatan. Berkas memuat semua isian demo,
+              Unduh JSON untuk meninjau catatan. Berkas memuat semua isian,
               tanpa hasil penilaian RVS. Fitur impor belum tersedia.
             </p>
           </div>
         </div>
         <button className="ws-primary" onClick={download}>
-          Unduh data demo ↓
+          Unduh data ↓
         </button>
         {downloadError && (
           <p role="alert" className="ws-error">
@@ -1206,7 +1198,7 @@ function DemoData({
         )}
       </section>
       <section className="ws-panel">
-        <h2>Mulai ulang demonstrasi</h2>
+        <h2>Mulai ulang data contoh</h2>
         <p className="ws-muted ws-data-description">
           Reset mengganti seluruh catatan saat ini dengan tiga bangunan contoh.
           Unduh salinan terlebih dahulu jika ingin menyimpan catatanmu.
@@ -1220,7 +1212,7 @@ function DemoData({
               requestAnimationFrame(() => confirmation.current?.focus());
             }}
           >
-            Reset data demo
+            Reset data contoh
           </button>
         ) : (
           <div
@@ -1230,7 +1222,7 @@ function DemoData({
             tabIndex={-1}
             ref={confirmation}
           >
-            <h3 id="reset-title">Ganti seluruh catatan demo?</h3>
+            <h3 id="reset-title">Ganti seluruh catatan?</h3>
             <p>
               Perubahan pada {buildings.length} catatan saat ini akan diganti
               dengan data contoh.

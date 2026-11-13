@@ -1,9 +1,86 @@
-/* Shared interaction contract. Imported after component and theme styles.
-   Only enabled controls change colour; static panels and disabled actions do not. */
+/* Data tabs own their text-only hover; exclude them from shared button fills. */
+/* Controls get a soft surface. Text links keep their shape and gain an underline.
+   No transforms or padding changes on hover: the layout stays still. */
 :is(.sp-landing, .actor-login, .workspace)
-  :is(a[href], button, summary, [role='tab'])
-  :where(.sp-brand) {
+  :is(a[href], button, summary, input, select, textarea) {
+  transition:
+    background-color 180ms ease,
+    color 180ms ease,
+    border-color 180ms ease,
+    box-shadow 180ms ease;
+}
+
+:is(.sp-landing, .actor-login, .workspace)
+  a[href]:not(
+    :where(
+      .sp-button,
+      .ws-primary,
+      .ws-secondary,
+      .sp-nav-capsule a,
+      .role-sidebar nav a,
+      .ws-sidebar nav a,
+      .role-stat-grid > a,
+      .actor-session-buttons a
+    )
+  ):not([aria-disabled='true']):is(:hover, :focus-visible) {
+  color: var(--action);
+  text-decoration: none;
+}
+
+:is(.sp-landing, .actor-login, .workspace)
+  :is(
+    button,
+    summary,
+    [role='tab'],
+    .sp-button,
+    .ws-primary,
+    .ws-secondary,
+    .sp-nav-capsule a,
+    .role-sidebar nav a,
+    .ws-sidebar nav a,
+    .role-stat-grid > a,
+    .actor-session-buttons a
+  ):not(:where(.dz-liquid-tabs .nimbus-item)):not(:disabled):not(
+    [aria-disabled='true']
+  ):is(:hover, :focus-visible) {
+  --muted: var(--hover-ink);
+  --ws-muted: var(--hover-ink);
+  background-color: var(--hover-surface);
+  border-color: var(--hover-border, var(--accent));
+  color: var(--hover-ink);
+}
+
+:is(.sp-landing, .actor-login, .workspace)
+  :is(
+    button,
+    summary,
+    [role='tab'],
+    .sp-button,
+    .ws-primary,
+    .ws-secondary,
+    .sp-nav-capsule a,
+    .role-sidebar nav a,
+    .ws-sidebar nav a,
+    .role-stat-grid > a,
+    .actor-session-buttons a
+  ):not(:where(.dz-liquid-tabs .nimbus-item)):not(:disabled):not(
+    [aria-disabled='true']
+  ):is(:hover, :focus-visible)
+  :where(span, small, strong, em, b, i) {
   color: inherit;
+}
+
+/* Selected navigation remains selected while hovered. */
+:is(.sp-nav-capsule, .role-sidebar nav, .ws-sidebar nav) a[aria-current],
+.report-view-switch [aria-pressed='true'] {
+  --hover-surface: var(--accent);
+  --hover-ink: var(--ink);
+}
+/* Buttons fill with soil brown on hover instead of showing an outline. */
+.sp-button {
+  --hover-surface: var(--action);
+  --hover-ink: var(--on-action);
+  --hover-border: var(--action);
 }
 
 .workspace
@@ -14,27 +91,14 @@
   .ws-badge {
   background: var(--paper);
   color: var(--ink);
-  border-color: var(--ink);
+  border-color: var(--line);
 }
-
-:is(.sp-landing, .actor-login, .workspace)
-  :is(a[href], button, summary, [role='tab']):not(:disabled):not(
-    [aria-disabled='true']
-  ):is(:hover, :focus-visible) {
-  --muted: var(--ink);
-  --ws-muted: var(--ink);
+.workspace
+  :is(.role-sidebar, .ws-sidebar)
+  nav
+  a:is(:hover, :focus-visible)
+  small {
   color: var(--ink);
-  background-color: var(--green);
-  border-color: var(--green);
-  text-decoration-color: currentColor;
-}
-
-:is(.sp-landing, .actor-login, .workspace)
-  :is(a[href], button, summary, [role='tab']):not(:disabled):not(
-    [aria-disabled='true']
-  ):is(:hover, :focus-visible)
-  :where(span, small, strong, em, b, i) {
-  color: inherit;
 }
 
 :is(.sp-landing, .actor-login, .workspace)
@@ -50,22 +114,31 @@
   outline: 2px solid var(--focus-ring);
   outline-offset: 4px;
 }
-
 .workspace .role-stat-grid > a:focus-visible {
   outline-offset: -3px;
 }
-
 :is(.actor-login, .workspace)
-  :is(input, select, textarea):not(:disabled):not([readonly]):is(
-    :hover,
-    :focus-visible
-  ) {
-  border-color: var(--green);
-  box-shadow: inset 0 0 0 1px var(--green);
+  :is(input, select, textarea):not(:disabled):not([readonly]):not(
+    [aria-invalid='true']
+  ):is(:hover, :focus-visible) {
+  border-color: var(--control-border);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 24%, transparent);
 }
-
 :is(.sp-landing, .actor-login, .workspace)
   :is(button:disabled, [aria-disabled='true']) {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Brown action buttons darken on hover instead of turning cream. */
+:is(.ws-primary, .actor-enter, .sp-button-solid) {
+  --hover-surface: var(--action-hover);
+  --hover-ink: var(--on-action);
+  --hover-border: var(--action-hover);
+}
+
+/* Every control that gets a hover fill is rounded, never a hard box.
+   :where() keeps this at zero specificity, so any explicit radius still wins. */
+:where(.sp-landing, .actor-login, .workspace) :where(button, summary) {
+  border-radius: 10px;
 }

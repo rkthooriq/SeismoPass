@@ -20,6 +20,9 @@ const required = [
   'description',
 ] as const;
 const optional = [
+  'address',
+  'landmark',
+  'contactPhone',
   'function',
   'year',
   'floors',

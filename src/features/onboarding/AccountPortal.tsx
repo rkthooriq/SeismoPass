@@ -1,3 +1,4 @@
+import Brand from '../../components/Brand';
 import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { accountStatusLabels } from '../../lib/surveyorAccess';
@@ -46,16 +47,16 @@ export default function AccountPortal({
   return (
     <div className="workspace report-workspace">
       <header className="report-top">
-        <a href="#" className="ws-logo">
-          SeismoPass
+        <a href="#" className="ws-logo" aria-label="SeismoPass, beranda">
+          <Brand />
         </a>
         <button className="ws-secondary" onClick={onLeave}>
-          Keluar demo
+          Keluar
         </button>
       </header>
       <main className="ws-main">
         <section className="ws-panel access-status-panel">
-          <span className="ws-badge">AKUN DEMO · DATA FIKTIF</span>
+          <span className="ws-badge">STATUS AKUN</span>
           <h1>{accountStatusLabels[account.status]}</h1>
           <p>
             {account.name} · {account.email}
@@ -70,7 +71,7 @@ export default function AccountPortal({
             ) : (
               <>
                 <li>Daftar akun</li>
-                <li>Verifikasi email demo</li>
+                <li>Verifikasi email</li>
                 {account.role === 'surveyor' && <li>Tinjauan admin</li>}
                 <li>Akses diaktifkan</li>
               </>
@@ -122,19 +123,18 @@ export default function AccountPortal({
               )}
               <button className="ws-primary">Simpan kata sandi baru</button>
               <p className="ws-muted">
-                Demo ini menyimpan kata sandi hanya di memori tab. Setelah muat
-                ulang, admin perlu menerbitkan sandi sementara baru.
+                Kata sandi baru berlaku selama tab ini terbuka. Setelah muat
+                ulang, minta admin menerbitkan sandi sementara baru.
               </p>
             </form>
           )}
           {account.status === 'pending-email' && (
             <>
               <p>
-                Pada layanan nyata, tautan dikirim ke emailmu. Demo ini tidak
-                mengirim email. Tombol berikut hanya mensimulasikan verifikasi.
+                Konfirmasi alamat emailmu untuk melanjutkan pengaktifan akun.
               </p>
               <button className="ws-primary" onClick={onVerify}>
-                Simulasikan verifikasi email demo
+                Verifikasi email
               </button>
             </>
           )}
@@ -147,9 +147,9 @@ export default function AccountPortal({
           )}
           {account.status === 'suspended' && (
             <p>
-              Akses pesurvei dinonaktifkan. Hubungi pengelola pada layanan
-              nyata; pada demo, admin dapat meninjau pengaktifan kembali.
-              Penugasan yang masih berjalan dikembalikan ke admin.
+              Akses pesurvei dinonaktifkan. Hubungi admin untuk meninjau
+              pengaktifan kembali. Penugasan yang masih berjalan dikembalikan ke
+              admin.
             </p>
           )}
           {account.reviewNote && (
@@ -184,7 +184,7 @@ export default function AccountPortal({
           )}
           {message && <p role="status">{message}</p>}
           <details className="access-history">
-            <summary>Riwayat pengajuan demo</summary>
+            <summary>Riwayat pengajuan</summary>
             <ol>
               {account.history?.map((event, index) => (
                 <li key={index}>
@@ -195,7 +195,6 @@ export default function AccountPortal({
               ))}
             </ol>
           </details>
-          <a href="#/flows">Lihat alur tiga peran →</a>
         </section>
       </main>
     </div>

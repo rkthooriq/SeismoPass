@@ -35,7 +35,6 @@ export function validateBuilding(
   ) {
     errors.floors = 'Masukkan jumlah lantai bulat antara 1–200.';
   }
-  if (!consent)
-    errors.consent = 'Konfirmasi bahwa kamu menggunakan data demonstrasi.';
+  if (!consent) errors.consent = 'Centang persetujuan data untuk melanjutkan.';
   return errors;
 }

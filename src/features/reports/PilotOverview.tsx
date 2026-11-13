@@ -93,8 +93,8 @@ export default function PilotOverview() {
       <section className="ws-panel">
         <h2>Indikator keberhasilan pilot</h2>
         <p className="ws-muted">
-          Target ditetapkan ulang pada fase protokol. Laporan dan kunjungan demo
-          tidak dihitung sebagai capaian screening.
+          Target ditetapkan ulang pada fase protokol. Laporan dan kunjungan
+          sebelum protokol disahkan tidak dihitung sebagai capaian screening.
         </p>
         <div className="pilot-indicators">
           {indicators.map(([title, target, phase, description]) => (
@@ -134,7 +134,8 @@ export default function PilotOverview() {
         </ul>
         <p className="ws-disclaimer">
           RVS adalah penyaringan awal, bukan sertifikat aman. Belum ada insentif
-          fiskal, pembiayaan, atau asuransi yang dapat diajukan melalui demo.
+          fiskal, pembiayaan, atau asuransi yang dapat diajukan melalui
+          SeismoPass saat ini.
         </p>
       </section>
     </div>

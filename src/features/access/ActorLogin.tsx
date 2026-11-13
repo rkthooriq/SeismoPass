@@ -1,10 +1,8 @@
-import Brand from '../../components/Brand';
 import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
-import BuildingScene from '../../components/BuildingScene';
+import SurveyorScene from '../../components/SurveyorScene';
 import { validateAccountForm } from '../../lib/accountFlow';
 import type { AccountForm, AccountPage } from '../../lib/accountFlow';
-import { demoPassword } from '../../lib/reportDemo';
 import './access.css';
 
 const copy: Record<
@@ -12,27 +10,24 @@ const copy: Record<
   { title: string; subtitle: string; button: string }
 > = {
   login: {
-    title: 'Selamat datang kembali.',
-    subtitle:
-      'Satu akun untuk ruang kerjamu. Akses mengikuti peran yang telah diaktifkan pada akun.',
+    title: 'SeismoPass',
+    subtitle: 'Selamat datang kembali. Masukkan detail akunmu.',
     button: 'Masuk',
   },
   register: {
-    title: 'Awali cerita bangunanmu.',
-    subtitle: 'Gunakan alamat @example.com untuk membuat akun pelapor demo.',
-    button: 'Buat akun demo',
+    title: 'Buat akun',
+    subtitle: 'Daftar sebagai pemilik atau pengelola bangunan.',
+    button: 'Daftar',
   },
   'forgot-password': {
-    title: 'Kembali ke ruang kerjamu.',
-    subtitle:
-      'Pada layanan nyata, pemulihan akun dilakukan melalui email yang terdaftar.',
-    button: 'Lihat alur pemulihan',
+    title: 'Lupa kata sandi',
+    subtitle: 'Masukkan email yang terdaftar pada akunmu.',
+    button: 'Kirim tautan pemulihan',
   },
   invitation: {
-    title: 'Satu undangan. Peran yang tepat.',
-    subtitle:
-      'Undangan perlu cocok dengan email penerima, masih berlaku, dan diverifikasi oleh layanan.',
-    button: 'Tinjau alur undangan',
+    title: 'Terima undangan',
+    subtitle: 'Masukkan email dan kode undangan dari organisasimu.',
+    button: 'Lanjutkan',
   },
 };
 const empty: AccountForm = {
@@ -46,24 +41,18 @@ const empty: AccountForm = {
 
 export default function ActorLogin({
   page = 'login',
-  onExplore,
   onSignIn,
   onRegister,
 }: {
   page?: AccountPage;
-  onExplore: () => void;
   onSignIn: (data: AccountForm) => string;
   onRegister: (data: AccountForm) => string;
 }) {
-  const [data, setData] = useState<AccountForm>({
-    ...empty,
-    ...(page === 'register'
-      ? { password: demoPassword, confirmPassword: demoPassword }
-      : {}),
-  });
+  const [data, setData] = useState<AccountForm>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [accountError, setAccountError] = useState('');
   const [preview, setPreview] = useState(false);
+  const [visible, setVisible] = useState<Record<string, boolean>>({});
   const summary = useRef<HTMLDivElement>(null);
   const result = useRef<HTMLDivElement>(null);
   const details = copy[page];
@@ -96,68 +85,120 @@ export default function ActorLogin({
     type = 'text',
     placeholder = '',
   ) {
+    const isPassword = type === 'password';
+    const revealed = isPassword && visible[key];
+    const input = (
+      <input
+        id={`account-${key}`}
+        type={revealed ? 'text' : type}
+        value={data[key]}
+        placeholder={placeholder}
+        autoComplete={
+          key === 'email'
+            ? 'email'
+            : key === 'name'
+              ? 'name'
+              : key === 'password' || key === 'confirmPassword'
+                ? page === 'register'
+                  ? 'new-password'
+                  : 'current-password'
+                : 'off'
+        }
+        maxLength={key === 'email' ? 254 : 200}
+        aria-invalid={Boolean(errors[key])}
+        aria-describedby={errors[key] ? `account-error-${key}` : undefined}
+        onChange={(event) =>
+          setData((previous) => ({ ...previous, [key]: event.target.value }))
+        }
+      />
+    );
     return (
-      <label className="account-field" htmlFor={`account-${key}`}>
-        {label}
-        <input
-          id={`account-${key}`}
-          type={type}
-          value={data[key]}
-          placeholder={placeholder}
-          autoComplete="off"
-          readOnly={
-            page === 'register' && ['password', 'confirmPassword'].includes(key)
-          }
-          maxLength={key === 'email' ? 254 : 200}
-          aria-invalid={Boolean(errors[key])}
-          aria-describedby={errors[key] ? `account-error-${key}` : undefined}
-          onChange={(event) =>
-            setData((previous) => ({ ...previous, [key]: event.target.value }))
-          }
-        />
+      <div className="account-field">
+        <label htmlFor={`account-${key}`}>{label}</label>
+        {isPassword ? (
+          <div className="account-password">
+            {input}
+            <button
+              type="button"
+              className="account-eye"
+              aria-label={
+                revealed ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'
+              }
+              aria-pressed={Boolean(revealed)}
+              onClick={() =>
+                setVisible((previous) => ({
+                  ...previous,
+                  [key]: !previous[key],
+                }))
+              }
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                aria-hidden="true"
+              >
+                <path
+                  d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinejoin="round"
+                />
+                <circle
+                  cx="12"
+                  cy="12"
+                  r="3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                />
+                {revealed && (
+                  <path
+                    d="M4 20 20 4"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                  />
+                )}
+              </svg>
+            </button>
+          </div>
+        ) : (
+          input
+        )}
         {errors[key] && (
           <small id={`account-error-${key}`} className="actor-error">
             {errors[key]}
           </small>
         )}
-      </label>
+      </div>
     );
   }
+  const links: Record<AccountPage, [string, string][]> = {
+    login: [
+      ['#/forgot-password', 'Lupa kata sandi?'],
+      ['#/register', 'Daftar akun baru'],
+    ],
+    register: [['#/login', 'Sudah punya akun? Masuk']],
+    'forgot-password': [
+      ['#/login', 'Kembali ke halaman masuk'],
+      ['#/register', 'Daftar akun baru'],
+    ],
+    invitation: [
+      ['#/login', 'Kembali ke halaman masuk'],
+      ['#/register', 'Daftar akun baru'],
+    ],
+  };
   return (
     <main className="actor-login">
-      <section className="actor-intro">
-        <a className="actor-brand" href="#">
-          <Brand />
-        </a>
-        <div>
-          <span className="actor-eyebrow">
-            Catatan bangunan, langkah yang terarah.
-          </span>
-          <h1>
-            Bangunan punya cerita.
-            <br />
-            Mulai dari milikmu.
-          </h1>
-          <p>
-            Satu paspor digital untuk menghubungkan catatan bangunan,
-            pemeriksaan awal, dan tindak lanjut bersama ahli.
-          </p>
-        </div>
+      <section className="actor-intro" aria-hidden="true">
         <div className="actor-art">
-          <BuildingScene />
+          <SurveyorScene />
         </div>
-        <p className="actor-intro-note">
-          RVS adalah penyaringan awal, bukan sertifikat aman.
-        </p>
       </section>
       <section className="actor-entry account-entry">
-        <a href="#" className="actor-back">
-          ← Kembali ke beranda
-        </a>
-        <span className="actor-demo-label">
-          Akun demo — gunakan data fiktif
-        </span>
-        <h2>{details.title}</h2>
+        <h1 className="account-title">{details.title}</h1>
         <p className="actor-subtitle">{details.subtitle}</p>
         {preview ? (
           <div
@@ -166,30 +207,22 @@ export default function ActorLogin({
             className="account-result"
             role="status"
           >
-            <span className="actor-symbol" aria-hidden="true">
-              {page === 'login' ? '◎' : '↗'}
-            </span>
-            <h3>
-              {page === 'login'
-                ? 'Layanan masuk belum terhubung.'
-                : 'Begini langkah berikutnya.'}
-            </h3>
+            <h2>
+              {page === 'invitation'
+                ? 'Undangan belum dapat diproses.'
+                : 'Pemulihan lewat email belum tersedia.'}
+            </h2>
             <p>
-              {page === 'login'
-                ? 'Kredensial tidak diverifikasi dan kamu belum masuk. Login nyata membutuhkan layanan akun.'
-                : page === 'register'
-                  ? 'Pada layanan nyata: periksa keunikan email → kirim verifikasi → pengguna memverifikasi email → aktifkan akun pemilik. Pendaftaran ini belum membuat akun atau mengirim email.'
-                  : page === 'invitation'
-                    ? 'Pada layanan nyata: verifikasi token undangan, penerima dan masa berlaku → verifikasi email → aktifkan peran dari undangan. Kode belum diperiksa dan akses belum diberikan.'
-                    : 'Pada layanan nyata, tampilkan respons umum lalu kirim tautan pemulihan hanya jika akun memenuhi syarat. Di pratinjau ini, email belum dikirim.'}
+              {page === 'invitation'
+                ? 'Pemeriksaan kode undangan belum tersedia. Minta admin membuatkan akun untukmu.'
+                : 'Pengiriman tautan pemulihan belum tersedia. Hubungi admin untuk bantuan masuk ke akunmu.'}
             </p>
-            <p className="actor-entry-note">
-              Isian hanya diproses di memori tampilan, tanpa dikirim atau
-              disimpan sebagai akun. Contoh kata sandi dan kode sudah
-              dibersihkan.
-            </p>
-            <button className="actor-enter" onClick={() => setPreview(false)}>
-              Kembali ke formulir ←
+            <button
+              className="actor-enter"
+              type="button"
+              onClick={() => setPreview(false)}
+            >
+              Kembali ke formulir
             </button>
           </div>
         ) : (
@@ -229,50 +262,18 @@ export default function ActorLogin({
                 </ul>
               </div>
             )}
-            {page === 'register' &&
-              field('name', 'Nama (contoh)', 'text', 'Nama fiktif')}
-            {field('email', 'Alamat email', 'email', 'nama@example.com')}
-            {['login', 'register'].includes(page) &&
-              field(
-                'password',
-                page === 'register'
-                  ? 'Kata sandi demo bersama (tetap)'
-                  : 'Kata sandi contoh',
-                'password',
-                'Jangan gunakan kata sandi asli',
-              )}
+            {page === 'register' && field('name', 'Nama lengkap')}
+            {field('email', 'Email', 'email', 'nama@example.com')}
+            {page === 'login' && field('password', 'Kata sandi', 'password')}
             {page === 'register' && (
               <>
-                {field(
-                  'confirmPassword',
-                  'Ulangi kata sandi contoh',
-                  'password',
-                )}
-                <p className="actor-entry-note">
-                  Untuk demonstrasi, semua akun memakai SeismoDemo123!. Tidak
-                  ada kata sandi pengguna yang disimpan di sesi browser.
-                </p>
+                {field('password', 'Kata sandi', 'password')}
+                {field('confirmPassword', 'Konfirmasi kata sandi', 'password')}
               </>
             )}
-            {page === 'invitation' &&
-              field(
-                'reference',
-                'Kode undangan contoh',
-                'text',
-                'Kode dari undangan organisasi',
-              )}
-            {page === 'login' && (
-              <a className="account-forgot" href="#/forgot-password">
-                Lupa kata sandi?
-              </a>
-            )}
-            {page === 'login' && (
-              <p className="actor-entry-note">
-                Pesurvei: akunmu dibuat oleh admin. Masuk dengan sandi sementara
-                dari admin, lalu buat kata sandi barumu sendiri.
-              </p>
-            )}
-            {!['login', 'forgot-password'].includes(page) && (
+
+            {page === 'invitation' && field('reference', 'Kode undangan')}
+            {page === 'invitation' && (
               <label className="actor-consent">
                 <input
                   id="account-consent"
@@ -290,7 +291,8 @@ export default function ActorLogin({
                   }
                 />
                 <span>
-                  Saya menggunakan data fiktif untuk mencoba alur demo.
+                  Saya setuju data yang saya isi dipakai untuk pencatatan
+                  bangunan di SeismoPass.
                 </span>
               </label>
             )}
@@ -299,32 +301,23 @@ export default function ActorLogin({
                 {errors.consent}
               </p>
             )}
-            <button className="actor-enter" type="submit">
-              {details.button} <span aria-hidden="true">→</span>
-            </button>
-            <p className="actor-entry-note">
-              Akun demo bertahan selama sesi tab. Akun contoh memakai kata sandi
-              uji bersama SeismoDemo123!. Verifikasi email disimulasikan; tidak
-              ada email dikirim.
-            </p>
+            <div className="account-actions">
+              <button className="actor-enter" type="submit">
+                {details.button}
+              </button>
+            </div>
           </form>
         )}
-        <nav className="account-links" aria-label="Navigasi akun">
-          {page !== 'login' && <a href="#/login">Sudah punya akun? Masuk →</a>}
-          {page !== 'register' && (
-            <a href="#/register">Pemilik / pengelola baru? Daftar →</a>
-          )}
-          {page !== 'invitation' && (
-            <a href="#/invitation">Punya undangan organisasi? →</a>
-          )}
+        <nav
+          className={`account-links ${links[page].length === 1 ? 'is-single' : ''}`}
+          aria-label="Navigasi akun"
+        >
+          {links[page].map(([href, label]) => (
+            <a key={href} href={href}>
+              {label}
+            </a>
+          ))}
         </nav>
-        <div className="account-explore">
-          <span>Ingin mengenal aplikasinya dulu?</span>
-          <button type="button" onClick={onExplore}>
-            Jelajahi contoh bangunan ↗
-          </button>
-          <small>Demo pemilik dengan data fiktif, tanpa membuat akun.</small>
-        </div>
       </section>
     </main>
   );

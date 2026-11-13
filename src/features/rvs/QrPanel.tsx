@@ -20,7 +20,7 @@ export default function QrPanel({ inputs }: { inputs?: RvsInputs }) {
     );
     const link = document.createElement('a');
     link.href = url;
-    link.download = 'seismopass-qr-demo.svg';
+    link.download = 'seismopass-qr.svg';
     link.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
@@ -54,7 +54,7 @@ export default function QrPanel({ inputs }: { inputs?: RvsInputs }) {
           type="button"
           onClick={() => setGenerated(true)}
         >
-          Buat QR demo
+          Buat QR
         </button>
       ) : (
         <>
@@ -77,7 +77,7 @@ export default function QrPanel({ inputs }: { inputs?: RvsInputs }) {
             <p role="alert">QR belum dapat dibuat. Gunakan tautan berikut.</p>
           )}
           <label>
-            Tautan demo
+            Tautan profil
             <input
               readOnly
               value={href}

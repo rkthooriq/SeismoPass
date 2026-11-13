@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 420" preserveAspectRatio="xMidYMax slice">
+  <!-- Far ridge with a stepped scarp, a nod to the Lembang fault escarpment -->
+  <path d="M0 250 C 180 228 360 206 560 214 L 700 212 L 722 178 C 900 152 1100 160 1300 176 C 1450 186 1540 180 1600 176 L1600 420 L0 420 Z" fill="#f1e5d4"/>
+  <!-- Small dust clouds -->
+  <g fill="#fffaf2" opacity="0.9">
+    <ellipse cx="260" cy="170" rx="70" ry="16"/>
+    <ellipse cx="310" cy="160" rx="44" ry="14"/>
+    <ellipse cx="1180" cy="120" rx="80" ry="18"/>
+    <ellipse cx="1240" cy="110" rx="48" ry="15"/>
+  </g>
+  <!-- Mid hills -->
+  <path d="M0 300 C 180 270 360 292 540 276 C 760 256 920 302 1120 286 C 1320 270 1460 296 1600 280 L1600 420 L0 420 Z" fill="#e8d4b9"/>
+  <!-- Houses on the mid hills -->
+  <g fill="#dcc3a3">
+    <path d="M300 286 h26 v-16 l-13 -10 l-13 10 Z"/>
+    <path d="M334 284 h18 v-12 l-9 -7 l-9 7 Z"/>
+    <path d="M880 290 h30 v-18 l-15 -11 l-15 11 Z"/>
+    <path d="M918 291 h20 v-13 l-10 -8 l-10 8 Z"/>
+    <path d="M1380 284 h24 v-15 l-12 -9 l-12 9 Z"/>
+  </g>
+  <!-- Near soil band with strata -->
+  <path d="M0 346 C 220 326 420 350 640 338 C 880 326 1100 356 1340 340 C 1460 334 1540 340 1600 336 L1600 420 L0 420 Z" fill="#dcc0a0"/>
+  <g fill="none" stroke="#c9a57c" stroke-width="2" opacity="0.55">
+    <path d="M0 366 C 220 348 420 372 640 360 C 880 348 1100 378 1340 362 C 1460 356 1540 362 1600 358"/>
+    <path d="M0 384 C 240 370 460 392 700 380 C 940 368 1160 396 1400 382 C 1500 377 1560 381 1600 379" stroke-dasharray="10 12"/>
+  </g>
+  <path d="M0 398 C 300 386 600 404 900 394 C 1200 384 1400 400 1600 392 L1600 420 L0 420 Z" fill="#cfae88"/>
+  <g fill="#f5ead9" opacity="0.8">
+    <ellipse cx="420" cy="405" rx="6" ry="3"/>
+    <ellipse cx="1040" cy="402" rx="5" ry="2.5"/>
+    <ellipse cx="1460" cy="406" rx="6" ry="3"/>
+  </g>
+</svg>

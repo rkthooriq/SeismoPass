@@ -41,7 +41,11 @@ test('owner steps never present a result, risk category or safe claim', () => {
     .map((step) => `${step.title} ${step.text}`)
     .join(' ')
     .toLowerCase();
-  assert.ok(!/(aman\b(?!\.)|skor|kategori risiko|insentif)/.test(text.replace('bukan sertifikat aman', '')));
+  assert.ok(
+    !/(aman\b(?!\.)|skor|kategori risiko|insentif)/.test(
+      text.replace('bukan sertifikat aman', ''),
+    ),
+  );
   assert.match(ownerStep('Selesai').text, /bukan sertifikat aman/);
 });
 
@@ -56,13 +60,16 @@ test('reports waiting on the owner are listed first, order otherwise kept', () =
     sortByOwnerTurn(list).map((item) => item.id),
     ['b', 'd', 'a', 'c'],
   );
-  assert.deepEqual(list.map((item) => item.id), ['a', 'b', 'c', 'd']);
+  assert.deepEqual(
+    list.map((item) => item.id),
+    ['a', 'b', 'c', 'd'],
+  );
 });
 
 test('owner has no overview page and lands on "Laporan saya"', () => {
   assert.deepEqual(
     workflowMenus.owner.map(([id]) => id),
-    ['reports', 'new', 'flow'],
+    ['reports', 'new'],
   );
   assert.equal(resolveWorkflowPage('owner', 'dashboard'), 'reports');
   assert.equal(resolveWorkflowPage('owner', 'dashboard/overview'), null);
