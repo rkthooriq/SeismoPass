@@ -1105,3 +1105,23 @@
     display: none;
   }
 }
+
+/* Admin notes name who must act, so the reporter is not asked to fix the
+   surveyor's visit record. */
+.report-detail .report-review-note {
+  flex-direction: column;
+  gap: 6px;
+}
+.report-detail .report-review-note p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.report-detail .report-review-note .report-note-hint,
+.report-note-label {
+  color: var(--muted);
+}
+.report-detail .report-review-note .report-note-hint {
+  font-size: 13px;
+}

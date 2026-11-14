@@ -301,9 +301,10 @@ function contohReports(): Report[] {
       landmark: 'Belakang warung bakso',
       description: 'Rumah satu lantai, dinding bata tanpa kolom praktis.',
       status: 'Perlu revisi',
-      assignmentNote: 'Lengkapi cakupan pemeriksaan interior.',
+      assignmentNote:
+        'Kunjungan ulang bila perlu: catat bagian dalam rumah yang sempat diperiksa.',
       reviewNote:
-        'Catatan kunjungan belum menyebut cakupan interior dan sumber informasi tanah. Mohon dilengkapi.',
+        'Untuk pesurvei: di formulir RVS, isi kolom "Cakupan interior" (tidak masuk, hanya terlihat dari luar, atau masuk ke dalam) dan "Sumber informasi tanah". Pelapor tidak perlu mengubah data laporan.',
       function: 'Rumah tinggal',
       year: '1990',
       floors: '1',
@@ -327,7 +328,7 @@ function contohReports(): Report[] {
         log(
           'Admin SeismoPass',
           'Meminta revisi',
-          'Cakupan interior belum dicatat.',
+          'Pesurvei diminta mencatat bagian dalam rumah yang diperiksa.',
           '2026-11-08T02:00:00.000Z',
         ),
       ],

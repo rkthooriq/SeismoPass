@@ -3,6 +3,7 @@ import test from 'node:test';
 import {
   ownerStep,
   ownerSteps,
+  reviewNoteLabel,
   sortByOwnerTurn,
 } from '../src/lib/ownerNextStep.ts';
 import {
@@ -75,4 +76,12 @@ test('owner has no overview page and lands on "Laporan saya"', () => {
   assert.equal(resolveWorkflowPage('owner', 'dashboard/overview'), null);
   assert.equal(resolveWorkflowPage('admin', 'dashboard'), 'overview');
   assert.equal(resolveWorkflowPage('surveyor', 'dashboard'), 'overview');
+});
+
+test('admin notes name who must act, so reporters are not asked to fix visit records', () => {
+  assert.match(reviewNoteLabel('Perlu dilengkapi').title, /pelapor/);
+  const revision = reviewNoteLabel('Perlu revisi');
+  assert.match(revision.title, /pesurvei/);
+  assert.match(revision.hint ?? '', /tidak perlu mengubah/);
+  assert.equal(ownerStep('Perlu revisi').turn, 'waiting');
 });

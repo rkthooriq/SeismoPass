@@ -3,7 +3,11 @@ import type { FormEvent } from 'react';
 import type { DemoAccount, Report } from '../../lib/reportDemo';
 import type { OwnerAction } from '../../lib/ownerProgress';
 import { timeSlots } from '../../lib/ownerProgress';
-import { ownerStep, sortByOwnerTurn } from '../../lib/ownerNextStep';
+import {
+  ownerStep,
+  reviewNoteLabel,
+  sortByOwnerTurn,
+} from '../../lib/ownerNextStep';
 import OwnerNextSteps from './OwnerNextSteps';
 import ReportPassport from './ReportPassport';
 import BuildingLocation from './BuildingLocation';
@@ -43,33 +47,88 @@ const today = () => {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 };
 
+// Isometric house with lit and shaded faces so it reads as a 3D object.
 function BuildingMark({ small = false }: { small?: boolean }) {
+  const uid = useId().replace(/:/g, '');
+  const g = (name: string) => `${name}-${uid}`;
+  const url = (name: string) => `url(#${g(name)})`;
   return (
     <svg
       className={small ? 'owner-building-mark is-small' : 'owner-building-mark'}
-      viewBox="0 0 180 130"
+      viewBox="0 8 180 138"
       fill="none"
       aria-hidden="true"
     >
-      <path d="m8 114 81-13 83 13-79 14z" fill="#E6D8C6" />
+      <defs>
+        <linearGradient id={g('lit')} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#FFFDF8" />
+          <stop offset="1" stopColor="#F1E6D6" />
+        </linearGradient>
+        <linearGradient id={g('shade')} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#E3D2BC" />
+          <stop offset="1" stopColor="#CDB698" />
+        </linearGradient>
+        <linearGradient id={g('roof')} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#A2714D" />
+          <stop offset="1" stopColor="#7A4C30" />
+        </linearGradient>
+        <linearGradient id={g('roofBack')} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#6E432A" />
+          <stop offset="1" stopColor="#5A3622" />
+        </linearGradient>
+        <linearGradient id={g('glass')} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stopColor="#CFE0E4" />
+          <stop offset="1" stopColor="#9DB6BD" />
+        </linearGradient>
+        <linearGradient id={g('ground')} x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stopColor="#EFE3D2" />
+          <stop offset="1" stopColor="#DCC8AE" />
+        </linearGradient>
+        <filter id={g('blur')} x="-20%" y="-40%" width="140%" height="180%">
+          <feGaussianBlur stdDeviation="3.5" />
+        </filter>
+      </defs>
+      {/* Ground slab with visible thickness. */}
+      <path d="M90 62 166 100 90 138 14 100Z" fill={url('ground')} />
+      <path d="M14 100v5l76 38v-5Z" fill="#CDB698" />
+      <path d="M90 138v5l76-38v-5Z" fill="#BCA284" />
+      {/* Soft cast shadow to the lower right. */}
       <path
-        d="M42 106V56l44-27 44 27v50l-44 17z"
-        fill="#FFFCF6"
-        stroke="#B89A80"
-        strokeWidth="2"
+        d="M90 126 142 100l20 9-52 26Z"
+        fill="#7A5A40"
+        opacity="0.28"
+        filter={url('blur')}
       />
-      <path d="m31 58 55-36 55 36-12 8-43-27-43 27z" fill="#8A5A3B" />
+      {/* Walls: left face lit, right face in shade. */}
+      <path d="M38 64 90 90v36L38 100Z" fill={url('lit')} />
+      <path d="M90 90 116 47l26 17v36l-52 26Z" fill={url('shade')} />
+      <path d="M90 90v36" stroke="#B89A80" strokeWidth="1" opacity="0.6" />
+      {/* Door and windows sit on the faces they belong to. */}
+      <path d="M66.6 92.7 77 97.9v21.6l-10.4-5.2Z" fill="#8A5A3B" />
+      <path d="M68 95.3l7.6 3.8v18" stroke="#6E432A" strokeWidth="1" />
+      <circle cx="74.6" cy="108.3" r="0.9" fill="#F3E4CF" />
+      <path d="M45.8 78.7 57.8 84.7v10.8l-12-6Z" fill={url('glass')} />
       <path
-        d="M86 40v82m-23-10V79l20 8v32M97 66l17 9v20l-17-8zM54 66l17-10v17l-17 9z"
-        stroke="#B89A80"
-        strokeWidth="2"
+        d="M45.8 78.7 57.8 84.7v10.8l-12-6Z M51.8 81.7v10.8"
+        stroke="#FFFDF8"
+        strokeWidth="1.6"
       />
+      <path d="M105.6 94.8 121.2 87v10.8l-15.6 7.8Z" fill={url('glass')} />
       <path
-        d="M147 105V75m-12 8 12-20 12 20z"
-        fill="#DCC3A3"
-        stroke="#B89A80"
-        strokeWidth="2"
+        d="M105.6 94.8 121.2 87v10.8l-15.6 7.8Z M113.4 90.9v10.8"
+        stroke="#EADBC6"
+        strokeWidth="1.6"
       />
+      {/* Roof: back plane first, then the front plane and its fascia. */}
+      <path d="M120 48 60 18l26 18 60 30Z" fill={url('roofBack')} />
+      <path d="M34 63 94 93l26-45-60-30Z" fill={url('roof')} />
+      <path d="M34 63 94 93v4L34 67Z" fill="#5A3622" />
+      <path d="M94 93 120 48v4L94 97Z" fill="#4A2C1B" />
+      <path d="M60 18 120 48" stroke="#C4936C" strokeWidth="1.4" />
+      {/* Tree: two-tone cone so it shares the same light direction. */}
+      <path d="M154 102V90" stroke="#8A6A50" strokeWidth="3" />
+      <path d="M154 56 142 90l12 4Z" fill="#B7A27E" />
+      <path d="M154 56l12 34-12 4Z" fill="#8F7A58" />
     </svg>
   );
 }
@@ -688,14 +747,19 @@ function Detail({
               </ol>
               {report.visitNote && (
                 <div className="owner-saved-note">
-                  <strong>Catatan kunjungan</strong>
+                  <strong>Catatan kunjungan dari pesurvei</strong>
                   <p>{report.visitNote}</p>
                 </div>
               )}
               {report.reviewNote && (
                 <div className="owner-saved-note">
-                  <strong>Catatan admin</strong>
+                  <strong>{reviewNoteLabel(report.status).title}</strong>
                   <p>{report.reviewNote}</p>
+                  {reviewNoteLabel(report.status).hint && (
+                    <p className="owner-note-hint">
+                      {reviewNoteLabel(report.status).hint}
+                    </p>
+                  )}
                 </div>
               )}
             </aside>

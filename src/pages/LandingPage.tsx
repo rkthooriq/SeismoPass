@@ -1,9 +1,6 @@
-import { useEffect, useId, useRef, useState } from 'react';
-import type { CSSProperties, ReactNode } from 'react';
-import {
-  LiquidNavbar,
-  supportsRefraction,
-} from '../components/ui/liquid-glass-navbar';
+import { useEffect, useRef, useState } from 'react';
+import type { ReactNode } from 'react';
+import { LiquidNavbar } from '../components/ui/liquid-glass-navbar';
 import type { LiquidNavItem } from '../components/ui/liquid-glass-navbar';
 import EarthScene from '../components/EarthScene';
 import DisasterBoard from '../features/disaster/DisasterData';
@@ -160,8 +157,6 @@ const roles = [
 
 export default function LandingPage() {
   const [activeSection, setActiveSection] = useState(currentSection);
-  const accountFilterId = `account-glass-${useId().replace(/:/g, '')}`;
-  const [accountRefraction] = useState(supportsRefraction);
   // While a nav click scrolls the page, ignore scroll-spy so the drop does not
   // stop at every section on the way.
   const lockUntil = useRef(0);
@@ -204,12 +199,15 @@ export default function LandingPage() {
   // content, and come back on scroll up or near the top. CSS limits the
   // effect to phone widths.
   const [headerHidden, setHeaderHidden] = useState(false);
+  // Give the navigation a denser surface when content scrolls beneath it.
+  const [headerRaised, setHeaderRaised] = useState(false);
   useEffect(() => {
     let lastY = window.scrollY;
     let frame = 0;
     const update = () => {
       frame = 0;
       const y = Math.max(window.scrollY, 0);
+      setHeaderRaised(y > 16);
       const delta = y - lastY;
       if (y < 80) setHeaderHidden(false);
       else if (delta > 8) setHeaderHidden(true);
@@ -219,6 +217,7 @@ export default function LandingPage() {
     const onScroll = () => {
       if (!frame) frame = requestAnimationFrame(update);
     };
+    update();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => {
       window.removeEventListener('scroll', onScroll);
@@ -239,63 +238,25 @@ export default function LandingPage() {
       </a>
       <header
         id="beranda"
-        className={`sp-header sp-shell${headerHidden ? ' is-hidden' : ''}`}
+        className={`sp-header sp-shell${headerHidden ? ' is-hidden' : ''}${headerRaised ? ' is-raised' : ''}`}
       >
         <span className="sp-wordmark">SeismoPass</span>
         <LiquidNavbar
           className="sp-liquid-nav"
+          material="subtle"
           tone="light"
           items={navigation}
           active={activeSection}
           onChange={goTo}
         />
-        <div
-          className="sp-nav-account"
-          data-refract={accountRefraction ? 'on' : 'off'}
-          style={
-            {
-              '--account-refraction': `url(#${accountFilterId})`,
-            } as CSSProperties
-          }
-        >
-          <svg
-            className="sp-account-filter"
-            width="0"
-            height="0"
-            aria-hidden="true"
-            focusable="false"
-          >
-            <defs>
-              <filter
-                id={accountFilterId}
-                x="0"
-                y="0"
-                width="100%"
-                height="100%"
-                colorInterpolationFilters="sRGB"
-              >
-                <feTurbulence
-                  type="fractalNoise"
-                  baseFrequency="0.006 0.02"
-                  numOctaves="2"
-                  seed="7"
-                  result="noise"
-                />
-                <feGaussianBlur in="noise" stdDeviation="2" result="soft" />
-                <feDisplacementMap
-                  in="SourceGraphic"
-                  in2="soft"
-                  scale="60"
-                  xChannelSelector="R"
-                  yChannelSelector="G"
-                />
-              </filter>
-            </defs>
-          </svg>
-          <a className="sp-button sp-button-outline" href="#/login">
+        <div className="sp-nav-account" role="group" aria-label="Akses akun">
+          <a className="sp-account-action sp-account-signin" href="#/login">
             Masuk
           </a>
-          <a className="sp-button" href="#/register">
+          <a
+            className="sp-account-action sp-account-register"
+            href="#/register"
+          >
             Daftar
           </a>
         </div>

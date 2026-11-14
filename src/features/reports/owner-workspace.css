@@ -934,3 +934,7 @@
     background: #fffaf3;
   }
 }
+.owner-saved-note .owner-note-hint {
+  font-size: 13px;
+  font-style: italic;
+}

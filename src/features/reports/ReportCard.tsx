@@ -5,6 +5,7 @@ import type { RvsRecord } from '../../lib/rvs';
 import ReportPassport from './ReportPassport';
 import RvsForm from '../rvs/RvsForm';
 import { timeSlots } from '../../lib/ownerProgress';
+import { reviewNoteLabel } from '../../lib/ownerNextStep';
 export default function ReportCard({
   report,
   account,
@@ -89,7 +90,10 @@ export default function ReportCard({
         {surveyor && (
           <div className="role-assignment-note">
             <strong>Pesurvei: {surveyor.name}</strong>
-            <p>{report.assignmentNote || 'Penugasan dari sesi sebelumnya.'}</p>
+            <p>
+              <span className="report-note-label">Catatan penugasan: </span>
+              {report.assignmentNote || 'Penugasan dari sesi sebelumnya.'}
+            </p>
           </div>
         )}
         {report.visitDate && (
@@ -98,10 +102,15 @@ export default function ReportCard({
           </p>
         )}
         {report.reviewNote && (
-          <p className="ws-disclaimer">
-            <strong>Catatan admin: </strong>
-            {report.reviewNote}
-          </p>
+          <div className="ws-disclaimer report-review-note">
+            <strong>{reviewNoteLabel(report.status).title}</strong>
+            <p>{report.reviewNote}</p>
+            {reviewNoteLabel(report.status).hint && (
+              <p className="report-note-hint">
+                {reviewNoteLabel(report.status).hint}
+              </p>
+            )}
+          </div>
         )}
         {report.ownerProgress?.availability && (
           <div className="role-assignment-note">

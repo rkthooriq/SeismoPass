@@ -173,6 +173,7 @@ export default function WorkspaceShell({
                 <div className="workspace-nav-scroll" ref={scrollRef}>
                   <LiquidNavbar
                     className="workspace-liquid-nav"
+                    material="subtle"
                     ariaLabel={`Menu ${role.shortName}`}
                     compact={false}
                     active={menus.findIndex(([id]) => id === page)}

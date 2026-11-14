@@ -41,6 +41,7 @@ export type LiquidNavbarProps = {
   onChange?: (index: number, item: LiquidNavItem) => void;
   /** "light" water for bright backgrounds, "dark" for dark ones */
   tone?: 'light' | 'dark';
+  material?: 'liquid' | 'subtle';
   /** icons only */
   compact?: boolean;
   /** soft synthesized "plip" on tap (no audio files) */
@@ -154,6 +155,13 @@ const NIMBUS_CSS = `
 .nimbus-nav[data-compact="true"] .nimbus-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 @media (max-width:520px){.nimbus-nav:not([data-compact="false"]) .nimbus-item{padding:0 13px}.nimbus-nav:not([data-compact="false"]) .nimbus-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}}
 @media (prefers-reduced-motion:reduce){.nv-ico svg,.nv-ico::before,.nv-ico::after,.nv-door{animation:none!important;transition:none}}
+.nimbus-nav[data-material="subtle"]{padding:5px;gap:3px;border-radius:22px}
+.nimbus-nav[data-material="subtle"] .nimbus-glass{background:rgba(255,252,247,.88);border:1px solid rgba(230,216,198,.9);box-shadow:0 4px 14px -8px rgba(59,42,30,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.nimbus-nav[data-material="subtle"] .nimbus-item{border-radius:17px;transition:background-color 150ms ease,color 150ms ease}
+.nimbus-nav[data-material="subtle"] .nimbus-item:hover{background:rgba(243,231,214,.45)}
+.nimbus-nav[data-material="subtle"] .nimbus-item:is([aria-current="page"],[aria-selected="true"]){background:#F3E7D6;color:#3B2A1E}
+.nimbus-nav[data-material="subtle"] .nv-ico svg{transform:none;transition:none}
+@media (prefers-reduced-motion:reduce){.nimbus-nav[data-material="subtle"] .nimbus-item{transition:none}}
 `;
 
 /* ---------- the water shader ---------- */
@@ -308,6 +316,7 @@ export function LiquidNavbar({
   active,
   onChange,
   tone = 'light',
+  material = 'liquid',
   compact,
   sound = false,
   className,
@@ -316,6 +325,7 @@ export function LiquidNavbar({
   ariaLabel = 'Navigasi utama',
   scrollContainerRef,
 }: LiquidNavbarProps) {
+  const subtle = material === 'subtle';
   const filterId = `nimbus-refract-${React.useId().replace(/:/g, '')}`;
   const Container = mode === 'tabs' ? 'div' : 'nav';
   const [inner, setInner] = React.useState(defaultActive);
@@ -470,6 +480,7 @@ export function LiquidNavbar({
   }, []);
 
   const loop = React.useCallback(() => {
+    if (subtle) return;
     const s = st.current;
     if (s.raf) return;
     s.last = performance.now();
@@ -485,7 +496,7 @@ export function LiquidNavbar({
       else s.raf = 0;
     };
     s.raf = requestAnimationFrame(tick);
-  }, [draw, step]);
+  }, [draw, step, subtle]);
 
   /* ---- layout ---- */
   const measure = React.useCallback(() => {
@@ -530,6 +541,7 @@ export function LiquidNavbar({
   }, [current, loop]);
 
   React.useEffect(() => {
+    if (subtle) return;
     setRefract(supportsRefraction());
     const s = st.current;
     const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -572,7 +584,7 @@ export function LiquidNavbar({
       cancelAnimationFrame(s.raf);
       s.raf = 0;
     };
-  }, [loop]);
+  }, [loop, subtle]);
 
   React.useLayoutEffect(() => {
     measure();
@@ -584,10 +596,10 @@ export function LiquidNavbar({
       row.scrollTo({
         left:
           row.scrollLeft + offset - (row.clientWidth - item.offsetWidth) / 2,
-        behavior: st.current.reduce ? 'instant' : 'smooth',
+        behavior: subtle || st.current.reduce ? 'instant' : 'smooth',
       });
     }
-  }, [measure, items.length, compact, current, scrollContainerRef]);
+  }, [measure, items.length, compact, current, scrollContainerRef, subtle]);
   const measureRef = React.useRef(measure);
   measureRef.current = measure;
   React.useEffect(() => {
@@ -613,6 +625,7 @@ export function LiquidNavbar({
     return { x: clientX - r.left + PAD, y: clientY - r.top + PAD };
   };
   const ripple = (x: number, y: number, amp: number) => {
+    if (subtle) return;
     const s = st.current;
     if (s.reduce) return;
     s.rips.push({ x, y, age: 0, amp });
@@ -645,6 +658,11 @@ export function LiquidNavbar({
   };
 
   const select = (i: number) => {
+    if (subtle) {
+      if (active === undefined) setInner(i);
+      onChange?.(i, items[i]);
+      return;
+    }
     const kind = items[i]?.fx ?? (items[i]?.icon ? 'pop' : 'none');
     setFx((f) => ({ i, n: f.n + 1 }));
     plip();
@@ -673,7 +691,12 @@ export function LiquidNavbar({
   };
 
   const onMove = (e: React.PointerEvent) => {
-    if (mode === 'tabs' || e.pointerType !== 'mouse' || st.current.reduce)
+    if (
+      subtle ||
+      mode === 'tabs' ||
+      e.pointerType !== 'mouse' ||
+      st.current.reduce
+    )
       return;
     const p = local(e.clientX, e.clientY);
     const s = st.current;
@@ -688,9 +711,10 @@ export function LiquidNavbar({
       ref={navRef as any}
       className={['nimbus-nav', className].filter(Boolean).join(' ')}
       data-tone={tone}
-      data-gl={gl}
+      data-material={material}
+      data-gl={subtle ? 'off' : gl}
       data-compact={compact === undefined ? undefined : String(compact)}
-      data-refract={refract ? 'on' : 'off'}
+      data-refract={!subtle && refract ? 'on' : 'off'}
       role={mode === 'tabs' ? 'tablist' : undefined}
       aria-label={ariaLabel}
       onKeyDown={onKeyDown}
@@ -711,43 +735,49 @@ export function LiquidNavbar({
       }
     >
       <style dangerouslySetInnerHTML={{ __html: NIMBUS_CSS }} />
-      <svg
-        width="0"
-        height="0"
-        style={{ position: 'absolute' }}
-        aria-hidden="true"
-      >
-        <filter
-          id={filterId}
-          x="0"
-          y="0"
-          width="100%"
-          height="100%"
-          colorInterpolationFilters="sRGB"
+      {!subtle && (
+        <svg
+          width="0"
+          height="0"
+          style={{ position: 'absolute' }}
+          aria-hidden="true"
         >
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.006 0.02"
-            numOctaves="2"
-            seed="7"
-            result="noise"
-          />
-          <feGaussianBlur in="noise" stdDeviation="2" result="soft" />
-          <feDisplacementMap
-            in="SourceGraphic"
-            in2="soft"
-            scale="60"
-            xChannelSelector="R"
-            yChannelSelector="G"
-          />
-        </filter>
-      </svg>
+          <filter
+            id={filterId}
+            x="0"
+            y="0"
+            width="100%"
+            height="100%"
+            colorInterpolationFilters="sRGB"
+          >
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.006 0.02"
+              numOctaves="2"
+              seed="7"
+              result="noise"
+            />
+            <feGaussianBlur in="noise" stdDeviation="2" result="soft" />
+            <feDisplacementMap
+              in="SourceGraphic"
+              in2="soft"
+              scale="60"
+              xChannelSelector="R"
+              yChannelSelector="G"
+            />
+          </filter>
+        </svg>
+      )}
       <span className="nimbus-glass" aria-hidden="true" />
-      <canvas className="nimbus-water" ref={canvasRef} aria-hidden="true" />
-      <span className="nimbus-drop" ref={dropRef} aria-hidden="true" />
+      {!subtle && (
+        <>
+          <canvas className="nimbus-water" ref={canvasRef} aria-hidden="true" />
+          <span className="nimbus-drop" ref={dropRef} aria-hidden="true" />
+        </>
+      )}
       {items.map((it, i) => {
         const kind = it.fx ?? 'pop';
-        const playing = fx.i === i && kind !== 'none';
+        const playing = !subtle && fx.i === i && kind !== 'none';
         const props = {
           ref: (el: HTMLElement | null) => {
             itemRefs.current[i] = el;

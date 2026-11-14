@@ -544,68 +544,101 @@
   height: 160px;
 }
 /* The same liquid component as the main navigation, inside a swipeable row. */
+.dz-board .dz-liquid-tabs[data-material='subtle'] .nimbus-glass {
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
 .dz-tab-frame {
   min-width: 0;
   overflow: hidden;
-  padding: 2px 10px 5px;
+  isolation: isolate;
+  transform: translateZ(0);
+  position: relative;
+  padding: 2px 10px;
   border: 1px solid var(--glass-line);
   border-radius: 999px;
   background: var(--glass-bg-strong);
-  box-shadow: var(--glass-shadow);
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
+  box-shadow: 0 3px 12px -8px rgb(59 42 30 / 0.14);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
 }
 .dz-tab-scroll {
+  --fade-start: 0px;
+  --fade-end: 0px;
   min-width: 0;
   overflow-x: auto;
   overflow-y: hidden;
   overscroll-behavior-x: contain;
   scrollbar-width: none;
+  /* The mask clips the row to a pill and fades tabs out at the edges.
+     Safari ignores the frame's rounded overflow for glass layers inside a
+     scroller; a mask on the scroller itself clips them in every engine. */
+  border-radius: 999px;
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent 0,
+    #000 var(--fade-start),
+    #000 calc(100% - var(--fade-end)),
+    transparent 100%
+  );
+}
+.dz-tab-scroll[data-fade-start='on'] {
+  --fade-start: 56px;
+}
+.dz-tab-scroll[data-fade-end='on'] {
+  --fade-end: 56px;
 }
 .dz-tab-scroll::-webkit-scrollbar {
   display: none;
 }
-.dz-tab-slider {
-  padding-inline: 16px;
-}
-.dz-tab-slider input {
-  display: block;
-  width: 100%;
-  height: 12px;
-  margin: 0;
+/* Round glass arrows sit over the faded edges of the tab row. */
+.dz-tab-arrow {
+  position: absolute;
+  top: 50%;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
   padding: 0;
-  border: 0;
+  border: 1px solid var(--glass-line);
   border-radius: 999px;
-  background: transparent;
-  appearance: none;
-  -webkit-appearance: none;
-  cursor: ew-resize;
-  touch-action: pan-y;
+  background: rgb(255 252 247 / 0.92);
+  color: var(--ink);
+  box-shadow: 0 4px 12px -4px rgb(59 42 30 / 0.28);
+  transform: translateY(-50%);
+  cursor: pointer;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
 }
-.dz-tab-slider input::-webkit-slider-runnable-track {
-  height: 3px;
-  border-radius: 999px;
-  background: rgb(138 90 59 / 0.16);
+.dz-tab-arrow[hidden] {
+  display: none;
 }
-.dz-tab-slider input::-webkit-slider-thumb {
-  width: var(--tab-thumb-width);
-  height: 7px;
-  margin-top: -2px;
-  border-radius: 999px;
-  background: rgb(138 90 59 / 0.5);
-  -webkit-appearance: none;
+.dz-tab-arrow.is-start {
+  left: 8px;
 }
-.dz-tab-slider input::-moz-range-track {
-  height: 3px;
-  border-radius: 999px;
-  background: rgb(138 90 59 / 0.16);
+.dz-tab-arrow.is-end {
+  right: 8px;
 }
-.dz-tab-slider input::-moz-range-thumb {
-  width: var(--tab-thumb-width);
-  height: 7px;
-  border: 0;
-  border-radius: 999px;
-  background: rgb(138 90 59 / 0.5);
+.dz-tab-arrow:hover {
+  background: #fff;
+  box-shadow: 0 6px 16px -4px rgb(59 42 30 / 0.34);
+}
+@media (prefers-reduced-motion: reduce) {
+  .dz-tab-arrow {
+    transition: none;
+  }
 }
 .dz-board .dz-liquid-tabs {
   width: max-content;

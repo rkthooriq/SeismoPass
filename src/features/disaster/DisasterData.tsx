@@ -1,5 +1,5 @@
 import { useEffect, useId, useRef, useState } from 'react';
-import type { CSSProperties, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import {
   cianjurDamage,
   cianjurImpact,
@@ -878,11 +878,19 @@ export default function DisasterBoard() {
     return allTabs.find((tab) => tab.id === requested)?.id ?? 'statistik';
   });
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [scrollState, setScrollState] = useState({
-    left: 0,
-    max: 0,
-    thumb: 32,
-  });
+  const [scrollState, setScrollState] = useState({ left: 0, max: 0 });
+  // Scroll most of a viewport per click so the next hidden tabs come in.
+  const scrollTabs = (direction: -1 | 1) => {
+    const row = scrollRef.current;
+    if (!row) return;
+    const reduce = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+    row.scrollBy({
+      left: direction * row.clientWidth * 0.7,
+      behavior: reduce ? 'auto' : 'smooth',
+    });
+  };
   useEffect(() => {
     const row = scrollRef.current;
     if (!row) return;
@@ -893,15 +901,9 @@ export default function DisasterBoard() {
       const next = {
         left: Math.max(0, Math.min(max, row.scrollLeft)),
         max,
-        thumb: Math.max(
-          28,
-          ((row.clientWidth - 32) * row.clientWidth) / row.scrollWidth,
-        ),
       };
       setScrollState((previous) =>
-        previous.left === next.left &&
-        previous.max === next.max &&
-        previous.thumb === next.thumb
+        previous.left === next.left && previous.max === next.max
           ? previous
           : next,
       );
@@ -940,9 +942,19 @@ export default function DisasterBoard() {
         Konteks Bandung Raya dan Sesar Lembang
       </p>
       <div className="dz-tab-frame">
-        <div className="dz-tab-scroll" ref={scrollRef}>
+        <div
+          className="dz-tab-scroll"
+          ref={scrollRef}
+          data-fade-start={scrollState.left > 1 ? 'on' : 'off'}
+          data-fade-end={
+            scrollState.max > 0 && scrollState.left < scrollState.max - 1
+              ? 'on'
+              : 'off'
+          }
+        >
           <LiquidNavbar
             className="dz-liquid-tabs"
+            material="subtle"
             mode="tabs"
             ariaLabel="Kategori data bencana"
             compact={false}
@@ -956,29 +968,46 @@ export default function DisasterBoard() {
             }))}
           />
         </div>
-        <div className="dz-tab-slider" hidden={scrollState.max <= 0}>
-          <input
-            type="range"
-            aria-label="Geser kategori data"
-            aria-valuetext={`${scrollState.max > 0 ? Math.round((scrollState.left / scrollState.max) * 100) : 0}%`}
-            min={0}
-            max={scrollState.max}
-            step={1}
-            value={scrollState.left}
-            style={
-              { '--tab-thumb-width': `${scrollState.thumb}px` } as CSSProperties
-            }
-            onChange={(event) => {
-              const row = scrollRef.current;
-              if (!row) return;
-              row.scrollLeft = Number(event.currentTarget.value);
-              setScrollState((previous) => ({
-                ...previous,
-                left: row.scrollLeft,
-              }));
-            }}
-          />
-        </div>
+        {/* Edge arrows replace a visible scrollbar: each one only shows while
+            tabs are hidden on its side. Keyboard users move with the tablist
+            arrow keys, so the buttons stay out of the tab order. */}
+        {(['start', 'end'] as const).map((side) => {
+          const visible =
+            side === 'start'
+              ? scrollState.left > 1
+              : scrollState.max > 0 && scrollState.left < scrollState.max - 1;
+          return (
+            <button
+              key={side}
+              type="button"
+              className={`dz-tab-arrow is-${side}`}
+              tabIndex={-1}
+              aria-label={
+                side === 'start'
+                  ? 'Tampilkan kategori sebelumnya'
+                  : 'Tampilkan kategori berikutnya'
+              }
+              hidden={!visible}
+              onClick={() => scrollTabs(side === 'start' ? -1 : 1)}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="16"
+                height="16"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path
+                  d={side === 'start' ? 'm14 6-6 6 6 6' : 'm10 6 6 6-6 6'}
+                />
+              </svg>
+            </button>
+          );
+        })}
       </div>
       {allTabs.map((tab) => (
         <div

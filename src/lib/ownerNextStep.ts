@@ -47,7 +47,7 @@ export const ownerSteps: Record<ReportStatus, OwnerStep> = {
   'Perlu revisi': {
     turn: 'waiting',
     title: 'Catatan kunjungan sedang diperbaiki',
-    text: 'Pesurvei memperbaiki catatan sesuai arahan admin.',
+    text: 'Pesurvei memperbaiki catatan kunjungan sesuai arahan admin. Tidak ada data yang perlu kamu ubah.',
   },
   Selesai: {
     turn: 'owner',
@@ -70,4 +70,26 @@ export function sortByOwnerTurn<T extends { status: ReportStatus }>(
     .map((report, index) => ({ report, index }))
     .sort((a, b) => rank(a.report) - rank(b.report) || a.index - b.index)
     .map(({ report }) => report);
+}
+
+// Catatan admin bisa ditujukan ke pihak berbeda. Judulnya menyebut penerima
+// agar pelapor tahu apakah ada yang perlu ia ubah.
+export interface ReviewNoteLabel {
+  title: string;
+  hint?: string;
+}
+
+export function reviewNoteLabel(status: ReportStatus): ReviewNoteLabel {
+  if (status === 'Perlu dilengkapi')
+    return {
+      title: 'Catatan admin untuk pelapor',
+      hint: 'Ubah data laporan sesuai catatan ini, lalu kirim ulang.',
+    };
+  if (status === 'Perlu revisi')
+    return {
+      title: 'Arahan admin untuk pesurvei',
+      hint: 'Pesurvei yang memperbaiki catatan kunjungan. Pelapor tidak perlu mengubah data laporan.',
+    };
+  if (status === 'Selesai') return { title: 'Catatan penutup admin' };
+  return { title: 'Catatan admin' };
 }

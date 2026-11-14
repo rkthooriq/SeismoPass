@@ -95,8 +95,16 @@ export const observationFields = [
   ['soilSource', 'Sumber informasi tanah', 'text'],
   ['geologySource', 'Sumber informasi geologi', 'text'],
   ['codeSource', 'Dasar pemilihan pre-code / post-benchmark', 'text'],
-  ['exterior', 'Cakupan eksterior: partial / all sides / aerial', 'text'],
-  ['interior', 'Cakupan interior: none / visible / entered', 'text'],
+  [
+    'exterior',
+    'Cakupan eksterior: sebagian sisi / semua sisi / foto udara',
+    'text',
+  ],
+  [
+    'interior',
+    'Cakupan interior: tidak masuk / terlihat dari luar / masuk ke dalam',
+    'text',
+  ],
   ['drawings', 'Gambar ditinjau: yes / no / DNK', 'text'],
   ['contact', 'Kontak (opsional)', 'text'],
   ['level2', 'Level 2: belum dilakukan / referensi hasil ahli', 'text'],
