@@ -26,6 +26,18 @@ Buka alamat yang ditampilkan terminal, biasanya **http://localhost:5173**. Jika 
 
 Tidak perlu membuat file `.env` untuk menjalankan prototipe saat ini. Informasi BMKG dan peta memerlukan koneksi internet. Gunakan data fiktif ketika mencoba.
 
+## Mengambil update terbaru
+
+Tidak perlu clone ulang. Hentikan aplikasi dengan **Ctrl+C**, buka terminal di folder SeismoPass pada branch `main`, lalu jalankan:
+
+```bash
+git pull --ff-only origin main
+npm ci
+npm run dev
+```
+
+Buka kembali alamat yang muncul di terminal. `--ff-only` mencegah penggabungan riwayat secara otomatis. Jika punya perubahan sendiri, simpan atau commit terlebih dahulu. Jika Git menolak update karena riwayat berbeda, hentikan dan periksa penyebabnya; jangan memaksa atau menghapus pekerjaan lokal.
+
 ## Alur mencoba aplikasi
 
 Setelah aplikasi terbuka, pilih **Masuk** atau buka `/#/login` pada alamat lokal. Gunakan akun contoh berikut; semuanya memakai kata sandi **`SeismoDemo123!`**.
