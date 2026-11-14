@@ -23,7 +23,11 @@ import WorkspaceShell from './WorkspaceShell';
 import ReportCard from './ReportCard';
 import ReportRegistrationForm from './ReportRegistrationForm';
 import PilotOverview from './PilotOverview';
-import OwnerNextSteps from './OwnerNextSteps';
+import OwnerWorkspace from './OwnerWorkspace';
+import {
+  updateOwnerProgress,
+  proposeAppointment,
+} from '../../lib/ownerProgress';
 import UserProfilePage from '../profile/UserProfilePage';
 import { toUserProfile } from '../../lib/userProfile';
 import type { ProfileInput } from '../../lib/userProfile';
@@ -61,7 +65,9 @@ function ReportWorkspaceContent({
     input: NewSurveyorInput,
   ) => IssuedPassword | { error: string };
   onReissuePassword: (id: string) => IssuedPassword | { error: string };
-  onImportSurveyors: (inputs: NewSurveyorInput[]) => { issued: IssuedPassword[] } | { error: string };
+  onImportSurveyors: (
+    inputs: NewSurveyorInput[],
+  ) => { issued: IssuedPassword[] } | { error: string };
   onLeave: () => void;
   storageFailed: boolean;
   invalidSession?: boolean;
@@ -156,7 +162,7 @@ function ReportWorkspaceContent({
     const target = accounts.find(
       (person) => person.id === form.get('surveyorId'),
     );
-    const next = target
+    let next = target
       ? assignReport(
           report,
           account,
@@ -164,9 +170,17 @@ function ReportWorkspaceContent({
           String(form.get('assignmentNote') ?? ''),
         )
       : null;
+    if (next && (form.get('appointmentDate') || form.get('appointmentSlot'))) {
+      next = proposeAppointment(
+        next,
+        account,
+        String(form.get('appointmentDate') ?? ''),
+        String(form.get('appointmentSlot') ?? ''),
+      );
+    }
     if (!next) {
       setMessage(
-        'Pilih pesurvei aktif yang telah disetujui dan isi catatan penugasan.',
+        'Pilih pesurvei aktif dan isi catatan penugasan. Jika mengusulkan jadwal, isi tanggal hari ini atau setelahnya beserta rentang waktu.',
       );
       return;
     }
@@ -478,14 +492,50 @@ function ReportWorkspaceContent({
       )}
       {page === 'pilot' && <PilotOverview />}
       {page === 'reports' && account.role === 'owner' && (
-        <OwnerNextSteps reports={visible} />
+        <OwnerWorkspace
+          reports={visible}
+          account={account}
+          accounts={accounts}
+          onEdit={(report) => {
+            setEditing(report);
+            requestAnimationFrame(() =>
+              document
+                .getElementById('edit-report')
+                ?.scrollIntoView({ block: 'start', behavior: 'instant' }),
+            );
+          }}
+          onSave={(report, action) => {
+            const next = updateOwnerProgress(report, account, action);
+            if (!next) return false;
+            onChange(
+              reports.map((item) => (item.id === report.id ? next : item)),
+            );
+            return true;
+          }}
+          onSubmit={(report) => {
+            const next = advanceReport(report, account, 'submit');
+            if (!next) {
+              setMessage(
+                [
+                  'Lengkapi data sebelum mengirim.',
+                  ...Object.values(validateReportRegistration(report)),
+                ].join(' '),
+              );
+              return;
+            }
+            onChange(
+              reports.map((item) => (item.id === report.id ? next : item)),
+            );
+            setMessage('Laporan dikirim untuk diperiksa admin.');
+          }}
+        />
       )}
-      {page && listPages.includes(page) && (
+      {page && listPages.includes(page) && account.role !== 'owner' && (
         <>
           <section className="ws-panel role-report-list">
             <div className="ws-section-head">
               <div>
-                <h2>{account.role === 'owner' ? 'Daftar laporan' : title}</h2>
+                <h2>{title}</h2>
                 <p>{filtered.length} laporan dalam daftar ini.</p>
               </div>
               {account.role === 'admin' && (

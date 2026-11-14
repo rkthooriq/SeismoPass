@@ -4,6 +4,7 @@ import type { DemoAccount, Report, ReportAction } from '../../lib/reportDemo';
 import type { RvsRecord } from '../../lib/rvs';
 import ReportPassport from './ReportPassport';
 import RvsForm from '../rvs/RvsForm';
+import { timeSlots } from '../../lib/ownerProgress';
 export default function ReportCard({
   report,
   account,
@@ -102,6 +103,45 @@ export default function ReportCard({
             {report.reviewNote}
           </p>
         )}
+        {report.ownerProgress?.availability && (
+          <div className="role-assignment-note">
+            <strong>Waktu tersedia dari pelapor</strong>
+            <p>
+              {report.ownerProgress.availability.date} ·{' '}
+              {report.ownerProgress.availability.slot}
+            </p>
+            <p>{report.ownerProgress.availability.note}</p>
+          </div>
+        )}
+        {report.appointment && (
+          <div className="role-assignment-note">
+            <strong>Usulan jadwal kunjungan</strong>
+            <p>
+              {report.appointment.date} · {report.appointment.slot}
+            </p>
+            <p>
+              {report.appointment.response === 'confirmed'
+                ? 'Dikonfirmasi pelapor'
+                : report.appointment.response === 'change-requested'
+                  ? 'Pelapor meminta perubahan'
+                  : 'Menunggu konfirmasi pelapor'}
+            </p>
+          </div>
+        )}
+        {report.ownerProgress?.support && (
+          <div className="role-assignment-note">
+            <strong>
+              Kebutuhan dukungan pelapor · belum menjadi pengajuan program
+            </strong>
+            <p>{report.ownerProgress.support.note}</p>
+          </div>
+        )}
+        {report.ownerProgress?.followUp && (
+          <div className="role-assignment-note">
+            <strong>Catatan tindak lanjut dari pelapor</strong>
+            <p>{report.ownerProgress.followUp.note}</p>
+          </div>
+        )}
         {account.role === 'admin' &&
           ['Siap disurvei', 'Ditugaskan'].includes(report.status) && (
             <form
@@ -139,6 +179,33 @@ export default function ReportCard({
                   placeholder="Lingkup kunjungan dan koordinasi supervisi"
                 />
               </label>
+              <fieldset className="report-visit-fields">
+                <legend>Usulkan jadwal kunjungan (opsional)</legend>
+                <label>
+                  Tanggal usulan
+                  <input
+                    name="appointmentDate"
+                    type="date"
+                    defaultValue={report.appointment?.date}
+                  />
+                </label>
+                <label>
+                  Rentang waktu
+                  <select
+                    name="appointmentSlot"
+                    defaultValue={report.appointment?.slot ?? ''}
+                  >
+                    <option value="">Belum ditentukan</option>
+                    {timeSlots.map((slot) => (
+                      <option key={slot}>{slot}</option>
+                    ))}
+                  </select>
+                </label>
+                <p className="ws-muted">
+                  Pelapor dapat mengonfirmasi atau meminta perubahan. Ini
+                  terpisah dari tanggal kunjungan yang dicatat pesurvei.
+                </p>
+              </fieldset>
               <button className="ws-primary">Simpan penugasan</button>
             </form>
           )}

@@ -1,5 +1,6 @@
 import { parseRvsRecord } from './rvs.ts';
 import type { Report, ReportStatus } from './reportDemo';
+import { parseOwnerProgress, parseAppointment } from './ownerProgress.ts';
 
 const statuses: ReportStatus[] = [
   'Draf',
@@ -94,6 +95,10 @@ export function restoreReports(
       };
       for (const key of optional)
         if (typeof record[key] === 'string') report[key] = record[key];
+      const ownerProgress = parseOwnerProgress(record.ownerProgress);
+      if (ownerProgress) report.ownerProgress = ownerProgress;
+      const appointment = parseAppointment(record.appointment);
+      if (appointment) report.appointment = appointment;
       for (const key of ['demoConsent', 'understandsRvs'] as const)
         if (typeof record[key] === 'boolean') report[key] = record[key];
       if (record.rvs !== undefined) {

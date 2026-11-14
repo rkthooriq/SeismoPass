@@ -3,6 +3,7 @@ import type { AccountStatus, AccessDecision } from './surveyorAccess';
 import { emptyObservations, emptyRvsInputs, parseRvsRecord } from './rvs.ts';
 import type { RvsInputs, RvsRecord } from './rvs';
 import type { ActorRole } from './actorAccess';
+import type { OwnerProgress, SurveyAppointment } from './ownerProgress';
 
 export interface DemoAccount {
   id: string;
@@ -64,6 +65,8 @@ export type ReportStatus =
   | 'Perlu revisi'
   | 'Selesai';
 export interface Report {
+  ownerProgress?: OwnerProgress;
+  appointment?: SurveyAppointment;
   id: string;
   reporterId: string;
   title: string;
@@ -593,6 +596,9 @@ export function assignReport(
     assignee: target.id,
     assignedBy: admin.id,
     assignmentNote: note.trim(),
+    ...(report.appointment && report.assignee !== target.id
+      ? { appointment: undefined }
+      : {}),
     status: 'Ditugaskan',
     activity: [
       ...(report.activity ?? []),
@@ -617,6 +623,7 @@ export function releaseSurveyorAssignments(
       ? {
           ...report,
           assignee: undefined,
+          appointment: undefined,
           status: 'Siap disurvei',
           activity: [
             ...(report.activity ?? []),
