@@ -1,14 +1,94 @@
 # SeismoPass
 
-SeismoPass adalah prototipe web paspor ketahanan gempa bangunan untuk Bandung Raya, dikembangkan sebagai pendukung esai IYEEA 2026. Aplikasi ini memperagakan pencatatan bangunan, alur laporan pelapor–admin–pesurvei, profil digital, serta simulasi pendidikan RVS (_Rapid Visual Screening_).
+SeismoPass adalah prototipe web paspor ketahanan gempa bangunan untuk Bandung Raya, dikembangkan sebagai pendukung esai IYEEA 2026. Aplikasi ini memperagakan pencatatan bangunan, alur laporan pelapor–admin–pesurvei, profil digital, serta simulasi pendidikan RVS (*Rapid Visual Screening*).
 
 Dibangun dengan React, TypeScript, dan Vite. Halaman depan menampilkan informasi gempa dari BMKG serta peta lokasi menggunakan Leaflet dan OpenStreetMap.
 
 > Aplikasi masih berupa frontend dengan data contoh; backend dan autentikasi produksi belum tersedia. Data percobaan disimpan selama sesi tab browser jika tersedia. RVS adalah penyaringan awal, **bukan sertifikat aman**, dan tidak menggantikan evaluasi ahli struktur.
 
+## Persiapan
+
+Sebelum menjalankan SeismoPass, pastikan Git dan Node.js sudah terpasang di komputer:
+
+- **Git** digunakan untuk mengambil proyek dari GitHub dan mendapatkan pembaruan.
+- **Node.js** digunakan untuk menjalankan proyek. **npm**, yang digunakan untuk mengunduh kebutuhan proyek, ikut terpasang bersama Node.js.
+
+### 1. Periksa Git dan Node.js
+
+Buka terminal di komputer:
+
+- **Windows:** buka Command Prompt, PowerShell, atau terminal di VS Code.
+- **Mac:** buka aplikasi Terminal atau terminal di VS Code.
+
+Jalankan perintah berikut satu per satu:
+
+```bash
+git --version
+node --version
+npm --version
+```
+
+Jika ketiganya menampilkan nomor versi, kamu dapat melanjutkan ke bagian **Clone proyek**. Proyek ini merekomendasikan Node.js **24.11.0** sesuai file [`.nvmrc`](.nvmrc). Jika Git atau Node.js belum terpasang, ikuti langkah di bawah.
+
+### 2. Instal Git
+
+#### Windows
+
+1. Buka [halaman Git untuk Windows](https://git-scm.com/install/windows).
+2. Unduh **Git for Windows/x64 Setup**. Jika komputer menggunakan prosesor ARM, pilih versi **ARM64**.
+3. Buka file yang sudah diunduh dan ikuti proses instalasi. Pengaturan bawaan dapat digunakan.
+4. Setelah selesai, tutup dan buka kembali terminal.
+5. Periksa instalasi:
+
+```bash
+git --version
+```
+
+Jika muncul nomor versi, Git sudah terpasang.
+
+#### Mac
+
+1. Buka aplikasi **Terminal**.
+2. Jalankan perintah berikut:
+
+```bash
+xcode-select --install
+```
+
+3. Jika muncul jendela instalasi, pilih **Install** dan ikuti petunjuk hingga selesai.
+4. Periksa instalasi:
+
+```bash
+git --version
+```
+
+Jika Mac menyatakan bahwa *command line tools* sudah terpasang, langsung jalankan perintah pemeriksaan di atas.
+
+### 3. Instal Node.js
+
+Jika Node.js belum terpasang, ikuti langkah berikut:
+
+1. Buka [halaman unduhan Node.js 24.11.0](https://nodejs.org/en/download/archive/v24.11.0).
+2. Pada bagian **Installer Packages**, pilih file sesuai komputer:
+   - **Windows x64:** `node-v24.11.0-x64.msi`.
+   - **Windows ARM64:** `node-v24.11.0-arm64.msi`.
+   - **Mac:** `node-v24.11.0.pkg`.
+3. Buka file yang diunduh dan ikuti petunjuk instalasi hingga selesai.
+4. Tutup dan buka kembali terminal.
+5. Periksa Node.js dan npm:
+
+```bash
+node --version
+npm --version
+```
+
+Perintah pertama akan menampilkan `v24.11.0` jika versi tersebut terpasang. Perintah kedua akan menampilkan versi npm.
+
+> Jika Node.js sudah terpasang untuk proyek lain, periksa versinya sebelum mengganti instalasi. Pertimbangkan menggunakan pengelola versi Node.js jika membutuhkan versi yang berbeda untuk setiap proyek.
+
 ## Clone proyek
 
-Siapkan Git dan Node.js **24.11.0** sesuai [`.nvmrc`](.nvmrc), lalu jalankan:
+Buka terminal di lokasi tempat proyek ingin disimpan, lalu jalankan:
 
 ```bash
 git clone https://github.com/rkthooriq/SeismoPass.git
@@ -16,6 +96,8 @@ cd SeismoPass
 ```
 
 ## Jalankan aplikasi
+
+Pastikan terminal berada di folder `SeismoPass`, lalu jalankan:
 
 ```bash
 npm ci
@@ -25,6 +107,15 @@ npm run dev
 Buka alamat yang ditampilkan terminal, biasanya **http://localhost:5173**. Jika port sudah digunakan, Vite akan memilih port lain. Hentikan aplikasi dengan **Ctrl+C**.
 
 Tidak perlu membuat file `.env` untuk menjalankan prototipe saat ini. Informasi BMKG dan peta memerlukan koneksi internet. Gunakan data fiktif ketika mencoba.
+
+### Jika perintah belum dikenali
+
+Jika muncul pesan seperti `command not found` atau `is not recognized`:
+
+1. Pastikan Git atau Node.js sudah selesai diinstal.
+2. Tutup terminal, lalu buka kembali.
+3. Jalankan kembali perintah pemeriksaan versi.
+4. Jika memakai terminal di VS Code dan perintah masih belum dikenali, tutup dan buka kembali VS Code.
 
 ## Mengambil update terbaru
 
@@ -42,10 +133,10 @@ Buka kembali alamat yang muncul di terminal. `--ff-only` mencegah penggabungan r
 
 Setelah aplikasi terbuka, pilih **Masuk** atau buka `/#/login` pada alamat lokal. Gunakan akun contoh berikut; semuanya memakai kata sandi **`SeismoDemo123!`**.
 
-| Peran    | Email                  |
-| -------- | ---------------------- |
-| Pelapor  | `pelapor@example.com`  |
-| Admin    | `admin@example.com`    |
+| Peran | Email |
+| --- | --- |
+| Pelapor | `pelapor@example.com` |
+| Admin | `admin@example.com` |
 | Pesurvei | `pesurvei@example.com` |
 
 Gunakan **satu tab browser yang sama** sepanjang percobaan. Tekan **Keluar**, lalu masuk dengan akun berikutnya untuk berganti peran. Gunakan nama bangunan yang mudah dikenali agar laporan yang sama dapat ditemukan pada setiap tahap.
