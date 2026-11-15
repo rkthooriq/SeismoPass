@@ -18,6 +18,7 @@ import { rvsDemoPath } from '../src/lib/rvsQr.ts';
 import { validPhotoFile, maxPhotoBytes } from '../src/lib/buildingPhotos.ts';
 const [owner, admin, surveyor] = demoAccounts;
 const sent = { ...sampleReports[0], status: 'Dikirim' };
+const draft = { ...sampleReports[0], status: 'Draf' };
 const now = '2026-11-14';
 const availability = {
   type: 'availability',
@@ -172,7 +173,7 @@ test('follow-up, support and owner work notes cannot produce technical approval 
 });
 
 test('restoring owner progress retains permitted values and drops fabricated decisions and malformed data', () => {
-  const result = updateOwnerProgress(sent, owner, {
+  const result = updateOwnerProgress(draft, owner, {
     type: 'location',
     point: { latitude: -6.87, longitude: 107.6 },
   });
@@ -193,14 +194,14 @@ test('restoring owner progress retains permitted values and drops fabricated dec
     undefined,
   );
   assert.equal(
-    updateOwnerProgress(sent, owner, {
+    updateOwnerProgress(draft, owner, {
       type: 'location',
       point: { latitude: NaN, longitude: 100 },
     }),
     null,
   );
   assert.equal(
-    updateOwnerProgress(sent, owner, {
+    updateOwnerProgress(draft, owner, {
       type: 'location',
       point: { latitude: 0, longitude: 0 },
     }).ownerProgress.point.latitude,
@@ -238,4 +239,23 @@ test('photo selection rejects oversized, executable and disguised files before s
     ),
     true,
   );
+});
+
+test('the building pin changes only while the owner may still edit the report', () => {
+  const point = { latitude: -6.87, longitude: 107.6 };
+  for (const status of ['Draf', 'Perlu dilengkapi'])
+    assert.ok(
+      updateOwnerProgress({ ...draft, status }, owner, {
+        type: 'location',
+        point,
+      }),
+    );
+  for (const status of ['Dikirim', 'Siap disurvei', 'Ditugaskan', 'Selesai'])
+    assert.equal(
+      updateOwnerProgress({ ...draft, status }, owner, {
+        type: 'location',
+        point,
+      }),
+      null,
+    );
 });

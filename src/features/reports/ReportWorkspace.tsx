@@ -51,7 +51,12 @@ function ReportWorkspaceContent({
   onReissuePassword,
   storageFailed,
   invalidSession = false,
+  notice = '',
+  onNotice = () => {},
 }: {
+  /** A confirmation carried across a route change (the content remounts). */
+  notice?: string;
+  onNotice?: (text: string, route: string) => void;
   route?: string;
   account: DemoAccount;
   accounts: DemoAccount[];
@@ -125,10 +130,13 @@ function ReportWorkspaceContent({
         : [...reports, next],
     );
     setEditing(null);
-    setMessage(
+    // The list route remounts this content, so the confirmation travels with
+    // the navigation instead of living in this component's state.
+    onNotice(
       send
         ? 'Laporan dikirim untuk diperiksa admin.'
         : 'Draf disimpan. Lengkapi data saat siap mengirim.',
+      'dashboard/reports',
     );
     window.location.assign('#/dashboard/reports');
   }
@@ -356,9 +364,9 @@ function ReportWorkspaceContent({
           perubahan untuk memulai sesi baru.
         </p>
       )}
-      {message && (
+      {(message || notice) && (
         <p role="status" className="ws-notice">
-          {message}
+          {message || notice}
         </p>
       )}
       {page === 'profile' && (
@@ -596,9 +604,29 @@ function ReportWorkspaceContent({
 // Keep the shell mounted so the liquid indicator can travel between destinations.
 // Route-local forms and filters still reset through the keyed content below.
 export default function ReportWorkspace(
-  props: ComponentProps<typeof ReportWorkspaceContent>,
+  props: Omit<
+    ComponentProps<typeof ReportWorkspaceContent>,
+    'notice' | 'onNotice'
+  >,
 ) {
   const { account, reports, route = 'dashboard', onLeave } = props;
+  // A notice is shown on the route it was sent to, then dropped as soon as
+  // the user moves on, so it never reappears on a later visit.
+  const [notice, setNotice] = useState<{
+    text: string;
+    route: string;
+    seen: boolean;
+  } | null>(null);
+  const [lastRoute, setLastRoute] = useState(route);
+  if (route !== lastRoute) {
+    setLastRoute(route);
+    if (notice)
+      setNotice(
+        notice.route === route && !notice.seen
+          ? { ...notice, seen: true }
+          : null,
+      );
+  }
   const page = resolveWorkflowPage(account.role, route);
   const visible = visibleReports(reports, account);
   const count = (statuses: string[]) =>
@@ -617,7 +645,14 @@ export default function ReportWorkspace(
       counts={counts}
       onLeave={onLeave}
     >
-      <ReportWorkspaceContent key={route} {...props} />
+      <ReportWorkspaceContent
+        key={route}
+        {...props}
+        notice={notice?.route === route ? notice.text : ''}
+        onNotice={(text, target) =>
+          setNotice({ text, route: target, seen: target === route })
+        }
+      />
     </WorkspaceShell>
   );
 }

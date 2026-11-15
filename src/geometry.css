@@ -640,24 +640,46 @@
   border-radius: var(--radius-box);
 }
 
-/* Status badges: told apart by fill, not by solid/dashed outlines. */
-#root .workspace .status-complete {
-  background: var(--surface);
-  color: var(--ink);
+/* Report status chips: one pill shape, told apart by a tinted fill that says
+   who holds the report (admin, field, owner action, done). No outline. */
+#root .workspace .status-draft {
+  --tone-fill: var(--status-draft-fill);
+  --tone-ink: var(--status-draft-ink);
 }
-#root .workspace .status-attention {
-  background: var(--fill-attention);
-  color: var(--ink);
-  font-weight: 650;
+#root .workspace .status-admin {
+  --tone-fill: var(--status-admin-fill);
+  --tone-ink: var(--status-admin-ink);
 }
-#root .workspace .status-progress {
-  background: var(--action);
-  color: var(--on-action);
+#root .workspace .status-field {
+  --tone-fill: var(--status-field-fill);
+  --tone-ink: var(--status-field-ink);
+}
+#root .workspace .status-action {
+  --tone-fill: var(--status-action-fill);
+  --tone-ink: var(--status-action-ink);
+}
+#root .workspace .status-done {
+  --tone-fill: var(--status-done-fill);
+  --tone-ink: var(--status-done-ink);
+}
+#root
+  .workspace
+  :is(.ws-badge, .owner-chip):is(
+    .status-draft,
+    .status-admin,
+    .status-field,
+    .status-action,
+    .status-done
+  ) {
+  background: var(--tone-fill);
+  color: var(--tone-ink);
+  border-radius: var(--radius-pill);
+  font-weight: 600;
 }
 #root .workspace :is(.ws-badge, .owner-chip, .directory-status) {
   box-shadow: none;
 }
-#root .workspace :is(.ws-badge:not([class*='status-']), .owner-chip) {
+#root .workspace :is(.ws-badge, .owner-chip):not([class*='status-']) {
   background: var(--surface);
 }
 #root .workspace .directory-status.is-active {

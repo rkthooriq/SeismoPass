@@ -3,6 +3,7 @@ import type { FormEvent } from 'react';
 import { getActor } from '../../lib/actorAccess';
 import { accountStatusLabels } from '../../lib/surveyorAccess';
 import { validateProfile } from '../../lib/userProfile';
+import { focusAndReveal } from '../../lib/reveal';
 import type {
   ProfileErrors,
   ProfileInput,
@@ -38,7 +39,10 @@ export default function UserProfilePage({
     const nextErrors = validateProfile(input);
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length) {
-      (nextErrors.name ? nameRef : organizationRef).current?.focus();
+      focusAndReveal(
+        (nextErrors.name ? nameRef : organizationRef).current,
+        'center',
+      );
       return;
     }
     const result = onSave(input);

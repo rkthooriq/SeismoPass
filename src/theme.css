@@ -68,6 +68,17 @@
   --fill-note: #f3e7d6;
   --fill-alert: #f6e0cf;
   --fill-attention: #f5dfb8;
+  /* Report status tones: who holds the report now. Text is 6:1 or more. */
+  --status-draft-fill: var(--surface);
+  --status-draft-ink: #5f4b3c;
+  --status-admin-fill: #e2e9ee;
+  --status-admin-ink: #2f4a5d;
+  --status-field-fill: #f6e4c2;
+  --status-field-ink: #6b4a10;
+  --status-action-fill: #f6dcd0;
+  --status-action-ink: #8a3419;
+  --status-done-fill: #e1ead6;
+  --status-done-ink: #3c5a2b;
   --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --font-heading: 'Figtree', 'Inter', Arial, sans-serif;
   --plan-pattern: url('./assets/plan-pattern.svg');
@@ -393,18 +404,6 @@ textarea:focus-visible {
   border: 1px solid var(--line);
   border-radius: var(--radius-panel);
 }
-.role-workspace .status-complete {
-  background: var(--surface);
-  color: var(--ink);
-}
-.role-workspace .status-attention {
-  background: var(--surface);
-  color: var(--muted);
-}
-.role-workspace .status-progress {
-  background: var(--surface);
-  color: var(--muted);
-}
 .role-workspace .report-item > summary {
   min-height: 88px;
 }
@@ -657,20 +656,6 @@ button {
 
 .workspace .ws-welcome .ws-illustration > span {
   color: var(--muted-on-dark);
-}
-.workspace :is(.status-complete, .status-progress, .status-attention) {
-  background: var(--paper);
-  color: var(--ink);
-  border: 1px solid var(--ink);
-}
-.workspace .status-attention {
-  border-style: dashed;
-  font-weight: 650;
-}
-.workspace .status-progress {
-  background: var(--action);
-  color: var(--on-action);
-  border-color: var(--action);
 }
 .workspace .rvs-result {
   background: var(--surface);

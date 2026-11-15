@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import type { FormEvent } from 'react';
 import SurveyorScene from '../../components/SurveyorScene';
 import { validateAccountForm } from '../../lib/accountFlow';
+import { focusAndReveal } from '../../lib/reveal';
 import type { AccountForm, AccountPage } from '../../lib/accountFlow';
 import './access.css';
 
@@ -61,13 +62,13 @@ export default function ActorLogin({
     const next = validateAccountForm(page, data);
     setErrors(next);
     if (Object.keys(next).length) {
-      requestAnimationFrame(() => summary.current?.focus());
+      requestAnimationFrame(() => focusAndReveal(summary.current));
       return;
     }
     if (page === 'login' || page === 'register') {
       const error = page === 'login' ? onSignIn(data) : onRegister(data);
       setAccountError(error);
-      if (error) requestAnimationFrame(() => summary.current?.focus());
+      if (error) requestAnimationFrame(() => focusAndReveal(summary.current));
       return;
     }
     setData((previous) => ({
@@ -77,7 +78,7 @@ export default function ActorLogin({
       reference: '',
     }));
     setPreview(true);
-    requestAnimationFrame(() => result.current?.focus());
+    requestAnimationFrame(() => focusAndReveal(result.current));
   }
   function field(
     key: keyof Omit<AccountForm, 'consent'>,
@@ -252,7 +253,10 @@ export default function ActorLogin({
                         href={`#account-${key}`}
                         onClick={(e) => {
                           e.preventDefault();
-                          document.getElementById(`account-${key}`)?.focus();
+                          focusAndReveal(
+                            document.getElementById(`account-${key}`),
+                            'center',
+                          );
                         }}
                       >
                         {value}

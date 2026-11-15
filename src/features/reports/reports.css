@@ -607,18 +607,6 @@
 .role-workspace .report-detail .ws-badge {
   font-size: 12px;
 }
-.role-workspace .status-complete {
-  background: var(--surface);
-  color: var(--muted);
-}
-.role-workspace .status-attention {
-  background: var(--surface);
-  color: var(--muted);
-}
-.role-workspace .status-progress {
-  background: var(--surface);
-  color: var(--muted);
-}
 .role-assignment-form,
 .role-assignment-note {
   border-radius: var(--radius-sm);

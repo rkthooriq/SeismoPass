@@ -143,9 +143,15 @@ export default function App() {
   }
   function importSurveyors(inputs: NewSurveyorInput[]) {
     if (!account) return { error: 'Masuk sebagai admin terlebih dahulu.' };
-    const result = createSurveyorBatch(account, inputs, workflow.accounts, () => ({
-      id: demoId(), password: generateTemporaryPassword(),
-    }));
+    const result = createSurveyorBatch(
+      account,
+      inputs,
+      workflow.accounts,
+      () => ({
+        id: demoId(),
+        password: generateTemporaryPassword(),
+      }),
+    );
     if ('error' in result) return result;
     updateWorkflow(result.accounts, workflow.reports);
     return { issued: result.issued };
@@ -217,8 +223,11 @@ export default function App() {
     const change = () => {
       const nextHash = window.location.hash;
       setHash(nextHash);
-      // Section anchors keep native scrolling; only app routes start at the top.
-      if (!nextHash || nextHash.startsWith('#/')) window.scrollTo(0, 0);
+      // Section anchors keep native (smooth) scrolling; app routes are a new
+      // view, so they start at the top at once instead of gliding up from the
+      // old position.
+      if (!nextHash || nextHash.startsWith('#/'))
+        window.scrollTo({ top: 0, behavior: 'instant' });
     };
     window.addEventListener('hashchange', change);
     return () => window.removeEventListener('hashchange', change);

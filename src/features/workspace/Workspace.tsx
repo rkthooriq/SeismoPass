@@ -7,6 +7,7 @@ import type { Building } from '../../types/building';
 import { validateBuilding } from '../../lib/buildingValidation';
 import { exportBuildingDemo } from '../../lib/buildingSession';
 import { parseWorkspaceRoute } from '../../lib/workspaceRoute';
+import { focusAndReveal } from '../../lib/reveal';
 import './workspace.css';
 import {
   canOpenPage,
@@ -924,7 +925,7 @@ function BuildingForm({
     const next = validateBuilding(data, consent, draft);
     setErrors(next);
     if (Object.keys(next).length) {
-      requestAnimationFrame(() => errorsRef.current?.focus());
+      requestAnimationFrame(() => focusAndReveal(errorsRef.current));
       return;
     }
     onSave({
@@ -956,7 +957,10 @@ function BuildingForm({
                     href={`#field-${key}`}
                     onClick={(e) => {
                       e.preventDefault();
-                      document.getElementById(`field-${key}`)?.focus();
+                      focusAndReveal(
+                        document.getElementById(`field-${key}`),
+                        'center',
+                      );
                     }}
                   >
                     {key === 'consent'

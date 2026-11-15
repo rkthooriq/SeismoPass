@@ -169,6 +169,9 @@ export function updateOwnerProgress(
   let description = '';
   let appointment = report.appointment;
   if (action.type === 'location') {
+    // The pin is part of the report: it changes only while the owner may
+    // still edit the report, never after sending.
+    if (!['Draf', 'Perlu dilengkapi'].includes(report.status)) return null;
     if (action.point !== undefined && !validPoint(action.point)) return null;
     progress.point = action.point;
     description = action.point

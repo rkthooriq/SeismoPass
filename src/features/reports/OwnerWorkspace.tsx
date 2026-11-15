@@ -8,6 +8,7 @@ import {
 import type { DemoAccount, Report } from '../../lib/reportDemo';
 import type { OwnerAction } from '../../lib/ownerProgress';
 import { timeSlots } from '../../lib/ownerProgress';
+import { statusToneClass } from '../../lib/statusTone';
 import {
   ownerDetailFocus,
   ownerStageLabel,
@@ -160,6 +161,9 @@ function Schedule({
   const available = report.ownerProgress?.availability;
   // Availability is asked only after the admin accepts the report.
   const canRequest = ['Siap disurvei', 'Ditugaskan'].includes(report.status);
+  // Saving a new time after agreeing reopens the agreed schedule, so the form
+  // says so instead of looking like a harmless preference edit.
+  const confirmed = appointment?.response === 'confirmed';
   const surveyor = accounts.find((person) => person.id === report.assignee);
   const id = useId();
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -172,9 +176,11 @@ function Schedule({
       note: String(form.get('note')),
     });
     setMessage(
-      ok
-        ? 'Waktu tersedia dicatat. Jadwal belum disepakati sampai ada usulan dari admin.'
-        : 'Pilih tanggal hari ini atau setelahnya dan lengkapi waktu.',
+      !ok
+        ? 'Pilih tanggal hari ini atau setelahnya dan lengkapi waktu.'
+        : confirmed
+          ? 'Permintaan jadwal lain dicatat. Admin akan mengusulkan jadwal baru.'
+          : 'Waktu tersedia dicatat. Jadwal belum disepakati sampai ada usulan dari admin.',
     );
   }
   return (
@@ -193,8 +199,8 @@ function Schedule({
         </div>
         {report.visitDate ? (
           <EmptyNotice title="Kunjungan sudah dicatat">
-            Tanggal {displayDate(report.visitDate)}. Catatan kunjungan dapat
-            dibaca pada tab Perjalanan.
+            Tanggal {displayDate(report.visitDate)}. Catatan kunjungan dari
+            pesurvei ada di bagian atas halaman ini.
           </EmptyNotice>
         ) : appointment ? (
           <div className="owner-appointment">
@@ -264,8 +270,18 @@ function Schedule({
         {canRequest && (
           <form className="owner-form" onSubmit={submit}>
             <h3>
-              {available ? 'Ubah waktu yang tersedia' : 'Kapan kamu tersedia?'}
+              {confirmed
+                ? 'Perlu waktu lain?'
+                : available
+                  ? 'Ubah waktu yang tersedia'
+                  : 'Kapan kamu tersedia?'}
             </h3>
+            {confirmed && (
+              <p>
+                Jadwal di atas sudah kamu setujui. Mengirim waktu baru
+                membatalkan persetujuan itu, lalu admin mengusulkan jadwal baru.
+              </p>
+            )}
             <div className="owner-form-grid">
               <label htmlFor={`${id}-date`}>
                 Tanggal
@@ -306,7 +322,9 @@ function Schedule({
                 placeholder="Contoh: pengelola ada di lokasi setelah pukul 09.00."
               />
             </label>
-            <button className="ws-primary">Simpan waktu tersedia</button>
+            <button className={confirmed ? 'ws-secondary' : 'ws-primary'}>
+              {confirmed ? 'Minta jadwal lain' : 'Simpan waktu tersedia'}
+            </button>
           </form>
         )}
         {available && (
@@ -741,7 +759,11 @@ function Detail({
             </p>
           )}
         </div>
-        <span className="owner-chip">{ownerStageLabel(report.status)}</span>
+        <span
+          className={`owner-chip ${statusToneClass(report.status, 'owner')}`}
+        >
+          {ownerStageLabel(report.status)}
+        </span>
       </section>
       <div className="owner-next-banner">
         <span aria-hidden="true">↳</span>
@@ -950,7 +972,9 @@ export default function OwnerWorkspace({
                     <span className="owner-house-icon" aria-hidden="true">
                       ⌂
                     </span>
-                    <span className="owner-chip">
+                    <span
+                      className={`owner-chip ${statusToneClass(item.status, 'owner')}`}
+                    >
                       {ownerStageLabel(item.status)}
                     </span>
                   </div>

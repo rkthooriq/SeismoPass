@@ -10,6 +10,7 @@ import {
   rvsHandbook,
 } from '../../lib/rvs';
 import type { RvsRecord, RvsInputs } from '../../lib/rvs';
+import { focusAndReveal } from '../../lib/reveal';
 import RvsResult from './RvsResult';
 import QrPanel from './QrPanel';
 
@@ -96,7 +97,7 @@ export default function RvsForm({
         ? 'Input simulasi disimpan pada laporan. Belum divalidasi ahli.'
         : 'Simulasi dihitung. Catatan di halaman latihan ini tidak disimpan setelah keluar atau refresh.',
     );
-    requestAnimationFrame(() => resultRef.current?.focus());
+    requestAnimationFrame(() => focusAndReveal(resultRef.current));
   }
   function select(
     key: keyof RvsInputs,

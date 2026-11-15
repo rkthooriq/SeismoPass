@@ -10,6 +10,7 @@ import BuildingLocation from './BuildingLocation';
 import BuildingPhotos from './BuildingPhotos';
 import type { BuildingPoint } from '../../lib/ownerProgress';
 import { clearBuildingPhotos } from '../../lib/buildingPhotos';
+import { focusAndReveal } from '../../lib/reveal';
 import './owner-workspace.css';
 
 function fieldStep(key: string): number {
@@ -110,13 +111,13 @@ export default function ReportRegistrationForm({
     );
     setErrors(current);
     if (Object.keys(current).length) {
-      requestAnimationFrame(() => summary.current?.focus());
+      requestAnimationFrame(() => focusAndReveal(summary.current));
       return;
     }
     setReview(report);
     setStep(Math.min(step + 1, 2));
     requestAnimationFrame(() =>
-      document.getElementById('owner-form-heading')?.focus(),
+      focusAndReveal(document.getElementById('owner-form-heading')),
     );
   }
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -135,7 +136,7 @@ export default function ReportRegistrationForm({
     setErrors(next);
     if (Object.keys(next).length) {
       setStep(Math.min(...Object.keys(next).map(fieldStep)));
-      requestAnimationFrame(() => summary.current?.focus());
+      requestAnimationFrame(() => focusAndReveal(summary.current));
       return;
     }
     saved.current = true;
@@ -210,7 +211,10 @@ export default function ReportRegistrationForm({
                   href={`#report-${key}`}
                   onClick={(event) => {
                     event.preventDefault();
-                    document.getElementById(`report-${key}`)?.focus();
+                    focusAndReveal(
+                      document.getElementById(`report-${key}`),
+                      'center',
+                    );
                   }}
                 >
                   {error}

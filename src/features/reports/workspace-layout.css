@@ -1,13 +1,22 @@
 /* Shared header, compact report desk, and liquid navigation for short role menus.
    Loaded after the shared glass layer; every rule stays inside this workspace. */
+/* The sticky header is a cream glass: at the top it blends into the canvas;
+   once content scrolls under it, the text stays readable instead of
+   overlapping. Script-scrolled headings stop below it. */
+.workspace {
+  --workspace-header-offset: 100px;
+}
 .workspace .workspace-header {
   position: sticky;
   top: 0;
   z-index: 20;
   border: 0;
-  background: transparent;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  background: color-mix(in srgb, var(--canvas) 84%, transparent);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+}
+.workspace :is([tabindex='-1'], #edit-report) {
+  scroll-margin-top: var(--workspace-header-offset);
 }
 .workspace .workspace-header-inner,
 .topnav-workspace .topnav-main {
@@ -162,6 +171,9 @@
    narrow screens (same toolbar pattern as the owner list). */
 .topnav-workspace .role-report-list .ws-toolbar {
   display: flex;
+  /* Stay a wrapping row on phones: the generic phone toolbar is a column,
+     which would turn the search's 240px basis into its height. */
+  flex-direction: row;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-3);
@@ -242,10 +254,12 @@
   }
 }
 
-/* Short role menus can scroll inside their own row on narrow screens. */
+/* Short role menus can scroll inside their own row on narrow screens. The
+   14px padding gives the pill's shadow room; the negative margin cancels it,
+   so the box may grow by both margins and still end on the content edge. */
 .topnav-workspace .workspace-nav-scroll {
   min-width: 0;
-  max-width: 100%;
+  max-width: calc(100% + 28px);
   padding: 14px;
   margin: -14px;
   overflow-x: auto;
@@ -255,6 +269,17 @@
 }
 .topnav-workspace .workspace-liquid-nav {
   width: max-content;
+}
+/* On phones the menu still swipes and the active item is scrolled into view;
+   the pill running off the edge is the cue, so the bar would only read as a
+   stray line under it. */
+@media (max-width: 720px) {
+  .topnav-workspace .workspace-nav-scroll {
+    scrollbar-width: none;
+  }
+  .topnav-workspace .workspace-nav-scroll::-webkit-scrollbar {
+    display: none;
+  }
 }
 .topnav-workspace .workspace-liquid-nav .nimbus-item {
   flex: none;

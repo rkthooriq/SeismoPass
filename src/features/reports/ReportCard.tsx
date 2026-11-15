@@ -6,6 +6,7 @@ import ReportPassport from './ReportPassport';
 import RvsForm from '../rvs/RvsForm';
 import { timeSlots } from '../../lib/ownerProgress';
 import { reviewNoteLabel } from '../../lib/ownerNextStep';
+import { statusToneClass } from '../../lib/statusTone';
 export default function ReportCard({
   report,
   account,
@@ -47,9 +48,7 @@ export default function ReportCard({
           <strong>{report.title}</strong>
           <small>{report.location || 'Lokasi belum diisi'}</small>
         </span>
-        <span
-          className={`ws-badge status-${report.status === 'Selesai' ? 'complete' : report.status === 'Perlu revisi' || report.status === 'Perlu dilengkapi' ? 'attention' : 'progress'}`}
-        >
+        <span className={`ws-badge ${statusToneClass(report.status)}`}>
           {report.status}
         </span>
         <span className="report-summary-arrow" aria-hidden="true">
