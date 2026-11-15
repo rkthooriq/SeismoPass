@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Analytics } from '@vercel/analytics/react';
 import App from './App';
 import RouteLoader from './components/RouteLoader';
 import './styles.css';
@@ -16,6 +17,8 @@ createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <App />
     <RouteLoader />
+    {/* Counts visits (no cookies, no personal data); active only on Vercel. */}
+    <Analytics />
   </StrictMode>,
 );
 
