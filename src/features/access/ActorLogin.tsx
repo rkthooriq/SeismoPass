@@ -3,8 +3,22 @@ import type { FormEvent } from 'react';
 import SurveyorScene from '../../components/SurveyorScene';
 import { validateAccountForm } from '../../lib/accountFlow';
 import { focusAndReveal } from '../../lib/reveal';
+import { demoAccounts, demoPassword } from '../../lib/reportDemo';
 import type { AccountForm, AccountPage } from '../../lib/accountFlow';
 import './access.css';
+
+// What each built-in account is for, in the words a first-time visitor needs.
+const sampleRoles: Record<string, { label: string; text: string }> = {
+  owner: { label: 'Pelapor', text: 'Catat bangunan dan ikuti prosesnya' },
+  admin: {
+    label: 'Admin',
+    text: 'Periksa laporan dan tugaskan pesurvei',
+  },
+  surveyor: {
+    label: 'Pesurvei',
+    text: 'Kerjakan penugasan dan catat kunjungan',
+  },
+};
 
 const copy: Record<
   AccountPage,
@@ -57,6 +71,15 @@ export default function ActorLogin({
   const summary = useRef<HTMLDivElement>(null);
   const result = useRef<HTMLDivElement>(null);
   const details = copy[page];
+  // One tap on a sample account signs in through the same path as the form.
+  function signInAs(email: string) {
+    const next = { ...empty, email, password: demoPassword };
+    setData(next);
+    setErrors({});
+    const error = onSignIn(next);
+    setAccountError(error);
+    if (error) requestAnimationFrame(() => focusAndReveal(summary.current));
+  }
   function submit(event: FormEvent) {
     event.preventDefault();
     const next = validateAccountForm(page, data);
@@ -322,6 +345,36 @@ export default function ActorLogin({
             </a>
           ))}
         </nav>
+        {page === 'login' && (
+          <section className="account-samples" aria-labelledby="samples-title">
+            <h2 id="samples-title">Coba dengan akun contoh</h2>
+            <p>
+              Pilih peran untuk langsung masuk. Kata sandi semua akun contoh:{' '}
+              <strong>{demoPassword}</strong>
+            </p>
+            <ul>
+              {demoAccounts.map((account) => (
+                <li key={account.id}>
+                  <button type="button" onClick={() => signInAs(account.email)}>
+                    <span>
+                      <strong>
+                        Masuk sebagai {sampleRoles[account.role].label}
+                      </strong>
+                      <small>{sampleRoles[account.role].text}</small>
+                      <small>{account.email}</small>
+                    </span>
+                    <span aria-hidden="true">→</span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+            <p className="account-samples-note">
+              Pakai satu tab browser: data tersimpan di tab ini saja. Untuk
+              melihat satu laporan berpindah peran, pilih Keluar lalu masuk
+              sebagai peran berikutnya.
+            </p>
+          </section>
+        )}
       </section>
     </main>
   );
