@@ -49,7 +49,7 @@
   min-height: 84px;
   resize: vertical;
   border: 1px solid var(--ws-line);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   font: inherit;
   padding: var(--padding-control);
 }
@@ -110,7 +110,7 @@
 .report-passport {
   margin: 12px 0;
   border: 1px solid var(--ws-line);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--surface);
   padding: var(--space-panel);
 }
@@ -141,7 +141,7 @@
   gap: 12px;
   background: var(--paper);
   border: 1px solid var(--ws-line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: var(--space-panel);
 }
 .report-step-number {
@@ -168,7 +168,7 @@
   margin-top: 16px;
   background: var(--paper);
   border: 1px dashed var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: var(--space-panel);
 }
 .pilot-phases {
@@ -180,7 +180,7 @@
 .pilot-indicators article {
   min-width: 0;
   border: 1px solid var(--ws-line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: var(--space-panel);
 }
 .pilot-phases h3,
@@ -252,7 +252,7 @@
   gap: 11px;
   background: var(--surface);
   border: 1px solid var(--ws-line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: var(--padding-control);
 }
 .role-context strong,
@@ -272,7 +272,7 @@
   place-items: center;
   width: 32px;
   height: 32px;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--muted);
   font-size: 19px;
@@ -293,7 +293,7 @@
   display: flex;
   gap: 11px;
   align-items: center;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   color: var(--muted);
   font-size: 14px;
   font-weight: 500;
@@ -318,7 +318,7 @@
 .role-sidebar nav a small {
   margin-left: auto;
   padding: 1px 7px;
-  border-radius: 5px;
+  border-radius: var(--radius-xs);
   background: var(--surface);
   color: var(--muted);
   font-size: 12px;
@@ -454,7 +454,7 @@
   flex-direction: column;
   background: var(--paper);
   border: 1px solid var(--ws-line);
-  border-radius: 13px;
+  border-radius: var(--radius-md);
   min-height: 149px;
   padding: var(--space-panel);
 }
@@ -490,7 +490,7 @@
   gap: 22px;
 }
 .role-workspace .ws-panel {
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   margin: 0 0 23px;
   padding: var(--space-panel);
 }
@@ -512,7 +512,7 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 17px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--surface);
   padding: var(--space-panel);
 }
@@ -568,7 +568,7 @@
   flex: 0 0 auto;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   font-size: 23px;
   color: var(--muted);
 }
@@ -621,7 +621,7 @@
 }
 .role-assignment-form,
 .role-assignment-note {
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--surface);
   border: 1px solid var(--line);
   padding: var(--space-panel);
@@ -675,7 +675,7 @@
   min-width: 0;
   border: 1px solid var(--ws-line);
   background: var(--paper);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   padding: var(--space-panel);
 }
 .role-flow-grid article > h3 {
@@ -700,7 +700,7 @@
 .role-flow-grid li > span {
   flex: 0 0 26px;
   height: 26px;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--action);
   font-size: 12px;
@@ -793,7 +793,7 @@
   margin: 20px 0;
   padding: 12px 14px;
   list-style: none;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--surface);
   font-size: 13px;
 }
@@ -882,7 +882,7 @@
     justify-content: space-between;
     background: var(--surface);
     color: var(--muted);
-    border-radius: 8px;
+    border-radius: var(--radius-sm);
     font: inherit;
     padding: var(--padding-control);
   }
@@ -943,36 +943,6 @@
     margin-left: 14px;
   }
 }
-.owner-steps ul {
-  display: grid;
-  gap: 12px;
-  margin: 12px 0 0;
-  padding: 0;
-  list-style: none;
-}
-.owner-steps li {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding-top: 12px;
-  border-top: 1px solid var(--ws-line);
-}
-.owner-steps li > div {
-  display: grid;
-  gap: 2px;
-  min-width: 0;
-}
-.owner-steps small {
-  color: var(--ws-muted);
-}
-.owner-step-title {
-  font-size: 14px;
-}
-.owner-turn.is-you {
-  background: var(--accent);
-  color: var(--ink);
-}
-
 /* Visit address block in the report form, and the read-only block on report cards. */
 .report-visit-fields {
   display: grid;
@@ -980,7 +950,7 @@
   margin: 18px 0;
   padding: 16px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
 }
 .report-visit-fields legend {
   padding: 0 6px;
@@ -997,7 +967,7 @@
   gap: 8px;
   margin: 12px 0;
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--surface);
   font-size: 14px;
 }
@@ -1041,7 +1011,7 @@
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   color: var(--muted);
   font-size: 14px;
   font-weight: 600;
@@ -1057,7 +1027,7 @@
 .owner-nav small {
   min-width: 20px;
   padding: 1px 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--paper);
   color: var(--ink);
   font-size: 12px;

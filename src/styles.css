@@ -125,7 +125,7 @@ p {
   justify-content: center;
   gap: 29px;
   border: 1px solid var(--ink);
-  border-radius: 100px;
+  border-radius: var(--radius-pill);
   background: var(--ink);
   color: #fff;
   padding: 14px 24px;
@@ -163,7 +163,7 @@ p {
   font-size: 11px;
   padding: 6px 12px;
   border: 1px solid #e0e5d5;
-  border-radius: 100px;
+  border-radius: var(--radius-pill);
   background: #f0f3e8;
 }
 .announcement > span:last-child {
@@ -226,7 +226,7 @@ h1 > span {
   margin-top: 53px;
   background: #e9eddf;
   border: 1px solid #dbe1cf;
-  border-radius: 22px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   text-align: left;
   scroll-margin-top: 20px;
@@ -251,7 +251,7 @@ h1 > span {
   gap: 4px;
   padding: 3px;
   border: 1px solid #dce2d1;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   background: #e7ebde;
 }
 .view-switch button {
@@ -259,7 +259,7 @@ h1 > span {
   background: transparent;
   padding: 6px 14px;
   font-size: 11px;
-  border-radius: 5px;
+  border-radius: var(--radius-xs);
   white-space: nowrap;
 }
 .view-switch button[aria-pressed='true'] {
@@ -272,7 +272,7 @@ h1 > span {
   color: #6b7862;
   border: 1px solid #d5ddc9;
   padding: 2px 7px;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 }
 .scene-content {
   display: grid;
@@ -337,7 +337,7 @@ h1 > span {
   width: 100%;
   max-width: 700px;
   height: auto;
-  border-radius: 20px;
+  border-radius: var(--radius-xl);
   transition: transform 0.7s ease;
 }
 .scene-art:hover .landscape-image {
@@ -359,7 +359,7 @@ h1 > span {
   gap: 12px;
   background: #fafbf1e8;
   border: 1px solid #fff;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: 13px 18px;
   box-shadow: 0 8px 30px #34462b0a;
 }
@@ -369,7 +369,7 @@ h1 > span {
   background: #e5edd5;
   display: grid;
   place-items: center;
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   font-size: 22px;
 }
 .floating-note strong {
@@ -430,7 +430,7 @@ h1 > span {
 .profile-card {
   background: #fbfcf7;
   border: 1px solid #d5ddc9;
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   padding: 24px;
   box-shadow: 0 12px 40px #293b3208;
 }
@@ -445,7 +445,7 @@ h1 > span {
 .profile-status {
   background: #e9eddf;
   padding: 5px 10px;
-  border-radius: 50px;
+  border-radius: var(--radius-pill);
   font-size: 10px;
 }
 .profile-card dl {
@@ -524,7 +524,7 @@ h1 > span {
 }
 .steps li {
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   padding: 25px;
   background: #f4f5ed;
   transition: background 0.2s;
@@ -564,7 +564,7 @@ h1 > span {
 .safety {
   background: #293e33;
   color: #edf2e4;
-  border-radius: 20px;
+  border-radius: var(--radius-xl);
   display: grid;
   grid-template-columns: 45px 1fr 130px;
   gap: 30px;
@@ -754,7 +754,7 @@ h1 > span {
     padding: 8px 14px;
     background: transparent;
     border: 1px solid #d5ddc9;
-    border-radius: 30px;
+    border-radius: var(--radius-pill);
     font-size: 12px;
   }
   .menu-toggle span {
@@ -817,7 +817,7 @@ h1 > span {
   }
   .showcase {
     margin-top: 35px;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
   }
   .showcase-toolbar {
     flex-wrap: wrap;
@@ -967,7 +967,7 @@ h1 > span {
     grid-template-columns: 1fr;
     gap: 18px;
     padding: 28px 25px;
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
   }
   .safety h2 {
     font-size: 34px;

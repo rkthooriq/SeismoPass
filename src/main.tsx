@@ -10,6 +10,7 @@ import './features/reports/workspace-layout.css';
 import './features/profile/profile.css';
 import './features/onboarding/directory.css';
 import './features/reports/workspace-rounded.css';
+import './geometry.css';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" fill="none">
+  <title>Ilustrasi tampak samping bangunan contoh</title>
+  <path fill="#F8F0E4" d="M0 0h640v400H0z"/>
+  <path d="M0 315c104-26 206 8 322-14s218-16 318 12v87H0Z" fill="#E5D1B4"/>
+  <path d="M108 328h422" stroke="#B99A79" stroke-width="4" stroke-linecap="round"/>
+  <path d="M150 197h340v129H150Z" fill="#EBDECA"/>
+  <path d="m133 204 36-91h303l35 91Z" fill="#8A5A3B"/>
+  <path d="M169 113h303l35 91" stroke="#B5845F" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M183 233h58v49h-58zm109 0h58v49h-58zm109 0h58v49h-58Z" fill="#B6D0D5" stroke="#FFF8EC" stroke-width="5"/>
+  <path d="M212 233v49m109-49v49m109-49v49" stroke="#FFFDF8" stroke-width="4"/>
+  <path d="M150 315h340v11H150Z" fill="#CDB698"/>
+  <path d="M548 320v-69" stroke="#8A5A3B" stroke-width="7"/>
+  <path d="m548 187-30 76h60Z" fill="#A39C76"/>
+</svg>

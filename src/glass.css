@@ -88,7 +88,7 @@
 }
 /* Text links get a rounded halo instead of a square one. */
 :where(a):focus-visible {
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
 }
 /* Fields: the border turns brown and a soft fill ring appears. */
 :where(input, select, textarea):focus,
@@ -159,6 +159,21 @@
   color: var(--ink);
 }
 
+/* An opaque field keeps the same warm white over every part of the landscape.
+   Glass belongs to the surrounding cards; typing surfaces stay predictable. */
+.workspace
+  :is(
+    input:not([type='checkbox']):not([type='radio']):not([type='file']):not(
+        [type='range']
+      ):not(:where(.ws-search input)),
+    select,
+    textarea
+  ) {
+  background: #fffdf9;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 .sp-landing .sp-button-solid {
   background: linear-gradient(
     155deg,
@@ -219,7 +234,7 @@
 }
 
 .actor-login .actor-entry {
-  border-radius: 24px;
+  border-radius: var(--radius-xl);
 }
 .workspace .ws-primary,
 .actor-login .actor-enter {

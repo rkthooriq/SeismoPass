@@ -3,6 +3,8 @@ import test from 'node:test';
 import {
   ownerStep,
   ownerSteps,
+  ownerStatusFilter,
+  ownerStatusFilters,
   reviewNoteLabel,
   sortByOwnerTurn,
 } from '../src/lib/ownerNextStep.ts';
@@ -22,6 +24,27 @@ const statuses = [
   'Perlu revisi',
   'Selesai',
 ];
+
+test('owner filters group stages by what the owner has to do', () => {
+  const groups = Object.fromEntries(
+    ownerStatusFilters.map((filter) => [
+      filter,
+      statuses.filter((status) => ownerStatusFilter(status) === filter),
+    ]),
+  );
+  assert.deepEqual(groups, {
+    'Perlu tindakanmu': ['Draf', 'Perlu dilengkapi'],
+    'Sedang diproses': [
+      'Dikirim',
+      'Siap disurvei',
+      'Ditugaskan',
+      'Dalam survei',
+      'Ditinjau',
+      'Perlu revisi',
+    ],
+    Selesai: ['Selesai'],
+  });
+});
 
 test('every report status has an owner-facing step', () => {
   for (const status of statuses) {
@@ -84,4 +107,28 @@ test('admin notes name who must act, so reporters are not asked to fix visit rec
   assert.match(revision.title, /pesurvei/);
   assert.match(revision.hint ?? '', /tidak perlu mengubah/);
   assert.equal(ownerStep('Perlu revisi').turn, 'waiting');
+});
+
+test('detail page leads with what the stage needs', async () => {
+  const { ownerDetailFocus } = await import('../src/lib/ownerNextStep.ts');
+  for (const status of [
+    'Draf',
+    'Dikirim',
+    'Perlu dilengkapi',
+    'Ditinjau',
+    'Perlu revisi',
+  ])
+    assert.equal(ownerDetailFocus(status), 'report', status);
+  for (const status of ['Siap disurvei', 'Ditugaskan', 'Dalam survei'])
+    assert.equal(ownerDetailFocus(status), 'schedule', status);
+  assert.equal(ownerDetailFocus('Selesai'), 'closed');
+});
+
+test('owner status chip names the real stage, filter keeps broad groups', async () => {
+  const { ownerStageLabel, ownerStatusFilter } = await import(
+    '../src/lib/ownerNextStep.ts'
+  );
+  assert.equal(ownerStageLabel('Ditugaskan'), 'Pesurvei ditugaskan');
+  assert.equal(ownerStatusFilter('Ditugaskan'), 'Sedang diproses');
+  for (const status of statuses) assert.ok(ownerStageLabel(status));
 });

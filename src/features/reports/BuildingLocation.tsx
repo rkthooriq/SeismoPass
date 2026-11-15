@@ -186,9 +186,10 @@ export default function BuildingLocation({
         </p>
       )}
       <p className="owner-footnote">
-        Peta awal menunjukkan area Bandung Raya, bukan lokasi bangunanmu. Titik
-        baru dicatat setelah kamu memilihnya. Lokasi presisi tidak ditampilkan
-        pada QR atau peta publik.
+        {value
+          ? 'Pin menunjukkan titik yang dicatat pada bangunan. Kamu dapat memperbaruinya melalui peta atau koordinat.'
+          : 'Peta awal menunjukkan area Bandung Raya, bukan lokasi bangunanmu. Titik baru dicatat setelah kamu memilihnya.'}{' '}
+        Lokasi presisi tidak ditampilkan pada QR atau peta publik.
       </p>
     </section>
   );

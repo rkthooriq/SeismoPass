@@ -67,7 +67,7 @@
   letter-spacing: 1.2px;
   border: 1px solid var(--line);
   background: var(--surface);
-  border-radius: 5px;
+  border-radius: var(--radius-xs);
   padding: 6px 9px;
   display: inline-block;
 }
@@ -97,7 +97,7 @@
 .actor-role-picker label {
   position: relative;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--paper);
   display: flex;
   align-items: flex-start;
@@ -157,7 +157,7 @@
   border: 0;
   background: var(--ink);
   color: var(--paper);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   width: 100%;
   display: flex;
   justify-content: space-between;
@@ -204,7 +204,7 @@
 .actor-session-buttons button {
   font-size: 10px;
   white-space: nowrap;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   border: 1px solid var(--line);
   background: var(--paper);
   padding: var(--padding-control);
@@ -316,7 +316,7 @@
   font: inherit;
   font-weight: 400;
   border: 1px solid var(--line);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   background: var(--paper);
   color: var(--ink);
   width: 100%;
@@ -351,7 +351,7 @@
 .account-explore {
   margin-top: 25px;
   background: var(--surface);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   display: flex;
   flex-direction: column;
   gap: 5px;
@@ -374,7 +374,7 @@
 .account-result,
 .account-info {
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--surface);
   margin-bottom: 20px;
   padding: var(--space-panel);
@@ -398,7 +398,7 @@
   background: var(--surface);
   border: 1px solid var(--line);
   color: var(--muted);
-  border-radius: 9px;
+  border-radius: var(--radius-sm);
   font-size: 12px;
   margin-bottom: 20px;
   padding: var(--space-panel);
@@ -521,7 +521,7 @@ main.actor-login {
   min-height: 42px;
   background: #fff;
   border: 1px solid var(--lg-line);
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   box-shadow: 0 1px 2px rgb(74 47 33 / 0.06);
   color: var(--lg-brown);
   font-size: 16px;
@@ -544,7 +544,7 @@ main.actor-login {
   border: 0;
   background: transparent;
   color: var(--lg-brown-soft);
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
   cursor: pointer;
 }
 .actor-login .account-eye:hover {
@@ -577,7 +577,7 @@ main.actor-login {
   min-height: 42px;
   margin: 0;
   border: 0;
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
   background: var(--lg-action);
   color: var(--on-action);
   font-size: 16px;
@@ -608,7 +608,7 @@ main.actor-login {
   margin-bottom: 20px;
   background: #faf6f3;
   border: 1px solid var(--lg-line);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   color: var(--lg-brown);
 }
 .actor-login .account-result h2 {

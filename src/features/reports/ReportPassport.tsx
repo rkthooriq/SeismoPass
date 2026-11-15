@@ -6,7 +6,16 @@ import QrPanel from '../rvs/QrPanel';
 import { observationFields, hazardFields } from '../../lib/rvs';
 import '../rvs/rvs.css';
 
-export default function ReportPassport({ report }: { report: Report }) {
+// limitsOnly renders only the saved RVS simulation (with its QR preview),
+// for the owner's closed report: that page lists the status and the RVS
+// limits itself, so the passport's heading, facts and journey are left out.
+export default function ReportPassport({
+  report,
+  limitsOnly = false,
+}: {
+  report: Report;
+  limitsOnly?: boolean;
+}) {
   const [showPublicPreview, setShowPublicPreview] = useState(false);
   const steps = [
     [
@@ -42,6 +51,48 @@ export default function ReportPassport({ report }: { report: Report }) {
       'Dukungan mengikuti program dan kerja sama yang tersedia. Pelaksanaan perkuatan perlu diverifikasi dan dicatat.',
     ],
   ];
+  const saved = report.rvs && (
+    <details className="rvs-saved">
+      <summary>Lihat input dan hasil simulasi tersimpan</summary>
+      <p>Dicatat oleh {report.rvs.recordedBy}. Belum divalidasi ahli.</p>
+      <RvsResult inputs={report.rvs.inputs} />
+      <dl className="report-facts">
+        <div>
+          <dt>Tipe FEMA</dt>
+          <dd>{report.rvs.inputs.buildingType}</dd>
+        </div>
+        <div>
+          <dt>Tanah</dt>
+          <dd>{report.rvs.inputs.soil}</dd>
+        </div>
+      </dl>
+      <details>
+        <summary>Data survei dan catatan yang disimpan</summary>
+        <dl className="report-facts">
+          {hazardFields.map(([key, label]) => (
+            <div key={key}>
+              <dt>{label}</dt>
+              <dd>
+                {report.rvs!.inputs[key] === 'DNK'
+                  ? 'Belum diketahui'
+                  : report.rvs!.inputs[key] === 'yes'
+                    ? 'Ya'
+                    : 'Tidak'}
+              </dd>
+            </div>
+          ))}
+          {observationFields.map(([key, label]) => (
+            <div key={key}>
+              <dt>{label}</dt>
+              <dd>{report.rvs!.observations[key] || 'Belum diisi'}</dd>
+            </div>
+          ))}
+        </dl>
+      </details>
+      <QrPanel inputs={report.rvs.inputs} />
+    </details>
+  );
+  if (limitsOnly) return saved || null;
   return (
     <section
       className="report-passport"
@@ -67,47 +118,7 @@ export default function ReportPassport({ report }: { report: Report }) {
           </div>
         ))}
       </dl>
-      {report.rvs && (
-        <details className="rvs-saved">
-          <summary>Lihat input dan hasil simulasi tersimpan</summary>
-          <p>Dicatat oleh {report.rvs.recordedBy}. Belum divalidasi ahli.</p>
-          <RvsResult inputs={report.rvs.inputs} />
-          <dl className="report-facts">
-            <div>
-              <dt>Tipe FEMA</dt>
-              <dd>{report.rvs.inputs.buildingType}</dd>
-            </div>
-            <div>
-              <dt>Tanah</dt>
-              <dd>{report.rvs.inputs.soil}</dd>
-            </div>
-          </dl>
-          <details>
-            <summary>Data survei dan catatan yang disimpan</summary>
-            <dl className="report-facts">
-              {hazardFields.map(([key, label]) => (
-                <div key={key}>
-                  <dt>{label}</dt>
-                  <dd>
-                    {report.rvs!.inputs[key] === 'DNK'
-                      ? 'Belum diketahui'
-                      : report.rvs!.inputs[key] === 'yes'
-                        ? 'Ya'
-                        : 'Tidak'}
-                  </dd>
-                </div>
-              ))}
-              {observationFields.map(([key, label]) => (
-                <div key={key}>
-                  <dt>{label}</dt>
-                  <dd>{report.rvs!.observations[key] || 'Belum diisi'}</dd>
-                </div>
-              ))}
-            </dl>
-          </details>
-          <QrPanel inputs={report.rvs.inputs} />
-        </details>
-      )}
+      {saved}
       <ol className="report-journey">
         {steps.map(([title, status, description], index) => (
           <li key={title}>

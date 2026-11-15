@@ -9,7 +9,9 @@ import {
 } from '../../lib/reportDemo';
 import type { DemoAccount, Report, ReportAction } from '../../lib/reportDemo';
 import {
+  reportsOnPage,
   resolveWorkflowPage,
+  statusFilterOptions,
   workflowMenus,
 } from '../../lib/workflowNavigation';
 import type { WorkflowPage } from '../../lib/workflowNavigation';
@@ -21,6 +23,7 @@ import type { NewSurveyorInput } from '../../lib/surveyorAccess';
 import SurveyorManagement from '../onboarding/SurveyorManagement';
 import WorkspaceShell from './WorkspaceShell';
 import ReportCard from './ReportCard';
+import FilterMenu from '../../components/FilterMenu';
 import ReportRegistrationForm from './ReportRegistrationForm';
 import PilotOverview from './PilotOverview';
 import OwnerWorkspace from './OwnerWorkspace';
@@ -74,28 +77,25 @@ function ReportWorkspaceContent({
 }) {
   const page = resolveWorkflowPage(account.role, route);
   const [search, setSearch] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState<string[]>([]);
+  // A status chosen on one list must not silently empty the next one.
+  const [statusPage, setStatusPage] = useState(page);
+  if (statusPage !== page) {
+    setStatusPage(page);
+    setStatus([]);
+  }
   const [editing, setEditing] = useState<Report | null>(null);
   const [message, setMessage] = useState('');
   const visible = visibleReports(reports, account);
-  const matchesPage = (report: Report) =>
-    page === 'incoming'
-      ? report.status === 'Dikirim'
-      : page === 'assignments'
-        ? ['Siap disurvei', 'Ditugaskan'].includes(report.status)
-        : page === 'review'
-          ? report.status === 'Ditinjau'
-          : page === 'tasks'
-            ? ['Ditugaskan', 'Dalam survei', 'Perlu revisi'].includes(
-                report.status,
-              )
-            : page === 'history'
-              ? ['Ditinjau', 'Selesai'].includes(report.status)
-              : true;
-  const filtered = visible.filter(
+  const onPage = reportsOnPage(page, visible);
+  const statusOptions = statusFilterOptions(page, onPage);
+  // A chosen status that no longer has reports drops out of the selection.
+  const activeStatus = status.filter((value) =>
+    statusOptions.some((option) => option.status === value),
+  );
+  const filtered = onPage.filter(
     (report) =>
-      matchesPage(report) &&
-      (!status || report.status === status) &&
+      (!activeStatus.length || activeStatus.includes(report.status)) &&
       [report.id, report.title, report.location, report.address ?? ''].some(
         (value) => value.toLowerCase().includes(search.trim().toLowerCase()),
       ),
@@ -492,43 +492,46 @@ function ReportWorkspaceContent({
       )}
       {page === 'pilot' && <PilotOverview />}
       {page === 'reports' && account.role === 'owner' && (
-        <OwnerWorkspace
-          reports={visible}
-          account={account}
-          accounts={accounts}
-          onEdit={(report) => {
-            setEditing(report);
-            requestAnimationFrame(() =>
-              document
-                .getElementById('edit-report')
-                ?.scrollIntoView({ block: 'start', behavior: 'instant' }),
-            );
-          }}
-          onSave={(report, action) => {
-            const next = updateOwnerProgress(report, account, action);
-            if (!next) return false;
-            onChange(
-              reports.map((item) => (item.id === report.id ? next : item)),
-            );
-            return true;
-          }}
-          onSubmit={(report) => {
-            const next = advanceReport(report, account, 'submit');
-            if (!next) {
-              setMessage(
-                [
-                  'Lengkapi data sebelum mengirim.',
-                  ...Object.values(validateReportRegistration(report)),
-                ].join(' '),
+        // Kept mounted while editing so Batal returns to the same report.
+        <div hidden={!!editing}>
+          <OwnerWorkspace
+            reports={visible}
+            account={account}
+            accounts={accounts}
+            onEdit={(report) => {
+              setEditing(report);
+              requestAnimationFrame(() =>
+                document
+                  .getElementById('edit-report')
+                  ?.scrollIntoView({ block: 'start', behavior: 'instant' }),
               );
-              return;
-            }
-            onChange(
-              reports.map((item) => (item.id === report.id ? next : item)),
-            );
-            setMessage('Laporan dikirim untuk diperiksa admin.');
-          }}
-        />
+            }}
+            onSave={(report, action) => {
+              const next = updateOwnerProgress(report, account, action);
+              if (!next) return false;
+              onChange(
+                reports.map((item) => (item.id === report.id ? next : item)),
+              );
+              return true;
+            }}
+            onSubmit={(report) => {
+              const next = advanceReport(report, account, 'submit');
+              if (!next) {
+                setMessage(
+                  [
+                    'Lengkapi data sebelum mengirim.',
+                    ...Object.values(validateReportRegistration(report)),
+                  ].join(' '),
+                );
+                return;
+              }
+              onChange(
+                reports.map((item) => (item.id === report.id ? next : item)),
+              );
+              setMessage('Laporan dikirim untuk diperiksa admin.');
+            }}
+          />
+        </div>
       )}
       {page && listPages.includes(page) && account.role !== 'owner' && (
         <>
@@ -557,26 +560,18 @@ function ReportWorkspaceContent({
                   onChange={(event) => setSearch(event.target.value)}
                 />
               </label>
-              <select
-                aria-label="Filter status laporan"
-                value={status}
-                onChange={(event) => setStatus(event.target.value)}
-              >
-                <option value="">Semua status</option>
-                {[
-                  'Draf',
-                  'Dikirim',
-                  'Perlu dilengkapi',
-                  'Siap disurvei',
-                  'Ditugaskan',
-                  'Dalam survei',
-                  'Ditinjau',
-                  'Perlu revisi',
-                  'Selesai',
-                ].map((value) => (
-                  <option key={value}>{value}</option>
-                ))}
-              </select>
+              {statusOptions.length > 0 && (
+                <FilterMenu
+                  label="Status"
+                  options={statusOptions.map((option) => ({
+                    value: option.status,
+                    label: option.status,
+                    count: option.count,
+                  }))}
+                  selected={activeStatus}
+                  onChange={setStatus}
+                />
+              )}
             </div>
             {filtered.length ? (
               filtered.map(card)

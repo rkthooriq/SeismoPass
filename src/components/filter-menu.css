@@ -1,0 +1,229 @@
+/* Filter pill + panel. Tiers from docs/ui-design-system.md:
+   trigger = pill control (8 × 16 padding, 44px target),
+   panel = card (radius 16), option rows = box (12 padding, radius 12). */
+.filter-menu {
+  position: relative;
+  flex: none;
+}
+/* One chip style for plain toggle chips (.filter-chip) and menu chips
+   (.filter-menu-trigger): control padding 12 × 16 (same height as search
+   fields and buttons), pill radius (documented exception for chips and
+   navigation), 14px / 500 text, 600 when active. #root lifts it above the
+   workspace-wide button font rules. */
+#root :is(.filter-chip, .filter-menu-trigger) {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: var(--padding-control);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--glass-bg-strong);
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+/* Active chips are told apart by fill only: no inset highlight, which on a
+   small pill reads as a border line. */
+#root :is(.filter-chip[aria-pressed='true'], .filter-menu-trigger.is-active) {
+  background: var(--glass-cream);
+  box-shadow: var(--shadow-card);
+  font-weight: 600;
+}
+.filter-menu-trigger svg {
+  color: var(--action);
+}
+/* Count badge: same pill in every chip; white on an active (cream) chip so
+   it never melts into the fill. */
+#root :is(.filter-chip-badge, .filter-menu-badge) {
+  min-width: 24px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 22px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+#root
+  :is(.filter-chip[aria-pressed='true'], .filter-menu-trigger.is-active)
+  :is(.filter-chip-badge, .filter-menu-badge) {
+  background: var(--paper);
+  color: var(--ink);
+}
+.filter-menu-label {
+  min-width: 0;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.filter-menu-panel.is-start {
+  right: auto;
+  left: 0;
+}
+.filter-menu-summary {
+  font-weight: inherit;
+  color: inherit;
+}
+.filter-menu-caret {
+  font-size: 12px;
+  color: var(--muted);
+  transition: transform 160ms ease;
+}
+.filter-menu-trigger[aria-expanded='true'] .filter-menu-caret {
+  transform: rotate(180deg);
+}
+.filter-menu-panel {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: 20;
+  width: min(320px, calc(100vw - 32px));
+  padding: var(--space-2);
+  border-radius: var(--radius-card);
+  background: var(--paper);
+  box-shadow: 0 18px 40px -18px rgb(59 42 30 / 0.45);
+}
+.filter-menu-panel fieldset {
+  display: grid;
+  gap: var(--space-1);
+  max-height: min(420px, 60vh);
+  margin: 0;
+  padding: 0;
+  overflow-y: auto;
+  border: 0;
+}
+/* Groups are separated by a hairline; children sit under the group label,
+   their checkbox aligned with the group's text. */
+.filter-menu-group {
+  display: grid;
+  gap: var(--space-1);
+}
+.filter-menu-group + .filter-menu-group,
+.filter-menu-group + .filter-menu-option,
+.filter-menu-option + .filter-menu-group {
+  position: relative;
+  margin-top: var(--space-2);
+}
+/* A straight hairline above the row, independent of the row's rounded corners. */
+.filter-menu-group + .filter-menu-group::before,
+.filter-menu-group + .filter-menu-option::before,
+.filter-menu-option + .filter-menu-group::before {
+  content: '';
+  position: absolute;
+  top: calc(-1 * var(--space-1) - 1px);
+  right: var(--space-2);
+  left: var(--space-2);
+  height: 1px;
+  background: var(--line);
+}
+.filter-menu-option.is-group {
+  font-weight: 600;
+}
+.filter-menu-option.is-child {
+  min-height: 40px;
+  padding-left: calc(var(--space-3) + 18px + var(--space-3));
+  color: var(--muted);
+}
+.filter-menu-panel legend {
+  padding: var(--space-2) var(--space-3);
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.filter-menu-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-box);
+  color: var(--ink);
+  font-size: 14px;
+  cursor: pointer;
+}
+.filter-menu-option:hover {
+  background: var(--hover-surface);
+}
+.filter-menu-option input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--action);
+}
+.filter-menu-count {
+  min-width: 24px;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 22px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.filter-menu-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding: var(--space-2) var(--space-1) 0;
+  border-top: 1px solid var(--line);
+}
+.filter-menu-footer button {
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent;
+  color: var(--action);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.filter-menu-footer .filter-menu-done {
+  background: var(--surface);
+  color: var(--ink);
+}
+.filter-menu-footer button:disabled {
+  color: var(--muted);
+  opacity: 0.6;
+  cursor: default;
+}
+@media (max-width: 600px) {
+  .filter-menu-panel {
+    right: auto;
+    left: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .filter-menu-caret {
+    transition: none;
+  }
+}
+
+/* Focus belongs to the whole row, not the small checkbox: the global halo
+   is removed from the box and drawn around the row's own rounded shape. */
+#root .filter-menu-option input {
+  border-radius: var(--radius-xs);
+}
+#root .filter-menu-option input:is(:focus, :focus-visible) {
+  outline: none !important;
+  box-shadow: none !important;
+}
+#root .filter-menu-option:has(input:focus-visible) {
+  background: var(--hover-surface);
+  box-shadow: 0 0 0 2px rgb(138 90 59 / 0.32);
+}

@@ -51,14 +51,14 @@
   align-items: center;
   gap: 4px;
   padding: 6px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--paper);
   border: 1px solid var(--line);
   color: var(--ink);
 }
 .sp-nav-capsule a {
   display: block;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 .sp-nav-capsule a[aria-current='location'] {
   background: var(--accent);
@@ -70,7 +70,7 @@
   gap: var(--space-control-y);
 }
 .sp-nav-account .sp-account-action {
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   min-width: 86px;
 }
 @media (min-width: 1300px) {
@@ -195,7 +195,7 @@
   font-size: 11px;
   font-weight: 500;
   border: 1px solid var(--muted-on-dark);
-  border-radius: 5px;
+  border-radius: var(--radius-xs);
   padding: 3px 8px;
 }
 .sp-building-art {
@@ -219,7 +219,7 @@
 .sp-passport-sheet {
   background: var(--paper);
   color: var(--ink);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   border: 1px solid var(--line);
   box-shadow: none;
   padding: var(--space-panel);
@@ -247,7 +247,7 @@
 .sp-status {
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 5px;
+  border-radius: var(--radius-xs);
   padding: 4px 8px;
   font-size: 11px;
   white-space: nowrap;
@@ -673,7 +673,7 @@
   min-height: 44px;
   padding: var(--padding-control);
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--muted-on-dark);
   font-size: 12px;
@@ -740,7 +740,7 @@
   min-height: 42px;
   padding: var(--padding-control);
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   color: var(--ink);
   line-height: 1;
@@ -799,7 +799,7 @@
   min-width: 86px;
   padding: 11px 18px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
   font-weight: 600;
   line-height: 1.2;

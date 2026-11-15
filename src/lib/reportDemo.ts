@@ -1,7 +1,7 @@
 import { canSurvey, isActiveAdmin } from './surveyorAccess.ts';
 import type { AccountStatus, AccessDecision } from './surveyorAccess';
-import { emptyObservations, emptyRvsInputs, parseRvsRecord } from './rvs.ts';
-import type { RvsInputs, RvsRecord } from './rvs';
+import { parseRvsRecord } from './rvs.ts';
+import type { RvsRecord } from './rvs';
 import type { ActorRole } from './actorAccess';
 import type { OwnerProgress, SurveyAppointment } from './ownerProgress';
 
@@ -95,312 +95,269 @@ export interface Report {
   reviewNote?: string;
   rvs?: RvsRecord;
 }
+// Fictional buildings and activities for trying the owner journey.
+const exampleAt = '2026-11-14T02:00:00.000Z';
+const exampleBase = {
+  reporterId: 'owner-demo',
+  demoConsent: true,
+  understandsRvs: true,
+} as const;
+function exampleDate(days: number): string {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+}
 export const sampleReports: Report[] = [
   {
+    ...exampleBase,
     id: 'LAP-CONTOH',
-    reporterId: 'owner-demo',
-    title: 'Balai warga contoh',
-    location: 'Kawasan contoh, Bandung Barat',
-    address: 'Jalan Contoh No. 1, RT 01/RW 02',
-    landmark: 'Dekat balai warga',
-    description: 'Catatan awal bangunan untuk latihan survei.',
+    title: 'Balai warga Lembang (contoh)',
+    location: 'Kecamatan Lembang, Kabupaten Bandung Barat',
+    address: 'Jalan Warga Contoh No. 1, RT 01/RW 02, Lembang',
+    landmark: 'Pagar krem di sebelah lapangan contoh',
+    description:
+      'Contoh pencatatan balai warga satu lantai untuk koordinasi kunjungan awal.',
     status: 'Dikirim',
     function: 'Fasilitas umum',
-    year: '',
+    year: '2005',
     floors: '1',
-    material: 'Belum diketahui',
+    material: 'Bata',
     structure: 'Belum diketahui',
-    demoConsent: true,
-    understandsRvs: true,
+    ownerProgress: {
+      point: { latitude: -6.8185, longitude: 107.6164 },
+      availability: {
+        date: exampleDate(5),
+        slot: 'Pagi (08.00–11.00)',
+        note: 'Contoh: pengelola membuka akses setelah pukul 09.00.',
+        at: exampleAt,
+      },
+      support: {
+        need: 'consultation',
+        note: 'Contoh: ingin memahami tahapan pemeriksaan awal dan dokumen yang perlu disiapkan.',
+        at: exampleAt,
+      },
+    },
+    activity: [
+      {
+        by: 'Pelapor Contoh',
+        action: 'Laporan dikirim',
+        note: 'Data contoh dikirim untuk pemeriksaan kelengkapan.',
+        at: exampleAt,
+      },
+    ],
   },
-  ...contohReports(),
-];
-// Laporan contoh untuk mencoba semua tahap. Nama, alamat, dan nomor sengaja
-// rekaan (tanda "contoh"); tidak mewakili bangunan atau orang nyata.
-function contohRvs(
-  inputs: Partial<RvsInputs>,
-  note: Partial<RvsRecord['observations']>,
-  savedAt: string,
-): RvsRecord {
-  return {
-    version: 1,
-    form: 'FEMA-P154-2015-HIGH',
-    inputs: { ...emptyRvsInputs(), ...inputs },
-    observations: { ...emptyObservations(), ...note },
-    recordedBy: 'Pesurvei Contoh',
-    savedAt,
-    demoAcknowledged: true,
-  };
-}
-function contohReports(): Report[] {
-  const base = {
-    reporterId: 'owner-demo',
-    demoConsent: true,
-    understandsRvs: true,
-  } as const;
-  const assigned = {
+  {
+    ...exampleBase,
+    id: 'LAP-CONTOH-3',
+    title: 'Rumah Jambudipa (contoh)',
+    location: 'Desa Jambudipa, Kecamatan Cisarua',
+    address: 'Gang Hunian Contoh No. 7, RT 02/RW 03, Desa Jambudipa',
+    landmark: 'Rumah berpagar hijau di gang contoh',
+    description:
+      'Contoh rumah dua lantai. Pengelola ingin menyiapkan akses untuk kunjungan pesurvei.',
+    status: 'Ditugaskan',
     assignee: 'survey-demo',
     assignedBy: 'admin-demo',
-  } as const;
-  const log = (
-    by: string,
-    action: string,
-    note: string,
-    at: string,
-  ): NonNullable<Report['activity']>[number] => ({ by, action, note, at });
+    assignmentNote:
+      'Penugasan contoh untuk mencoba koordinasi jadwal. Hubungi pengelola sebelum kunjungan.',
+    function: 'Rumah tinggal',
+    year: '2008',
+    floors: '2',
+    material: 'Beton',
+    structure: 'Rangka beton',
+    appointment: {
+      date: exampleDate(7),
+      slot: 'Pagi (08.00–11.00)',
+      response: 'proposed',
+    },
+    ownerProgress: {
+      point: { latitude: -6.8042, longitude: 107.5502 },
+      availability: {
+        date: exampleDate(7),
+        slot: 'Pagi (08.00–11.00)',
+        note: 'Contoh: penghuni tersedia pukul 09.00, akses melalui pintu depan.',
+        at: exampleAt,
+      },
+      support: {
+        need: 'cost-information',
+        note: 'Contoh: ingin mengetahui komponen biaya konsultasi sebelum menentukan langkah berikutnya.',
+        at: exampleAt,
+      },
+    },
+    activity: [
+      {
+        by: 'Pelapor Contoh',
+        action: 'Laporan dikirim',
+        note: 'Data dasar dan alamat contoh dicatat.',
+        at: '2026-11-12T02:00:00.000Z',
+      },
+      {
+        by: 'Admin SeismoPass',
+        action: 'Kelengkapan diperiksa',
+        note: 'Data contoh lengkap untuk penugasan kunjungan.',
+        at: '2026-11-13T02:00:00.000Z',
+      },
+      {
+        by: 'Admin SeismoPass',
+        action: 'Jadwal kunjungan diusulkan',
+        note: 'Usulan contoh menunggu konfirmasi pelapor.',
+        at: exampleAt,
+      },
+    ],
+  },
+  {
+    ...exampleBase,
+    id: 'LAP-CONTOH-7',
+    title: 'Pos kesehatan Cisarua (contoh)',
+    location: 'Kecamatan Cisarua, Kabupaten Bandung Barat',
+    address: 'Jalan Kesehatan Contoh No. 3, RT 01/RW 04, Cisarua',
+    landmark: 'Di samping balai desa contoh',
+    description:
+      'Contoh fasilitas kesehatan satu lantai untuk mencoba pencatatan tindak lanjut.',
+    status: 'Selesai',
+    assignee: 'survey-demo',
+    assignedBy: 'admin-demo',
+    assignmentNote: 'Contoh pencatatan kunjungan awal fasilitas kesehatan.',
+    function: 'Fasilitas kesehatan',
+    year: '2010',
+    floors: '1',
+    material: 'Beton',
+    structure: 'Rangka beton',
+    visitDate: '2026-11-10',
+    visitNote:
+      'Contoh: pengelola mendampingi kunjungan dan menunjukkan ruang pelayanan. Catatan ini tidak memuat penilaian struktur.',
+    reviewNote:
+      'Administrasi contoh ditutup. Penilaian struktur dan rekomendasi tetap menunggu ahli.',
+    appointment: {
+      date: '2026-11-10',
+      slot: 'Pagi (08.00–11.00)',
+      response: 'confirmed',
+    },
+    ownerProgress: {
+      point: { latitude: -6.8201, longitude: 107.5431 },
+      followUp: {
+        choice: 'consultation',
+        note: 'Contoh: ingin berkonsultasi dengan ahli tentang kebutuhan pemeriksaan lanjutan.',
+        at: exampleAt,
+      },
+      support: {
+        need: 'funding-information',
+        note: 'Contoh: ingin mengetahui persyaratan pembiayaan jika kelak ada program resmi. Belum mengajukan bantuan.',
+        at: exampleAt,
+      },
+      work: {
+        stage: 'preparing',
+        note: 'Contoh: mengumpulkan gambar bangunan dan catatan pemeliharaan untuk konsultasi. Belum ada pekerjaan perkuatan.',
+        at: exampleAt,
+      },
+    },
+    activity: [
+      {
+        by: 'Pelapor Contoh',
+        action: 'Laporan dikirim',
+        note: 'Data contoh diterima untuk proses pencatatan.',
+        at: '2026-11-08T02:00:00.000Z',
+      },
+      {
+        by: 'Admin SeismoPass',
+        action: 'Kunjungan dikoordinasikan',
+        note: 'Jadwal contoh disepakati bersama pengelola.',
+        at: '2026-11-09T02:00:00.000Z',
+      },
+      {
+        by: 'Pesurvei Contoh',
+        action: 'Catatan kunjungan diterima',
+        note: 'Kunjungan contoh pada 10 November 2026.',
+        at: '2026-11-10T04:00:00.000Z',
+      },
+      {
+        by: 'Admin SeismoPass',
+        action: 'Administrasi selesai',
+        note: 'Bukan keputusan kelayakan atau keamanan bangunan.',
+        at: '2026-11-11T02:00:00.000Z',
+      },
+      {
+        by: 'Pelapor Contoh',
+        action: 'Kebutuhan tindak lanjut dicatat',
+        note: 'Pilihan konsultasi, kebutuhan informasi, dan persiapan dokumen dicatat sebagai contoh.',
+        at: exampleAt,
+      },
+    ],
+  },
+  {
+    ...exampleBase,
+    id: 'LAP-CONTOH-8',
+    title: 'Rumah Cipada (contoh)',
+    location: 'Desa Cipada, Kecamatan Cisarua',
+    address: 'Gang Rumah Contoh No. 2, RT 01/RW 01, Desa Cipada',
+    landmark: 'Dekat kebun contoh, pagar kayu',
+    description:
+      'Contoh draf yang belum dikirim. Lengkapi jumlah lantai sebelum melanjutkan.',
+    status: 'Draf',
+    function: 'Rumah tinggal',
+    year: '',
+    floors: '',
+    material: 'Bata',
+    structure: 'Belum diketahui',
+    ownerProgress: { point: { latitude: -6.7881, longitude: 107.5302 } },
+    activity: [
+      {
+        by: 'Pelapor Contoh',
+        action: 'Draf disimpan',
+        note: 'Jumlah lantai belum dicatat. Draf belum masuk antrean admin.',
+        at: exampleAt,
+      },
+    ],
+  },
+  {
+    ...exampleBase,
+    id: 'LAP-CONTOH-9',
+    title: 'Warung Parongpong (contoh)',
+    location: 'Kecamatan Parongpong, Kabupaten Bandung Barat',
+    address: '',
+    landmark: 'Di samping lapangan contoh',
+    description:
+      'Contoh laporan yang perlu dilengkapi: alamat kunjungan belum cukup rinci.',
+    status: 'Perlu dilengkapi',
+    function: 'Tempat usaha',
+    year: '2015',
+    floors: '1',
+    material: 'Bata',
+    structure: 'Belum diketahui',
+    reviewNote:
+      'Lengkapi nama jalan atau gang, nomor, RT/RW, dan desa pada alamat kunjungan, lalu kirim ulang laporan.',
+    ownerProgress: { point: { latitude: -6.8084, longitude: 107.5815 } },
+    activity: [
+      {
+        by: 'Pelapor Contoh',
+        action: 'Laporan dikirim',
+        note: 'Contoh laporan diajukan untuk pemeriksaan kelengkapan.',
+        at: '2026-11-13T02:00:00.000Z',
+      },
+      {
+        by: 'Admin SeismoPass',
+        action: 'Data perlu dilengkapi',
+        note: 'Alamat kunjungan belum dicatat secara lengkap.',
+        at: exampleAt,
+      },
+    ],
+  },
+];
+
+// Only the built-in sample catalogue is refreshed; user-created reports stay.
+export function isSampleReport(
+  report: Pick<Report, 'id' | 'reporterId'>,
+): boolean {
+  return (
+    report.reporterId === 'owner-demo' &&
+    /^LAP-CONTOH(?:-[2-9])?$/.test(report.id)
+  );
+}
+export function refreshSampleReports(reports: Report[]): Report[] {
+  if (!reports.some(isSampleReport)) return reports;
   return [
-    {
-      ...base,
-      id: 'LAP-CONTOH-2',
-      title: 'Rumah tinggal dua lantai (contoh)',
-      location: 'Desa Jambudipa, Kecamatan Cisarua',
-      address: 'Kampung Contoh RT 03/RW 05, Desa Jambudipa',
-      landmark: 'Seberang masjid, pagar hijau',
-      contactPhone: '0812 0000 0002',
-      description:
-        'Rumah dibangun swadaya, dinding bata, ada retak rambut di dinding lantai dua.',
-      status: 'Siap disurvei',
-      function: 'Rumah tinggal',
-      year: '1998',
-      floors: '2',
-      material: 'Beton bertulang',
-      structure: 'Portal beton dengan dinding pengisi',
-      activity: [
-        log(
-          'Admin SeismoPass',
-          'Memverifikasi',
-          'Data lengkap.',
-          '2026-11-09T07:30:00.000Z',
-        ),
-      ],
-    },
-    {
-      ...base,
-      ...assigned,
-      id: 'LAP-CONTOH-3',
-      title: 'Kos putri Melati (contoh)',
-      location: 'Desa Jambudipa, Kecamatan Cisarua',
-      address: 'Gang Contoh II No. 7, RT 02/RW 03, Desa Jambudipa',
-      landmark: 'Gang kedua setelah warung, tanya Bu RT',
-      contactPhone: '0812 0000 0003',
-      description:
-        'Kos-kosan tiga lantai dengan 12 kamar, tangga di sisi luar.',
-      status: 'Ditugaskan',
-      assignmentNote:
-        'Kunjungi Sabtu pagi. Hubungi pengelola dulu; periksa tangga luar dan sambungan kolom.',
-      function: 'Hunian sewa',
-      year: '2008',
-      floors: '3',
-      material: 'Beton bertulang',
-      structure: 'Portal beton',
-      activity: [
-        log(
-          'Admin SeismoPass',
-          'Menugaskan',
-          'Ditugaskan ke Pesurvei Contoh.',
-          '2026-11-09T08:10:00.000Z',
-        ),
-      ],
-    },
-    {
-      ...base,
-      ...assigned,
-      id: 'LAP-CONTOH-4',
-      title: 'SDN Cisarua (contoh)',
-      location: 'Kecamatan Cisarua, Kabupaten Bandung Barat',
-      address: 'Jalan Pendidikan Contoh No. 12, Cisarua',
-      landmark: 'Di sebelah lapangan desa',
-      contactPhone: '0812 0000 0004',
-      description:
-        'Gedung sekolah satu lantai, enam ruang kelas, atap rangka baja ringan.',
-      status: 'Dalam survei',
-      assignmentNote: 'Isi input RVS di lokasi lalu kirim catatan kunjungan.',
-      function: 'Fasilitas pendidikan',
-      year: '1985',
-      floors: '1',
-      material: 'Pasangan bata',
-      structure: 'Dinding pemikul',
-      activity: [
-        log(
-          'Admin SeismoPass',
-          'Menugaskan',
-          'Ditugaskan ke Pesurvei Contoh.',
-          '2026-11-08T09:00:00.000Z',
-        ),
-        log(
-          'Pesurvei Contoh',
-          'Memulai survei',
-          'Survei dimulai.',
-          '2026-11-10T01:15:00.000Z',
-        ),
-      ],
-    },
-    {
-      ...base,
-      ...assigned,
-      id: 'LAP-CONTOH-5',
-      title: 'Ruko Pasar Contoh',
-      location: 'Desa Jambudipa, Kecamatan Cisarua',
-      address: 'Jalan Pasar Contoh No. 21, Desa Jambudipa',
-      landmark: 'Depan pasar, ruko ketiga dari pojok',
-      description:
-        'Rumah toko dua lantai, lantai bawah dipakai usaha, ada penambahan lantai.',
-      status: 'Ditinjau',
-      assignmentNote: 'Periksa penambahan lantai dua.',
-      function: 'Tempat usaha',
-      year: '2001',
-      floors: '2',
-      material: 'Beton bertulang',
-      structure: 'Portal beton',
-      visitDate: '2026-11-10',
-      visitNote:
-        'Bertemu pemilik. Lantai dua ditambah sekitar 2012 tanpa gambar. Tidak ada retak struktural terlihat dari luar.',
-      rvs: contohRvs(
-        {
-          buildingType: 'RM1',
-          stories: '2',
-          soil: 'D',
-          vertical: 'none',
-          plan: 'no',
-          code: 'pre',
-          pounding: 'no',
-          damage: 'no',
-          parapet: 'yes',
-        },
-        {
-          exterior: 'all sides',
-          interior: 'visible',
-          soilSource: 'Perkiraan pemeriksa, belum ada data tanah',
-          comments:
-            'Parapet di sisi depan. Penambahan lantai perlu ditinjau ahli.',
-        },
-        '2026-11-10T04:20:00.000Z',
-      ),
-      activity: [
-        log(
-          'Admin SeismoPass',
-          'Menugaskan',
-          'Ditugaskan ke Pesurvei Contoh.',
-          '2026-11-08T09:20:00.000Z',
-        ),
-        log(
-          'Pesurvei Contoh',
-          'Mengirim catatan kunjungan',
-          'Kunjungan 10 Nov 2026.',
-          '2026-11-10T04:30:00.000Z',
-        ),
-      ],
-    },
-    {
-      ...base,
-      ...assigned,
-      id: 'LAP-CONTOH-6',
-      title: 'Rumah tinggal Pak Dedi (contoh)',
-      location: 'Desa Cipada, Kecamatan Cisarua',
-      address: 'Kampung Contoh RT 01/RW 01, Desa Cipada',
-      landmark: 'Belakang warung bakso',
-      description: 'Rumah satu lantai, dinding bata tanpa kolom praktis.',
-      status: 'Perlu revisi',
-      assignmentNote:
-        'Kunjungan ulang bila perlu: catat bagian dalam rumah yang sempat diperiksa.',
-      reviewNote:
-        'Untuk pesurvei: di formulir RVS, isi kolom "Cakupan interior" (tidak masuk, hanya terlihat dari luar, atau masuk ke dalam) dan "Sumber informasi tanah". Pelapor tidak perlu mengubah data laporan.',
-      function: 'Rumah tinggal',
-      year: '1990',
-      floors: '1',
-      material: 'Pasangan bata',
-      structure: 'Dinding pemikul',
-      visitDate: '2026-11-07',
-      visitNote: 'Kunjungan singkat, pemilik tidak di rumah.',
-      activity: [
-        log(
-          'Admin SeismoPass',
-          'Menugaskan',
-          'Ditugaskan ke Pesurvei Contoh.',
-          '2026-11-05T08:00:00.000Z',
-        ),
-        log(
-          'Pesurvei Contoh',
-          'Mengirim catatan kunjungan',
-          'Kunjungan 7 Nov 2026.',
-          '2026-11-07T06:00:00.000Z',
-        ),
-        log(
-          'Admin SeismoPass',
-          'Meminta revisi',
-          'Pesurvei diminta mencatat bagian dalam rumah yang diperiksa.',
-          '2026-11-08T02:00:00.000Z',
-        ),
-      ],
-    },
-    {
-      ...base,
-      ...assigned,
-      id: 'LAP-CONTOH-7',
-      title: 'Pustu Cisarua (contoh)',
-      location: 'Kecamatan Cisarua, Kabupaten Bandung Barat',
-      address: 'Jalan Kesehatan Contoh No. 3, Cisarua',
-      landmark: 'Samping kantor desa',
-      description: 'Pos kesehatan satu lantai, bangunan tahun 2010.',
-      status: 'Selesai',
-      assignmentNote: 'Survei awal fasilitas kesehatan.',
-      reviewNote: 'Administrasi ditutup. Hasil simulasi belum divalidasi ahli.',
-      function: 'Fasilitas kesehatan',
-      year: '2010',
-      floors: '1',
-      material: 'Beton bertulang',
-      structure: 'Portal beton',
-      visitDate: '2026-11-03',
-      visitNote:
-        'Bangunan terawat, tidak ada kerusakan terlihat. Interior dapat dimasuki sebagian.',
-      rvs: contohRvs(
-        {
-          buildingType: 'C1',
-          stories: '1',
-          soil: 'C',
-          vertical: 'none',
-          plan: 'no',
-          code: 'post',
-          damage: 'no',
-          pounding: 'no',
-        },
-        {
-          exterior: 'all sides',
-          interior: 'entered',
-          soilSource: 'Peta microzonasi desa',
-          comments: 'Tidak ada tanda bahaya jatuh yang terlihat.',
-        },
-        '2026-11-03T05:00:00.000Z',
-      ),
-      activity: [
-        log(
-          'Admin SeismoPass',
-          'Menugaskan',
-          'Ditugaskan ke Pesurvei Contoh.',
-          '2026-11-01T08:00:00.000Z',
-        ),
-        log(
-          'Pesurvei Contoh',
-          'Mengirim catatan kunjungan',
-          'Kunjungan 3 Nov 2026.',
-          '2026-11-03T05:30:00.000Z',
-        ),
-        log(
-          'Admin SeismoPass',
-          'Menutup administrasi',
-          'Selesai ditinjau.',
-          '2026-11-04T03:00:00.000Z',
-        ),
-      ],
-    },
-    {
-      ...base,
-      id: 'LAP-CONTOH-8',
-      title: 'Rumah baru di Cipada (draf)',
-      location: '',
-      description: '',
-      status: 'Draf',
-    },
+    ...sampleReports,
+    ...reports.filter((report) => !isSampleReport(report)),
   ];
 }
 

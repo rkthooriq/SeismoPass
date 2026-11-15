@@ -32,19 +32,53 @@
   --surface: #f4eadc;
   --hover-surface: #efe1cd;
   --hover-ink: #3b2a1e;
-  --space-control-y: 11px;
-  --space-control-x: 16px;
-  --space-panel: 18px;
+  /* Spacing scale. Use these steps for padding and gap; see
+     docs/ui-design-system.md for which tier each component uses. */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-12: 48px;
+  /* Radius scale. */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-pill: 9999px;
+  /* Semantic tiers built from the scales: panel > card > box > control. */
+  --space-control-y: var(--space-3);
+  --space-control-x: var(--space-4);
+  --space-panel: var(--space-6);
+  --space-card: var(--space-4);
+  /* Cards whose main content is a large figure (≥28px) need one step more. */
+  --space-card-figure: var(--space-5);
+  --space-box: var(--space-3);
   --space-page: clamp(16px, 2.4vw, 28px);
   --padding-control: var(--space-control-y) var(--space-control-x);
-  --radius-panel: 16px;
-  --radius-control: 10px;
+  --radius-panel: var(--radius-xl);
+  --radius-card: var(--radius-lg);
+  --radius-box: var(--radius-md);
+  --radius-control: var(--radius-sm);
+  /* Surfaces are separated by fill and shadow, never by an outline border. */
+  --shadow-card: 0 6px 18px -12px rgb(59 42 30 / 0.28);
+  --fill-note: #f3e7d6;
+  --fill-alert: #f6e0cf;
+  --fill-attention: #f5dfb8;
   --font-body: 'Inter', 'Helvetica Neue', Arial, sans-serif;
   --font-heading: 'Figtree', 'Inter', Arial, sans-serif;
   --plan-pattern: url('./assets/plan-pattern.svg');
   font-family: var(--font-body);
   color: var(--ink);
   background: var(--canvas);
+}
+@media (max-width: 600px) {
+  :root {
+    --space-panel: var(--space-4);
+  }
 }
 h1,
 h2,
@@ -141,7 +175,7 @@ textarea:focus-visible {
   color: var(--ink);
   font-size: 12px;
   letter-spacing: 0;
-  border-radius: 5px;
+  border-radius: var(--radius-xs);
 }
 .actor-enter {
   background: var(--action);
@@ -252,7 +286,7 @@ textarea:focus-visible {
   background: var(--surface);
   color: var(--muted);
   border-color: var(--line);
-  border-radius: 5px;
+  border-radius: var(--radius-xs);
   letter-spacing: 0;
 }
 .workspace input:focus-visible,
@@ -313,7 +347,7 @@ textarea:focus-visible {
   color: var(--ink);
 }
 .role-sidebar nav a {
-  border-radius: 6px;
+  border-radius: var(--radius-xs);
 }
 
 .role-nav-label,
@@ -439,7 +473,7 @@ button {
   background: var(--paper);
 }
 .workspace :is(.report-journey li, .report-qr-preview, .rvs-editor fieldset) {
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   box-shadow: none;
 }
 .workspace input:not([type='checkbox']):not([type='radio']),

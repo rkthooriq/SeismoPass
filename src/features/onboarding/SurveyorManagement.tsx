@@ -3,7 +3,10 @@ import type { FormEvent } from 'react';
 import { accountStatusLabels } from '../../lib/surveyorAccess';
 import type { NewSurveyorInput } from '../../lib/surveyorAccess';
 import type { DemoAccount, Report } from '../../lib/reportDemo';
-import { accountDirectory } from '../../lib/accountDirectory';
+import {
+  accountDirectory,
+  directoryFilterOptions,
+} from '../../lib/accountDirectory';
 import type { DirectoryFilters } from '../../lib/accountDirectory';
 import ImportSurveyors from './ImportSurveyors';
 import type { ImportAccounts } from './ImportSurveyors';
@@ -68,6 +71,7 @@ export default function SurveyorManagement({
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const candidates = accountDirectory(accounts, filters, mode);
   const total = accountDirectory(accounts, emptyFilters, mode).length;
+  const filterOptions = directoryFilterOptions(accounts, mode);
   const selected =
     view?.type === 'detail'
       ? accounts.find(
@@ -198,41 +202,49 @@ export default function SurveyorManagement({
             }
           />
         </label>
-        <label>
-          Peran
-          <select
-            value={filters.role}
-            onChange={(event) =>
-              setFilters({
-                ...filters,
-                role: event.target.value as DirectoryFilters['role'],
-              })
-            }
-          >
-            <option value="all">Semua peran</option>
-            <option value="surveyor">Pesurvei</option>
-            {mode === 'surveyors' && <option value="admin">Admin</option>}
-          </select>
-        </label>
-        <label>
-          Status akun
-          <select
-            value={filters.status}
-            onChange={(event) =>
-              setFilters({
-                ...filters,
-                status: event.target.value as DirectoryFilters['status'],
-              })
-            }
-          >
-            <option value="all">Semua status</option>
-            {Object.entries(accountStatusLabels).map(([value, label]) => (
-              <option value={value} key={value}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </label>
+        {filterOptions.roles.length > 0 && (
+          <label>
+            Peran
+            <select
+              value={filters.role}
+              onChange={(event) =>
+                setFilters({
+                  ...filters,
+                  role: event.target.value as DirectoryFilters['role'],
+                })
+              }
+            >
+              <option value="all">Semua peran ({total})</option>
+              {filterOptions.roles.map((option) => (
+                <option value={option.value} key={option.value}>
+                  {option.value === 'admin' ? 'Admin' : 'Pesurvei'} (
+                  {option.count})
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        {filterOptions.statuses.length > 0 && (
+          <label>
+            Status akun
+            <select
+              value={filters.status}
+              onChange={(event) =>
+                setFilters({
+                  ...filters,
+                  status: event.target.value as DirectoryFilters['status'],
+                })
+              }
+            >
+              <option value="all">Semua status ({total})</option>
+              {filterOptions.statuses.map((option) => (
+                <option value={option.value} key={option.value}>
+                  {accountStatusLabels[option.value]} ({option.count})
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
       </div>
       <div className="directory-results">
         <p role="status">

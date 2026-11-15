@@ -1,10 +1,4 @@
-/* Admin and surveyor surfaces share a rounded hierarchy: panels, cards,
-   controls, then pill-shaped statuses. Keep the public and owner UI scoped out. */
-.workspace:is(.admin-workspace, .surveyor-workspace) {
-  --radius-panel: 22px;
-  --radius-card: 18px;
-  --radius-control: 14px;
-}
+/* Shared geometry tokens come from theme.css for every role and page. */
 
 .workspace:is(.admin-workspace, .surveyor-workspace)
   :is(.ws-panel, .role-next-step, .role-sidebar, .directory-dialog) {
@@ -84,7 +78,7 @@
 
 .workspace:is(.admin-workspace, .surveyor-workspace)
   :is(.ws-badge, .directory-status, .role-sidebar nav small) {
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 .workspace:is(.admin-workspace, .surveyor-workspace) .ws-badge {
   padding: 5px 10px;

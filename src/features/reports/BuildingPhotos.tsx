@@ -5,13 +5,16 @@ import {
   listBuildingPhotos,
 } from '../../lib/buildingPhotos';
 import type { BuildingPhoto } from '../../lib/buildingPhotos';
+import { isSampleReport } from '../../lib/reportDemo';
+import exampleFront from '../../assets/building-example-front.svg';
+import exampleSide from '../../assets/building-example-side.svg';
 
 function Photo({
   photo,
   onDelete,
 }: {
   photo: BuildingPhoto;
-  onDelete: () => void;
+  onDelete?: () => void;
 }) {
   const [url, setUrl] = useState('');
   useEffect(() => {
@@ -33,27 +36,33 @@ function Photo({
       )}
       <figcaption>
         <span>{photo.name}</span>
-        <button
-          type="button"
-          className="owner-text-button"
-          onClick={onDelete}
-          aria-label={`Hapus foto ${photo.name}`}
-        >
-          Hapus
-        </button>
+        {onDelete && (
+          <button
+            type="button"
+            className="owner-text-button"
+            onClick={onDelete}
+            aria-label={`Hapus foto ${photo.name}`}
+          >
+            Hapus
+          </button>
+        )}
       </figcaption>
     </figure>
   );
 }
 
+// readOnly shows the saved photos of a sent report without upload or delete.
 export default function BuildingPhotos({
   reportId,
   ownerId,
+  readOnly = false,
 }: {
   reportId: string;
   ownerId: string;
+  readOnly?: boolean;
 }) {
   const scope = `${ownerId}/${reportId}`;
+  const example = isSampleReport({ id: reportId, reporterId: ownerId });
   const [photos, setPhotos] = useState<BuildingPhoto[]>([]);
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
@@ -116,41 +125,69 @@ export default function BuildingPhotos({
       <div className="owner-section-title">
         <div>
           <h3>Foto bangunan</h3>
-          <p>Tampak depan, samping, atau bagian yang ingin kamu catat.</p>
+          <p>
+            {readOnly
+              ? 'Foto yang dilampirkan pada laporan ini.'
+              : 'Tampak depan, samping, atau bagian yang ingin kamu catat.'}
+          </p>
         </div>
-        <span>{photos.length}/4 foto</span>
+        {!readOnly && <span>{photos.length}/4 foto</span>}
       </div>
       <div className="owner-photo-grid">
+        {example &&
+          !photos.length &&
+          [
+            [exampleFront, 'Ilustrasi tampak depan (contoh)'],
+            [exampleSide, 'Ilustrasi tampak samping (contoh)'],
+          ].map(([src, label]) => (
+            <figure className="owner-photo" key={src}>
+              <img src={src} alt={label} loading="lazy" />
+              <figcaption>
+                <span>{label}</span>
+              </figcaption>
+            </figure>
+          ))}
         {photos.map((photo) => (
           <Photo
             key={photo.id}
             photo={photo}
-            onDelete={() => void remove(photo.id)}
+            onDelete={readOnly ? undefined : () => void remove(photo.id)}
           />
         ))}
       </div>
-      <label className={`owner-upload ${busy ? 'is-busy' : ''}`}>
-        <span aria-hidden="true">＋</span>
-        <strong>
-          {busy
-            ? 'Menyimpan foto…'
-            : photos.length >= 4
-              ? 'Empat foto sudah tersimpan'
-              : 'Pilih foto bangunan'}
-        </strong>
-        <small>JPG, PNG, WebP · maksimal 2 MB per foto</small>
-        <input
-          aria-label="Pilih foto bangunan"
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          multiple
-          disabled={busy || photos.length >= 4}
-          onChange={(event) => {
-            void add(event.target.files);
-            event.target.value = '';
-          }}
-        />
-      </label>
+      {example && !photos.length && (
+        <p className="owner-footnote">
+          Ilustrasi contoh, bukan foto bangunan nyata.
+          {!readOnly && ' Unggah foto untuk mengganti tampilan contoh ini.'}
+        </p>
+      )}
+      {readOnly && !photos.length && !example && (
+        <p className="owner-footnote">Tidak ada foto yang dilampirkan.</p>
+      )}
+      {!readOnly && (
+        <label className={`owner-upload ${busy ? 'is-busy' : ''}`}>
+          <span aria-hidden="true">＋</span>
+          <strong>
+            {busy
+              ? 'Menyimpan foto…'
+              : photos.length >= 4
+                ? 'Empat foto sudah tersimpan'
+                : 'Pilih foto bangunan'}
+          </strong>
+          <small>JPG, PNG, WebP · maksimal 2 MB per foto</small>
+          <input
+            aria-label="Pilih foto bangunan"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            disabled={busy || photos.length >= 4}
+            onChange={(event) => {
+              void add(event.target.files);
+              event.target.value = '';
+            }}
+          />
+        </label>
+      )}
       {message && (
         <p className="owner-inline-message" role="status">
           {message}

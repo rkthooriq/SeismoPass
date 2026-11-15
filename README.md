@@ -62,7 +62,7 @@ xcode-select --install
 git --version
 ```
 
-Jika Mac menyatakan bahwa *command line tools* sudah terpasang, langsung jalankan perintah pemeriksaan di atas.
+Jika Mac menyatakan bahwa _command line tools_ sudah terpasang, langsung jalankan perintah pemeriksaan di atas.
 
 ### 3. Instal Node.js
 
@@ -133,10 +133,10 @@ Buka kembali alamat yang muncul di terminal. `--ff-only` mencegah penggabungan r
 
 Setelah aplikasi terbuka, pilih **Masuk** atau buka `/#/login` pada alamat lokal. Gunakan akun contoh berikut; semuanya memakai kata sandi **`SeismoDemo123!`**.
 
-| Peran | Email |
-| --- | --- |
-| Pelapor | `pelapor@example.com` |
-| Admin | `admin@example.com` |
+| Peran    | Email                  |
+| -------- | ---------------------- |
+| Pelapor  | `pelapor@example.com`  |
+| Admin    | `admin@example.com`    |
 | Pesurvei | `pesurvei@example.com` |
 
 Gunakan **satu tab browser yang sama** sepanjang percobaan. Tekan **Keluar**, lalu masuk dengan akun berikutnya untuk berganti peran. Gunakan nama bangunan yang mudah dikenali agar laporan yang sama dapat ditemukan pada setiap tahap.
@@ -153,7 +153,7 @@ flowchart TD
 2. **Admin — periksa dan tugaskan.** Berganti ke akun admin. Buka **Laporan masuk**, perluas laporan tadi, lalu pilih **Data lengkap, siap ditugaskan**. Buka **Penugasan survei**, pilih **Pesurvei Contoh**, isi catatan penugasan, dan tekan **Simpan penugasan**. Status menjadi **Ditugaskan**.
 3. **Pesurvei — catat kunjungan.** Berganti ke akun pesurvei. Buka **Penugasan saya**, perluas laporan, dan tekan **Mulai survei**. Isi tanggal serta catatan kunjungan contoh, lalu pilih **Kirim catatan ke admin**. Status menjadi **Ditinjau**. Input simulasi RVS dapat dicoba saat laporan masih **Dalam survei** melalui **Isi input RVS dan lihat hasil simulasi**.
 4. **Admin — tinjau catatan.** Masuk kembali sebagai admin dan buka **Tinjauan catatan**. Isi catatan tinjauan administrasi, lalu pilih **Tutup administrasi laporan**. Status menjadi **Selesai**. Untuk mencoba alur perbaikan, pilih **Minta revisi**, lalu masuk sebagai pesurvei untuk memperbaiki dan mengirim ulang catatan.
-5. **Pelapor — lihat hasil proses.** Masuk kembali sebagai pelapor, buka **Laporan saya**, lalu pilih **Lihat perjalanan bangunan**. Tab **Perjalanan** memuat profil dan riwayat; **Lokasi & foto** untuk dokumentasi; **Jadwal survei** untuk koordinasi waktu; **Tindak lanjut** dan **Dukungan** untuk mencatat kebutuhan. Status **Selesai** berarti administrasi ditutup, bukan bangunan dinyatakan aman; hasil simulasi belum menjadi penilaian resmi.
+5. **Pelapor — lihat hasil proses.** Masuk kembali sebagai pelapor, buka **Laporan saya**, lalu pilih kartu bangunannya. Halaman detail menampilkan hal yang relevan untuk tahapnya: isi laporan saat masih Draf, dikirim, atau dikembalikan; **jadwal survei** setelah admin menyetujui dan menugaskan pesurvei; serta **hasil screening, tindak lanjut, dan dukungan** saat Selesai. Isi laporan selalu dapat dibuka lewat "Lihat isi laporan yang dikirim"; data dan lokasi diubah lewat **Lengkapi data** saat laporan berstatus Draf atau Perlu dilengkapi. Status **Selesai** berarti administrasi ditutup, bukan bangunan dinyatakan aman; hasil simulasi belum menjadi penilaian resmi.
 
 Laporan contoh pada beberapa tahap juga tersedia jika ingin langsung menjelajahi setiap peran. Setelah refresh, masuk kembali; data laporan bertahan selama sesi tab jika penyimpanan browser tersedia, tanpa sinkronisasi antarperangkat.
 

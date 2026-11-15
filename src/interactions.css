@@ -140,5 +140,5 @@
 /* Every control that gets a hover fill is rounded, never a hard box.
    :where() keeps this at zero specificity, so any explicit radius still wins. */
 :where(.sp-landing, .actor-login, .workspace) :where(button, summary) {
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
 }

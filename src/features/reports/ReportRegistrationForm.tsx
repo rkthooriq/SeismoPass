@@ -12,6 +12,18 @@ import type { BuildingPoint } from '../../lib/ownerProgress';
 import { clearBuildingPhotos } from '../../lib/buildingPhotos';
 import './owner-workspace.css';
 
+function fieldStep(key: string): number {
+  if (
+    [
+      'title',
+      'location',
+      ...reportBuildingFields.map(([name]) => name),
+    ].includes(key)
+  )
+    return 0;
+  return ['address', 'landmark', 'contactPhone'].includes(key) ? 1 : 2;
+}
+
 export default function ReportRegistrationForm({
   initial,
   reporterId,
@@ -40,6 +52,31 @@ export default function ReportRegistrationForm({
     [initial, reporterId, reportId],
   );
   const summary = useRef<HTMLDivElement>(null);
+  const visibleErrors = Object.entries(errors).filter(
+    ([key]) => fieldStep(key) === step,
+  );
+  function changeStep(next: number) {
+    setErrors({});
+    setStep(next);
+  }
+  function updateFieldError(event: FormEvent<HTMLFormElement>) {
+    const field = event.target;
+    if (
+      !(
+        field instanceof HTMLInputElement ||
+        field instanceof HTMLTextAreaElement
+      )
+    )
+      return;
+    if (!errors[field.name]) return;
+    const next = validateReportRegistration(readReport(event.currentTarget));
+    setErrors((current) => {
+      const updated = { ...current };
+      if (next[field.name]) updated[field.name] = next[field.name];
+      else delete updated[field.name];
+      return updated;
+    });
+  }
   function readReport(element: HTMLFormElement): Report {
     const form = new FormData(element);
     const read = (key: string) => String(form.get(key) ?? '').trim();
@@ -68,12 +105,8 @@ export default function ReportRegistrationForm({
     if (!formRef.current) return;
     const report = readReport(formRef.current);
     const all = validateReportRegistration(report);
-    const fields =
-      step === 0
-        ? ['title', 'location', ...reportBuildingFields.map(([key]) => key)]
-        : ['address', 'contactPhone'];
     const current = Object.fromEntries(
-      Object.entries(all).filter(([key]) => fields.includes(key)),
+      Object.entries(all).filter(([key]) => fieldStep(key) === step),
     );
     setErrors(current);
     if (Object.keys(current).length) {
@@ -89,27 +122,19 @@ export default function ReportRegistrationForm({
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const submitter = (event.nativeEvent as SubmitEvent).submitter;
-    const send =
-      submitter instanceof HTMLButtonElement && submitter.value === 'send';
+    const draft =
+      submitter instanceof HTMLButtonElement && submitter.value === 'draft';
+    if (!draft && step < 2) {
+      goNext();
+      return;
+    }
+    const send = !draft && step === 2;
     const report = readReport(event.currentTarget);
     setReview(report);
     const next = validateReportRegistration(report, !send);
     setErrors(next);
     if (Object.keys(next).length) {
-      const keys = Object.keys(next);
-      setStep(
-        keys.some((key) =>
-          [
-            'title',
-            'location',
-            ...reportBuildingFields.map(([name]) => name),
-          ].includes(key),
-        )
-          ? 0
-          : keys.some((key) => ['address', 'contactPhone'].includes(key))
-            ? 1
-            : 2,
-      );
+      setStep(Math.min(...Object.keys(next).map(fieldStep)));
       requestAnimationFrame(() => summary.current?.focus());
       return;
     }
@@ -126,6 +151,7 @@ export default function ReportRegistrationForm({
       ref={formRef}
       className="ws-panel report-form owner-registration"
       onSubmit={submit}
+      onChange={updateFieldError}
       noValidate
     >
       <div className="owner-section-title">
@@ -158,7 +184,7 @@ export default function ReportRegistrationForm({
                 type="button"
                 aria-current={step === index ? 'step' : undefined}
                 disabled={index > step}
-                onClick={() => setStep(index)}
+                onClick={() => changeStep(index)}
               >
                 <span>{index + 1}</span>
                 {label}
@@ -167,11 +193,18 @@ export default function ReportRegistrationForm({
           ),
         )}
       </ol>
-      {!!Object.keys(errors).length && (
-        <div ref={summary} tabIndex={-1} role="alert" className="ws-errors">
-          <strong>Periksa kembali isian.</strong>
+      {!!visibleErrors.length && (
+        <div
+          ref={summary}
+          tabIndex={-1}
+          role="alert"
+          className="ws-errors owner-validation"
+        >
+          <strong>
+            Periksa {visibleErrors.length} isian pada langkah ini.
+          </strong>
           <ul>
-            {Object.entries(errors).map(([key, error]) => (
+            {visibleErrors.map(([key, error]) => (
               <li key={key}>
                 <a
                   href={`#report-${key}`}
@@ -418,23 +451,23 @@ export default function ReportRegistrationForm({
           <button
             type="button"
             className="ws-secondary"
-            onClick={() => setStep(step - 1)}
+            onClick={() => changeStep(step - 1)}
           >
             Sebelumnya
           </button>
         )}
-        <button type="submit" value="draft" className="ws-secondary">
-          Simpan draf
-        </button>
         {step === 2 ? (
           <button type="submit" value="send" className="ws-primary">
             Simpan dan kirim laporan
           </button>
         ) : (
-          <button type="button" className="ws-primary" onClick={goNext}>
+          <button type="submit" value="next" className="ws-primary">
             Lanjutkan
           </button>
         )}
+        <button type="submit" value="draft" className="ws-secondary">
+          Simpan draf
+        </button>
         <button type="button" className="ws-secondary" onClick={onCancel}>
           Batal
         </button>

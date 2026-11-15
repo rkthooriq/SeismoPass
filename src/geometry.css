@@ -1,0 +1,681 @@
+/* One geometry hierarchy across public pages, account pages, and workspaces.
+   Panels own their padding; inset cards use the smaller shared radius.
+   Navigation capsules, avatars, and illustration silhouettes retain their shape. */
+#root
+  :is(.sp-landing, .workspace, .actor-login)
+  :is(
+    .eq-panel,
+    .dz-board,
+    .ws-panel,
+    .role-next-step,
+    .role-sidebar,
+    .ws-welcome,
+    .directory-dialog,
+    .owner-building-card,
+    .owner-sheet,
+    .owner-side-note,
+    .owner-list-empty,
+    .sp-roles article,
+    .sp-steps li,
+    .sp-development-note,
+    .sp-safety,
+    .sp-faq details
+  ) {
+  border-radius: var(--radius-panel);
+}
+#root
+  :is(.sp-landing, .workspace)
+  :is(
+    .eq-panel,
+    .dz-board,
+    .ws-panel,
+    .role-next-step,
+    .role-sidebar,
+    .ws-welcome,
+    .directory-dialog,
+    .owner-building-card,
+    .owner-sheet,
+    .owner-side-note,
+    .owner-list-empty,
+    .sp-roles article,
+    .sp-steps li,
+    .sp-development-note,
+    .sp-safety
+  ) {
+  padding: var(--space-panel);
+}
+#root .workspace .user-profile .ws-panel,
+#root .workspace .report-form.owner-registration {
+  padding: var(--space-panel);
+  border-radius: var(--radius-panel);
+}
+#root .actor-login .actor-entry.account-entry {
+  width: min(480px, calc(100% - 2 * var(--space-page)));
+  margin-inline: auto;
+  padding: var(--space-panel);
+  border-radius: var(--radius-panel);
+}
+#root .actor-login .account-links {
+  flex-wrap: wrap;
+  gap: 12px 16px;
+}
+
+/* Standalone rows inside an outer panel share one inset-card treatment. */
+#root
+  :is(.sp-landing, .workspace, .actor-login)
+  :is(
+    .dz-stat-card,
+    .dz-panel-body,
+    .dz-events li,
+    .dz-ladder li,
+    .dz-quality-grid > div,
+    .role-context,
+    .role-assignment-form,
+    .report-passport,
+    .report-journey li,
+    .report-visit-fields,
+    .pilot-phases li,
+    .pilot-indicators article,
+    .directory-filters,
+    .directory-preview,
+    .directory-file,
+    .directory-result,
+    .account-explore,
+    .account-result,
+    .account-errors,
+    .owner-card-next,
+    .owner-next-banner,
+    .owner-empty-note,
+    .owner-appointment,
+    .owner-program-empty,
+    .owner-review,
+    .owner-upload
+  ) {
+  border-radius: var(--radius-card);
+  padding: var(--space-card);
+}
+#root .workspace .role-stat-grid > a {
+  padding: var(--space-card);
+  border-radius: var(--radius-card);
+}
+
+/* Flush-edge content uses the same curve as its immediate container. */
+#root .workspace .report-item {
+  border-radius: var(--radius-card);
+}
+#root .workspace .report-item > summary {
+  padding: var(--space-card);
+  border-radius: calc(var(--radius-card) - 1px);
+}
+#root .workspace .report-item[open] > summary {
+  border-radius: calc(var(--radius-card) - 1px) calc(var(--radius-card) - 1px) 0
+    0;
+}
+#root .workspace .report-item > .report-detail {
+  padding: var(--space-card);
+  border-radius: 0 0 calc(var(--radius-card) - 1px)
+    calc(var(--radius-card) - 1px);
+}
+#root
+  :is(.sp-landing, .workspace)
+  :is(
+    .eq-map,
+    .eq-map-unavailable,
+    .owner-map,
+    .owner-photo,
+    .report-facts,
+    .directory-table-wrap
+  ) {
+  border-radius: var(--radius-card);
+}
+#root .workspace .owner-saved-note {
+  padding: var(--space-card);
+  border-radius: 0 var(--radius-card) var(--radius-card) 0;
+}
+
+/* Inputs and ordinary actions use the compact tier, independently of role. */
+#root
+  :is(.sp-landing, .workspace, .actor-login)
+  :is(
+    .sp-account-action,
+    .sp-button,
+    .ws-primary,
+    .ws-secondary,
+    .actor-enter,
+    .role-mobile-menu,
+    .directory-action,
+    input:not([type='checkbox']):not([type='radio']):not([type='range']):not(
+        [type='file']
+      ):not(.ws-search input),
+    select,
+    textarea
+  ) {
+  border-radius: var(--radius-control);
+  padding: var(--padding-control);
+}
+#root .sp-header .sp-nav-account .sp-account-action,
+#root
+  .workspace
+  :is(.owner-journey, .owner-registration)
+  :is(input:not([type='checkbox']):not([type='file']), select, textarea),
+#root .actor-login .account-field :is(input, select) {
+  border-radius: var(--radius-control);
+  padding: var(--padding-control);
+}
+/* Nested information boxes sit inside a card: one step smaller again. */
+#root
+  :is(.workspace, .sp-landing)
+  :is(
+    .ws-notice,
+    .ws-disclaimer,
+    .owner-inline-message,
+    .role-assignment-note,
+    .report-visit-info,
+    .dz-events dl,
+    .dz-empty
+  ) {
+  border-radius: var(--radius-box);
+  padding: var(--space-box);
+}
+#root .workspace .ws-search {
+  border-radius: var(--radius-control);
+  padding: var(--padding-control);
+}
+
+/* FAQ summaries and their bodies meet at a single shared outer curve. */
+#root .sp-landing .sp-faq details {
+  padding: 0;
+}
+#root .sp-landing .sp-faq summary {
+  padding: var(--space-panel);
+}
+#root .sp-landing .sp-faq details p {
+  padding: 0 var(--space-panel) var(--space-panel);
+}
+
+/* Embedded groups with no visible surface must not create a second inset. */
+#root .owner-journey .owner-sheet .report-passport {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+#root .workspace .report-passport .ws-disclaimer {
+  display: block;
+}
+#root .workspace .owner-registration .report-visit-fields {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+}
+#root .workspace .report-item .report-detail .report-passport {
+  padding: var(--space-box);
+  border-radius: var(--radius-box);
+}
+#root .workspace .owner-upload input[type='file'] {
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+}
+#root .actor-login .account-password input {
+  padding-right: 52px;
+}
+#root .workspace .report-passport .report-facts {
+  border-radius: var(--radius-box);
+}
+#root .owner-journey .owner-sheet .report-passport .report-facts {
+  border-radius: var(--radius-card);
+}
+#root
+  .sp-landing
+  .dz-stat-card
+  :is(.dz-tiles p, .dz-accordion details, .dz-accordion summary) {
+  border-radius: var(--radius-box);
+}
+#root .sp-landing .dz-stat-card :is(.dz-tiles p, .dz-accordion summary) {
+  padding: var(--space-box);
+}
+#root .sp-header .sp-nav-account {
+  border-left: 0;
+}
+
+/* Small screens keep buttons usable while preventing the account group
+   from competing with the wordmark for horizontal space. */
+@media (max-width: 380px) {
+  #root .sp-header .sp-nav-account .sp-account-action {
+    min-width: 64px;
+    padding-inline: 12px;
+  }
+}
+
+/* ---------- Data board (landing) ----------
+   Main cards: panel tier. Heading 8px to subtitle, 24px to content. */
+#root .sp-landing :is(.dz-board-title, .eq-panel h2) {
+  margin-bottom: var(--space-2);
+}
+#root .sp-landing .dz-board-subtitle {
+  margin-bottom: var(--space-6);
+}
+/* Accordion panels (Statistik) and history cards (Riwayat) share 16px gaps. */
+#root .sp-landing :is(.dz-stats, .dz-events) {
+  gap: var(--space-4);
+}
+#root .sp-landing .dz-events li {
+  column-gap: var(--space-4);
+  row-gap: var(--space-3);
+}
+/* Date and source columns keep one width, so boxes line up across cards
+   whatever the month name length. */
+#root .sp-landing .dz-events dl {
+  display: grid;
+  grid-template-columns: 9.5rem 6.5rem;
+  column-gap: var(--space-4);
+}
+#root .sp-landing .dz-filters {
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+/* Tabs keep their pill shape; every tab gets the same 12/20 padding. */
+#root .sp-landing .dz-tab-frame {
+  padding: var(--space-1);
+}
+#root .sp-landing .dz-board .dz-liquid-tabs .nimbus-item {
+  min-height: 44px;
+  padding: var(--space-3) var(--space-5);
+}
+#root .sp-landing .dz-board .dz-panel {
+  padding-top: var(--space-4);
+}
+/* Narrow cards (phone, or the two-column hero) move the info box under the
+   title instead of squeezing it; the trigger is the list width, not the
+   viewport. */
+#root .sp-landing .dz-events {
+  container-type: inline-size;
+}
+@container (max-width: 620px) {
+  #root .sp-landing .dz-events li {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  #root .sp-landing .dz-events dl {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+/* ---------- Page audit (all roles): tiers the earlier passes missed ---------- */
+
+/* Badges and status chips: one size everywhere (4px × 12px, pill). */
+#root .workspace :is(.ws-badge, .owner-chip, .directory-status) {
+  padding: var(--space-1) var(--space-3);
+}
+/* Small pill actions inside the data accordions share one size. */
+#root .sp-landing :is(.dz-more, .dz-stat-toggle) {
+  min-height: 40px;
+  padding: var(--space-2) var(--space-4);
+}
+/* Liquid navbars and tabs stay true pills on every page; tab padding sits on
+   the scale (12px × 20px for data tabs, 0 × 20px for workspace tabs). */
+#root
+  :is(.sp-landing, .workspace)
+  :is(.nimbus-item, .nimbus-glass, .nimbus-drop) {
+  border-radius: var(--radius-pill);
+}
+#root .workspace .nimbus-item {
+  padding-inline: var(--space-5);
+}
+/* Owner detail section switcher: 8px rail around 12/16 buttons. */
+#root .workspace .owner-detail-nav {
+  padding: var(--space-2);
+}
+#root .workspace .owner-detail-nav button {
+  padding: var(--space-3) var(--space-4);
+}
+
+/* Section rhythm: footers and dividers sit on the spacing scale. */
+#root .sp-landing .dz-human-impact {
+  padding-top: var(--space-4);
+}
+#root .sp-landing .sp-footer {
+  padding-block: var(--space-8);
+}
+#root .workspace .role-footer {
+  padding-block: var(--space-4) var(--space-2);
+}
+#root .workspace .ws-demo-strip {
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-6);
+}
+
+/* Login/register intro: symmetric padding. */
+#root .actor-login .actor-intro {
+  padding: var(--space-12);
+}
+@media (max-width: 600px) {
+  #root .actor-login .actor-intro {
+    padding: var(--space-8) var(--space-6);
+  }
+}
+
+/* Standalone RVS page header uses the page gutter on the scale. */
+#root .report-workspace .report-top {
+  padding: var(--space-3) var(--space-6);
+}
+@media (max-width: 600px) {
+  #root .report-workspace .report-top {
+    padding: var(--space-3) var(--space-4);
+  }
+}
+
+/* Admin sidebar: one-line labels so every icon sits on the same column. */
+#root .admin-workspace .role-layout {
+  grid-template-columns: 264px minmax(0, 1fr);
+}
+#root .admin-workspace .role-sidebar {
+  padding: var(--space-4);
+}
+#root .workspace .role-sidebar nav a {
+  gap: var(--space-3);
+  white-space: nowrap;
+}
+#root .workspace .role-sidebar nav a small {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-pill);
+}
+@media (max-width: 900px) {
+  #root .admin-workspace .role-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Profile: header chip, qualification box, facts list. */
+#root .workspace .account-profile-link {
+  padding: var(--space-1) var(--space-3) var(--space-1) var(--space-1);
+}
+#root .workspace .profile-qualification {
+  padding: var(--space-box);
+  border-radius: var(--radius-box);
+}
+#root .workspace .profile-facts {
+  padding-block: var(--space-4);
+}
+
+/* Directory table: header row is the only tinted row; name cells read as
+   normal body text, not as tiny column headers. */
+#root .workspace .directory-table :is(th, td) {
+  padding: var(--space-3) var(--space-4);
+}
+#root .workspace .directory-table tbody th {
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+  letter-spacing: 0;
+}
+
+/* RVS: fields in one row line up at the input even when a label wraps;
+   fieldsets nested in the editor card use the box tier. */
+#root .workspace .rvs-editor .report-registration-grid {
+  align-items: end;
+}
+#root .workspace .rvs-editor fieldset {
+  border-radius: var(--radius-box);
+}
+/* On the standalone RVS page the QR section is a sibling of the main panel,
+   so it is a panel too. Inside a report it stays a card. */
+#root .report-workspace .ws-main > .rvs-qr {
+  margin-top: var(--space-6);
+  padding: var(--space-panel);
+  border-radius: var(--radius-panel);
+}
+#root .report-workspace .ws-main > .rvs-qr {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-3);
+}
+#root .report-workspace .ws-main > .rvs-qr :is(h3, p) {
+  margin: 0;
+}
+
+/* Text disclosures (no padding, no surface) react with colour and underline
+   only. A hover fill on an unpadded summary would put the text against the
+   fill's edge; card-style summaries (report items, accordions, FAQ) keep it. */
+#root
+  :is(.sp-landing, .workspace)
+  :is(
+    .eq-scope,
+    .eq-other-events,
+    .dz-table,
+    .access-history,
+    .role-rvs-entry,
+    .role-passport-entry,
+    .rvs-saved,
+    .report-detail details:not([class]),
+    .report-passport details:not([class])
+  )
+  > summary:is(:hover, :focus-visible) {
+  background-color: transparent;
+  color: var(--action);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Figure cards: a large number needs more room than ordinary card text.
+   20px on wide screens, back to the card tier (16px) on phones. */
+#root .sp-landing .dz-board .dz-stat-card,
+#root .workspace .role-stat-grid > a {
+  padding: var(--space-card-figure);
+}
+/* The open Cianjur card keeps extra room at the bottom for its soil band. */
+#root .sp-landing .dz-board .dz-stat-card.is-open {
+  padding-bottom: calc(var(--space-card-figure) + var(--space-2));
+}
+@media (max-width: 600px) {
+  #root .sp-landing .dz-board .dz-stat-card,
+  #root .workspace .role-stat-grid > a {
+    padding: var(--space-card);
+  }
+}
+
+/* Grid detail bodies keep children inside their padding: without a bounded
+   column, one unbreakable child widened the column past the right padding. */
+#root .workspace .report-item > .report-detail {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+/* Registration stepper: three equal steps, each a padded box, so the number
+   badge never touches a filled edge (current, hover, or focus).
+   Box tier: 12px radius, 12px × 16px padding, 8px badge-to-label gap. */
+#root .workspace .owner-registration .owner-form-steps {
+  gap: var(--space-3);
+  margin-block: var(--space-6);
+}
+/* Same surface language as the other cards and the sidebar selection:
+   glass fill and soft shadow, no outline border. */
+#root .workspace .owner-form-steps button {
+  min-height: 48px;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-box);
+  background: var(--glass-bg-strong);
+  box-shadow: 0 6px 18px -12px rgb(59 42 30 / 0.28);
+}
+#root .workspace .owner-form-steps .is-current button {
+  background: var(--glass-cream);
+  box-shadow:
+    inset 0 1px 0 var(--glass-edge),
+    0 6px 18px -12px rgb(59 42 30 / 0.32);
+}
+#root .workspace .owner-form-steps .is-complete button {
+  color: var(--ink);
+}
+#root .workspace .owner-form-steps .is-complete button > span {
+  border-color: var(--action);
+  color: var(--action);
+}
+@media (max-width: 600px) {
+  #root .workspace .owner-form-steps button {
+    padding: var(--space-2) var(--space-3);
+  }
+}
+
+/* Form sections: heading 8px to its hint, 24px between other blocks. */
+#root .workspace .owner-registration .owner-form-section {
+  gap: 0;
+}
+#root .workspace .owner-registration .owner-form-section > * {
+  margin-block: 0;
+}
+#root .workspace .owner-registration .owner-form-section > * + * {
+  margin-top: var(--space-6);
+}
+#root .workspace .owner-registration .owner-form-section > h3 + p {
+  margin-top: var(--space-2);
+}
+
+/* ---------- Borderless surfaces (all pages) ----------
+   Panels, cards, boxes, notices, and badges are separated by fill and shadow,
+   not by outline borders. Form fields (input, select, textarea, search) keep
+   their border so people can see where to type; dividers between sections
+   (single top/bottom lines) stay. */
+#root
+  :is(.sp-landing, .workspace, .actor-login)
+  :is(
+    .eq-panel,
+    .dz-board,
+    .dz-tab-frame,
+    .ws-panel,
+    .role-next-step,
+    .role-sidebar,
+    .role-context,
+    .owner-sheet,
+    .owner-building-card,
+    .owner-next-banner,
+    .owner-detail-nav,
+    .owner-saved-note,
+    .owner-review,
+    .owner-appointment,
+    .owner-program-empty,
+    .owner-empty-note,
+    .sp-roles article,
+    .sp-steps li,
+    .sp-safety,
+    .sp-development-note,
+    .sp-faq details,
+    .actor-entry,
+    .report-item,
+    .report-journey li,
+    .report-passport,
+    .report-qr-preview,
+    .report-visit-fields,
+    .role-assignment-form,
+    .role-assignment-note,
+    .role-stat-grid > a,
+    .pilot-phases li,
+    .pilot-indicators article,
+    .rvs-editor,
+    .rvs-editor fieldset,
+    .rvs-observations,
+    .rvs-result,
+    .rvs-alert,
+    .eq-map,
+    .directory-filters,
+    .directory-table-wrap,
+    .ws-disclaimer,
+    .ws-notice,
+    .ws-errors,
+    .account-errors,
+    .ws-badge,
+    .owner-chip,
+    .directory-status,
+    .nimbus-glass
+  ) {
+  border: 0;
+}
+
+/* Cards that sit on a panel get the shared soft shadow in place of the line. */
+#root
+  :is(.sp-landing, .workspace)
+  :is(
+    .report-item,
+    .owner-building-card,
+    .role-stat-grid > a,
+    .sp-steps li,
+    .report-journey li,
+    .pilot-phases li,
+    .pilot-indicators article,
+    .rvs-editor,
+    .report-qr-preview,
+    .role-assignment-form,
+    .directory-filters,
+    .eq-map
+  ) {
+  box-shadow: var(--shadow-card);
+}
+
+/* Grouping boxes inside a card: a quiet fill instead of an outline. */
+#root
+  .workspace
+  :is(
+    .rvs-editor fieldset,
+    .rvs-observations,
+    .report-visit-fields,
+    .role-assignment-note,
+    .role-context
+  ) {
+  background: rgb(243 231 214 / 0.45);
+}
+
+/* Notices: fill only, no left bar. Errors use a warmer fill so they still
+   stand out; their heading names the problem, so colour is not the only cue. */
+#root :is(.sp-landing, .workspace) :is(.ws-disclaimer, .ws-notice, .rvs-alert),
+#root .workspace .owner-saved-note {
+  background: var(--fill-note);
+  box-shadow: none;
+}
+#root :is(.workspace, .actor-login) :is(.ws-errors, .account-errors) {
+  background: var(--fill-alert);
+  box-shadow: none;
+}
+#root .workspace .owner-saved-note {
+  border-radius: var(--radius-box);
+}
+
+/* Status badges: told apart by fill, not by solid/dashed outlines. */
+#root .workspace .status-complete {
+  background: var(--surface);
+  color: var(--ink);
+}
+#root .workspace .status-attention {
+  background: var(--fill-attention);
+  color: var(--ink);
+  font-weight: 650;
+}
+#root .workspace .status-progress {
+  background: var(--action);
+  color: var(--on-action);
+}
+#root .workspace :is(.ws-badge, .owner-chip, .directory-status) {
+  box-shadow: none;
+}
+#root .workspace :is(.ws-badge:not([class*='status-']), .owner-chip) {
+  background: var(--surface);
+}
+#root .workspace .directory-status.is-active {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* Containers focused by script (error summaries, headings with tabindex=-1)
+   are not interactive: screen readers still move to them, but no ring is
+   drawn that would read as a border. */
+#root [tabindex='-1']:focus,
+#root [tabindex='-1']:focus-visible {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+/* The registration form's address fieldset is part of the form itself, not a
+   nested box: no fill, so its unpadded content never meets a fill edge. */
+#root .workspace .owner-registration .report-visit-fields {
+  background: transparent;
+}

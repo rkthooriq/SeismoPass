@@ -1,4 +1,8 @@
-import { demoAccounts, demoPassword } from './reportDemo.ts';
+import {
+  demoAccounts,
+  demoPassword,
+  refreshSampleReports,
+} from './reportDemo.ts';
 import type { DemoAccount, Report } from './reportDemo';
 import { restoreReports } from './reportSession.ts';
 import type { AccessDecision, AccountStatus } from './surveyorAccess';
@@ -117,6 +121,7 @@ export function serializeDemoSession(
 ): string {
   return JSON.stringify({
     version: 2,
+    examplesVersion: 1,
     accounts: accounts.map((account) => ({ ...account, password: undefined })),
     reports,
   });
@@ -145,7 +150,14 @@ export function restoreDemoSession(
         .map((account) => account.id),
     );
     if (reports === marker) return fallback;
-    return { accounts, reports, invalid: false };
+    return {
+      accounts,
+      reports:
+        data.examplesVersion === undefined
+          ? refreshSampleReports(reports)
+          : reports,
+      invalid: false,
+    };
   } catch {
     return fallback;
   }

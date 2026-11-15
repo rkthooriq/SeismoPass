@@ -1,6 +1,6 @@
 .owner-journey,
 .owner-registration {
-  --owner-radius: 26px;
+  --owner-radius: var(--radius-panel);
   --owner-soft: rgb(243 231 214 / 0.65);
   color: var(--ink);
 }
@@ -37,30 +37,6 @@
   font-weight: 600;
   margin-bottom: 12px;
 }
-.owner-intro {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 28px;
-  padding: clamp(22px, 3vw, 38px);
-  border: 1px solid var(--glass-line);
-  border-radius: var(--owner-radius);
-  background: linear-gradient(
-    115deg,
-    rgb(255 255 255 / 0.8),
-    rgb(243 231 214 / 0.65)
-  );
-  box-shadow: var(--glass-shadow);
-}
-.owner-intro h2 {
-  font-size: clamp(28px, 3vw, 40px);
-  max-width: 21ch;
-}
-.owner-intro p {
-  max-width: 53ch;
-  color: var(--muted);
-  margin-bottom: 22px;
-}
 .owner-building-mark {
   flex: 0 0 auto;
   width: clamp(140px, 23vw, 260px);
@@ -68,35 +44,6 @@
 }
 .owner-building-mark.is-small {
   width: 100px;
-}
-.owner-journey .owner-steps {
-  padding: 20px 24px;
-  border-radius: var(--owner-radius);
-  margin: 0;
-}
-.owner-journey .owner-steps h2 {
-  font-size: 20px;
-}
-.owner-journey .owner-steps ul {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-.owner-journey .owner-steps li {
-  min-width: 0;
-  align-items: start;
-  padding: 14px;
-  border-radius: 16px;
-  background: rgb(255 255 255 / 0.45);
-  border: 1px solid var(--line);
-}
-.owner-journey .owner-steps li small {
-  font-size: 12px;
-  line-height: 1.6;
-}
-.owner-journey .owner-turn {
-  white-space: nowrap;
-  border-radius: 999px;
 }
 .owner-section-title {
   display: flex;
@@ -114,13 +61,37 @@
   color: var(--muted);
   font-size: 13px;
 }
+/* One toolbar row: search grows, the filter pill keeps its size. */
 .owner-list-toolbar {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(150px, 240px);
-  gap: 16px;
-  margin-bottom: 22px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
 }
-.owner-list-toolbar label,
+/* Search keeps at least 240px; when the row is too narrow the filter pill
+   wraps below instead of squeezing the search. */
+.owner-list-toolbar .owner-search {
+  flex: 1 1 240px;
+  min-width: 0;
+}
+.owner-list-toolbar .owner-search input {
+  width: 100%;
+}
+.owner-list-count {
+  margin: 0 0 var(--space-4);
+  color: var(--muted);
+  font-size: 13px;
+}
+.owner-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.owner-list-toolbar > label,
 .owner-coordinate-fields label,
 .owner-form label {
   display: grid;
@@ -137,7 +108,7 @@
   min-width: 0;
   padding: 12px 14px;
   border: 1px solid var(--control-border);
-  border-radius: 13px;
+  border-radius: var(--radius-md);
   background: rgb(255 252 247 / 0.8);
   color: var(--ink);
   font: inherit;
@@ -180,7 +151,7 @@
   place-items: center;
   width: 44px;
   height: 44px;
-  border-radius: 15px;
+  border-radius: var(--radius-lg);
   background: var(--sand);
   color: var(--action);
   font-size: 27px;
@@ -191,7 +162,7 @@
   justify-content: center;
   padding: 6px 11px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgb(255 249 240 / 0.7);
   font-size: 12px;
   color: var(--muted);
@@ -211,7 +182,7 @@
   gap: 6px;
   padding: 16px;
   background: var(--owner-soft);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   margin-top: auto;
 }
 .owner-card-next span {
@@ -286,7 +257,7 @@
   gap: 20px;
   padding: 20px 24px;
   border: 1px solid var(--line);
-  border-radius: 20px;
+  border-radius: var(--radius-xl);
   background: var(--owner-soft);
 }
 .owner-next-banner > span {
@@ -310,7 +281,7 @@
   overflow-x: auto;
   padding: 7px;
   border: 1px solid var(--glass-line);
-  border-radius: 22px;
+  border-radius: var(--radius-xl);
   background: var(--glass-bg-strong);
   box-shadow: var(--glass-shadow);
   scrollbar-width: thin;
@@ -319,7 +290,7 @@
 .owner-detail-nav button {
   flex: 1 0 auto;
   border: 1px solid transparent;
-  border-radius: 17px;
+  border-radius: var(--radius-lg);
   background: transparent;
   color: var(--muted);
   padding: 13px 16px;
@@ -343,6 +314,30 @@
   grid-template-columns: minmax(0, 1.6fr) minmax(240px, 1fr);
   gap: 22px;
   align-items: start;
+}
+/* Report preview without notes or screening: one full-width column. */
+.owner-detail-grid.is-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+/* Closed report: result and follow-up side by side, equal weight. */
+.owner-detail-grid.is-pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-6);
+  align-items: stretch;
+}
+.owner-closed {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+.owner-closed h2 {
+  margin: 0;
+  font-size: 20px;
+}
+.owner-closed > p,
+.owner-closed .owner-form,
+.owner-closed .owner-footnote {
+  margin: 0;
 }
 .owner-sheet {
   min-width: 0;
@@ -371,26 +366,8 @@
   padding: 0;
 }
 .owner-sheet .report-facts {
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
-}
-.owner-side-note {
-  padding: 26px;
-  border-radius: var(--owner-radius);
-  background: var(--owner-soft);
-  border: 1px solid var(--line);
-}
-.owner-side-note p,
-.owner-side-note li {
-  font-size: 14px;
-  color: var(--muted);
-  line-height: 1.8;
-}
-.owner-side-note :is(ul, ol) {
-  padding-left: 20px;
-  margin-block: 16px 22px;
-  display: grid;
-  gap: 12px;
 }
 .owner-activity {
   list-style: none;
@@ -438,7 +415,7 @@
   padding: 22px;
   margin-block: 20px;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: var(--owner-soft);
 }
 .owner-empty-symbol {
@@ -486,7 +463,7 @@
 }
 .owner-journey :is(.ws-primary, .ws-secondary),
 .owner-registration :is(.ws-primary, .ws-secondary) {
-  border-radius: 13px;
+  border-radius: var(--radius-md);
   min-height: 44px;
   white-space: normal;
   text-align: center;
@@ -496,7 +473,7 @@
   gap: 5px;
   padding: 18px;
   border-left: 3px solid var(--control-border);
-  border-radius: 0 14px 14px 0;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
   background: rgb(243 231 214 / 0.45);
   margin-block: 22px;
 }
@@ -517,7 +494,7 @@
 .owner-inline-message {
   padding: 12px 16px;
   border: 1px solid var(--line);
-  border-radius: 13px;
+  border-radius: var(--radius-md);
   background: #fff9f0;
   color: var(--muted);
   font-size: 13px;
@@ -539,7 +516,7 @@
   margin-top: 20px;
   padding: 22px;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: var(--owner-soft);
 }
 .owner-appointment > span {
@@ -553,35 +530,6 @@
 .owner-appointment > strong {
   font-size: 13px;
   font-weight: 500;
-}
-.owner-technical-list {
-  display: grid;
-}
-.owner-technical-list > div {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 14px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 13px;
-}
-.owner-technical-list span {
-  color: var(--muted);
-}
-.owner-program-empty {
-  padding: 24px;
-  border: 1px dashed var(--control-border);
-  border-radius: 18px;
-  background: var(--owner-soft);
-  margin-top: 24px;
-}
-.owner-program-empty h3 {
-  margin-top: 16px;
-}
-.owner-program-empty p {
-  font-size: 14px;
-  color: var(--muted);
 }
 .owner-location {
   display: grid;
@@ -601,7 +549,7 @@
 .owner-map {
   height: 290px;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   isolation: isolate;
   z-index: 0;
   background: var(--sand);
@@ -614,7 +562,7 @@
 .owner-map .leaflet-bar {
   border: 1px solid var(--line);
   box-shadow: var(--glass-shadow);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 .owner-map .leaflet-bar a {
@@ -669,7 +617,7 @@
 .owner-photo {
   min-width: 0;
   border: 1px solid var(--line);
-  border-radius: 15px;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   margin: 0;
   background: rgb(255 255 255 / 0.6);
@@ -700,7 +648,7 @@
   gap: 8px;
   padding: 22px;
   border: 1px dashed var(--control-border);
-  border-radius: 17px;
+  border-radius: var(--radius-lg);
   background: rgb(255 252 247 / 0.7);
   text-align: center;
 }
@@ -734,7 +682,7 @@
 .workspace .report-form.owner-registration {
   display: block;
   padding: clamp(22px, 3vw, 36px);
-  border-radius: 26px;
+  border-radius: var(--radius-xl);
 }
 .owner-registration > .owner-section-title {
   margin-bottom: 12px;
@@ -805,6 +753,8 @@
   background: transparent;
 }
 .owner-registration .report-visit-fields legend {
+  /* No legend inset, so the heading shares the labels' left edge. */
+  padding: 0;
   font-family: var(--font-heading);
   font-size: 21px;
   letter-spacing: -0.025em;
@@ -815,10 +765,24 @@
   padding-top: 24px;
   margin-top: 28px;
 }
+.workspace .owner-registration .owner-validation {
+  padding: var(--space-card);
+  margin-block: 0 24px;
+  border-radius: var(--radius-box);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.owner-validation ul {
+  margin-block: 8px 0;
+}
+.owner-validation a {
+  text-underline-offset: 3px;
+}
 .owner-review {
   padding: 22px;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: var(--owner-soft);
 }
 .owner-review h3 {
@@ -832,48 +796,21 @@
   color: var(--muted);
 }
 @media (max-width: 1000px) {
-  .owner-journey .owner-steps ul {
+  .owner-detail-grid,
+  .owner-detail-grid.is-pair {
     grid-template-columns: 1fr;
-  }
-  .owner-detail-grid {
-    grid-template-columns: 1fr;
-  }
-  .owner-side-note {
-    padding: 22px;
   }
 }
 @media (max-width: 650px) {
   .owner-journey {
     gap: 22px;
   }
-  .owner-intro {
-    gap: 0;
-    padding: 24px;
-    position: relative;
-    overflow: hidden;
-  }
-  .owner-intro > div {
-    position: relative;
-    z-index: 1;
-  }
-  .owner-intro > svg {
-    position: absolute;
-    width: 135px;
-    right: -20px;
-    bottom: -14px;
-    opacity: 0.2;
-  }
-  .owner-intro h2 {
-    font-size: 30px;
-  }
-  .owner-intro p {
-    font-size: 13px;
-  }
   .owner-building-grid,
   .owner-list-toolbar,
   .owner-form-grid {
     grid-template-columns: 1fr;
   }
+
   .owner-building-card {
     padding: 22px;
   }
@@ -929,12 +866,324 @@
 }
 @supports not (backdrop-filter: blur(1px)) {
   .owner-building-card,
-  .owner-sheet,
-  .owner-intro {
+  .owner-sheet {
     background: #fffaf3;
   }
 }
 .owner-saved-note .owner-note-hint {
   font-size: 13px;
   font-style: italic;
+}
+
+/* In the preview photos are thumbnails, not full-width panels. */
+.owner-sent-report .owner-photo-grid {
+  grid-template-columns: repeat(auto-fill, minmax(140px, 220px));
+}
+
+/* ---------- Owner detail: stage-led page, no tabs ----------
+   Tiers from docs/ui-design-system.md: panel 24, card 16, box 12, control 8. */
+.owner-detail-body {
+  display: grid;
+  gap: var(--space-6);
+  min-width: 0;
+}
+
+/* Sent-report preview: two group cards side by side, label/value rows. */
+.owner-sent-report {
+  display: grid;
+  gap: var(--space-6);
+  align-content: start;
+}
+.owner-sent-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+}
+.owner-sent-head h2 {
+  margin: 0 0 var(--space-2);
+}
+.owner-sent-head p {
+  margin: 0;
+  color: var(--muted);
+}
+/* Preview steps mirror the form: same names, order, and number badge as
+   the stepper. Steps 1 and 2 side by side, step 3 full width. */
+.owner-preview-steps {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.owner-preview-step {
+  container-type: inline-size;
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+  min-width: 0;
+  padding: var(--space-card);
+  border-radius: var(--radius-card);
+  background: rgb(243 231 214 / 0.45);
+}
+.owner-preview-step.is-wide {
+  grid-column: 1 / -1;
+}
+.owner-preview-step h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 16px;
+}
+.owner-preview-step h3 > span {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--action);
+  color: var(--on-action);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.owner-empty-value {
+  color: var(--muted);
+  font-weight: 500;
+}
+.owner-missing {
+  display: inline-block;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-xs);
+  background: var(--fill-alert);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
+.owner-consents {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-weight: 500;
+}
+.owner-consents li {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  gap: var(--space-2);
+  color: var(--muted);
+}
+.owner-consents li.is-given {
+  color: var(--ink);
+}
+.owner-consents li.is-given > span {
+  color: var(--action);
+  font-weight: 700;
+}
+.owner-consents li.is-missing {
+  color: var(--ink);
+}
+.owner-preview-step .owner-photos {
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--line);
+}
+@media (max-width: 760px) {
+  .owner-preview-steps {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.owner-sent-facts {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+}
+.owner-sent-facts > div {
+  display: grid;
+  grid-template-columns: minmax(0, 9.5rem) minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+}
+.owner-sent-facts dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+.owner-sent-facts dd {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.owner-sent-facts a {
+  color: var(--action);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Folded report: a panel whose whole summary row is the padded target. */
+.owner-report-fold {
+  border-radius: var(--radius-panel);
+  background: var(--glass-bg);
+  box-shadow: var(--glass-shadow);
+}
+.owner-report-fold > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-panel);
+  border-radius: var(--radius-panel);
+  list-style: none;
+  cursor: pointer;
+}
+.owner-report-fold > summary::-webkit-details-marker {
+  display: none;
+}
+.owner-report-fold[open] > summary {
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+}
+.owner-report-fold > summary > span:first-child {
+  display: grid;
+  gap: var(--space-1);
+}
+.owner-report-fold > summary small {
+  color: var(--muted);
+  font-size: 13px;
+}
+.owner-fold-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  font-size: 18px;
+  transition: transform 180ms ease;
+}
+.owner-report-fold[open] .owner-fold-icon {
+  transform: rotate(90deg);
+}
+.owner-report-fold > .owner-sent-report {
+  padding: 0 var(--space-panel) var(--space-panel);
+}
+
+/* Back link: a control-tier button, so its hover fill has room around text. */
+.owner-detail .owner-back {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 40px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--glass-bg-strong);
+  box-shadow: var(--shadow-card);
+  color: var(--action);
+  font-weight: 600;
+}
+
+/* Building card: only the "Lihat laporan" row opens the report, so the
+   hover and focus feedback appear on that row alone, not on the card. */
+.owner-building-card .owner-open-button {
+  width: 100%;
+  margin-top: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-box);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 180ms ease;
+}
+.owner-building-card .owner-open-button span {
+  transition: transform 180ms ease;
+}
+.owner-building-card .owner-open-button:hover {
+  background: var(--hover-surface);
+}
+.owner-building-card .owner-open-button:hover span {
+  transform: translate(2px, -2px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .owner-building-card .owner-open-button,
+  .owner-building-card .owner-open-button span,
+  .owner-fold-icon {
+    transition: none;
+  }
+}
+
+/* Owner list filter: a row of pill chips like a filter bar. "Semua" and
+   one-stage groups are toggle pills; groups with several stages are
+   FilterMenu pills opening a checkbox panel. All share the pill control tier:
+   44px target, 8 × 16 padding, count badge, cream fill when active. */
+.owner-filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
+}
+
+/* One building in focus: while a report detail or its edit form is open, the
+   page title and the Laporan saya / Buat laporan nav step aside; the way out
+   is "Semua bangunan" (or Batal in the form). */
+.owner-workspace:has(:is(.owner-detail, #edit-report))
+  :is(.role-page-heading, .workspace-section-nav) {
+  display: none;
+}
+/* Rows follow their own card's width: label beside value when there is
+   room, label above value in a narrow card or on a phone. */
+@container (max-width: 420px) {
+  .owner-sent-facts > div {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-1);
+  }
+}
+
+/* Read-only pin map in the preview: box tier inside the step card. */
+.owner-preview-map {
+  height: 200px;
+  border-radius: var(--radius-box);
+  overflow: hidden;
+  background: var(--surface);
+}
+.owner-preview-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Notes to the owner: compact box-tier notices above the page content
+   (padding 12 × 16, radius 12), not a side panel. */
+.owner-notes {
+  display: grid;
+  gap: var(--space-2);
+}
+#root .workspace .owner-notes .owner-saved-note {
+  display: grid;
+  gap: var(--space-1);
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-box);
+}
+.owner-notes .owner-saved-note strong {
+  font-size: 14px;
+}
+.owner-notes .owner-saved-note p {
+  margin: 0;
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.owner-notes .owner-saved-note .owner-note-hint {
+  color: var(--muted);
+  font-size: 13px;
+  font-style: normal;
+}
+
+.owner-schedule-note {
+  margin-top: var(--space-4);
 }

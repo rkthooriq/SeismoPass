@@ -1,40 +1,33 @@
 import { useId, useRef, useState } from 'react';
+import type React from 'react';
 import type { FormEvent } from 'react';
+import {
+  isSampleReport,
+  validateReportRegistration,
+} from '../../lib/reportDemo';
 import type { DemoAccount, Report } from '../../lib/reportDemo';
 import type { OwnerAction } from '../../lib/ownerProgress';
 import { timeSlots } from '../../lib/ownerProgress';
 import {
+  ownerDetailFocus,
+  ownerStageLabel,
   ownerStep,
+  ownerFilterGroups,
   reviewNoteLabel,
   sortByOwnerTurn,
 } from '../../lib/ownerNextStep';
-import OwnerNextSteps from './OwnerNextSteps';
 import ReportPassport from './ReportPassport';
-import BuildingLocation from './BuildingLocation';
+import FilterMenu from '../../components/FilterMenu';
 import BuildingPhotos from './BuildingPhotos';
+import PointPreviewMap from './PointPreviewMap';
 import './owner-workspace.css';
 
-const tabs = [
-  'Perjalanan',
-  'Lokasi & foto',
-  'Jadwal survei',
-  'Tindak lanjut',
-  'Dukungan',
-] as const;
+// Lokasi, foto, and the building data are entered in Buat laporan. The
+// detail page has no tabs; ownerDetailFocus picks its main content per stage.
 const followUpLabels = {
   consultation: 'Ingin berkonsultasi',
   explanation: 'Butuh penjelasan',
   later: 'Melanjutkan nanti',
-};
-const supportLabels = {
-  consultation: 'Pendampingan teknis',
-  'cost-information': 'Informasi biaya',
-  'funding-information': 'Informasi pembiayaan',
-};
-const workLabels = {
-  preparing: 'Persiapan',
-  ongoing: 'Sedang berlangsung',
-  'reported-complete': 'Selesai menurut pelapor',
 };
 const displayDate = (value: string) =>
   new Date(`${value}T00:00:00`).toLocaleDateString('id-ID', {
@@ -165,9 +158,8 @@ function Schedule({
   const [message, setMessage] = useState('');
   const appointment = report.appointment;
   const available = report.ownerProgress?.availability;
-  const canRequest = ['Dikirim', 'Siap disurvei', 'Ditugaskan'].includes(
-    report.status,
-  );
+  // Availability is asked only after the admin accepts the report.
+  const canRequest = ['Siap disurvei', 'Ditugaskan'].includes(report.status);
   const surveyor = accounts.find((person) => person.id === report.assignee);
   const id = useId();
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -186,7 +178,7 @@ function Schedule({
     );
   }
   return (
-    <div className="owner-detail-grid">
+    <div className="owner-detail-grid is-single">
       <section className="owner-sheet">
         <div className="owner-section-title">
           <div>
@@ -331,43 +323,20 @@ function Schedule({
             {message}
           </p>
         )}
-      </section>
-      <aside className="owner-side-note">
-        <h3>Siapkan sebelum kunjungan</h3>
-        <ul>
-          <li>Pastikan alamat dan pin bangunan sesuai.</li>
-          <li>Koordinasikan akses dengan penghuni atau pengelola.</li>
-          <li>Siapkan foto atau catatan yang sudah dimiliki.</li>
-          <li>Jangan memasuki bagian bangunan yang membahayakan.</li>
-        </ul>
-        <p>
-          Nama petugas dan konfirmasi jadwal tercatat di sini. Tidak ada
-          notifikasi email atau pesan otomatis pada versi ini.
+        <p className="owner-footnote owner-schedule-note">
+          Jangan memasuki bagian bangunan yang membahayakan. Tidak ada
+          notifikasi email atau pesan otomatis; jadwal dan nama pesurvei
+          diperbarui di halaman ini.
         </p>
-      </aside>
+      </section>
     </div>
   );
 }
 
-function SavedProgress({
-  title,
-  value,
-  note,
-}: {
-  title: string;
-  value?: string;
-  note?: string;
-}) {
-  return value ? (
-    <div className="owner-saved-note">
-      <span>{title}</span>
-      <strong>{value}</strong>
-      <p>{note}</p>
-    </div>
-  ) : null;
-}
-
-function FollowUp({
+// After the administration is closed: what is (not yet) known, and one place
+// to note what the owner needs next. Expert results stay "not available";
+// nothing here is a recommendation, referral, or programme application.
+function Closed({
   report,
   save,
 }: {
@@ -376,258 +345,338 @@ function FollowUp({
 }) {
   const [message, setMessage] = useState('');
   const id = useId();
-  const progress = report.ownerProgress;
-  const enabled = report.status === 'Selesai';
-  function submit(
-    event: FormEvent<HTMLFormElement>,
-    type: 'follow-up' | 'work',
-  ) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const note = String(form.get('note'));
-    const ok = save(
-      type === 'follow-up'
-        ? { type, choice: String(form.get('choice')), note }
-        : { type, stage: String(form.get('stage')), note },
-    );
-    setMessage(
-      ok
-        ? 'Catatan tersimpan. Keputusan dan verifikasi teknis tetap memerlukan ahli.'
-        : 'Catatan belum dapat disimpan. Periksa status dan isian.',
-    );
-  }
-  return (
-    <div className="owner-detail-grid">
-      <section className="owner-sheet">
-        <span className="owner-kicker">Sesudah pencatatan survei</span>
-        <h2>Langkah berikutnya, lebih jelas</h2>
-        <EmptyNotice title="Hasil tinjauan ahli belum tersedia">
-          Penutupan administrasi tidak mengesahkan hasil simulasi. Prioritas
-          pemeriksaan, rekomendasi teknis, serta rencana retrofit menunggu
-          penilaian ahli yang berwenang.
-        </EmptyNotice>
-        <div className="owner-technical-list">
-          <div>
-            <span>Penilaian ahli</span>
-            <strong>Belum tersedia</strong>
-          </div>
-          <div>
-            <span>Rujukan pemeriksaan</span>
-            <strong>Belum ditentukan</strong>
-          </div>
-          <div>
-            <span>Rencana perkuatan</span>
-            <strong>Menunggu evaluasi ahli</strong>
-          </div>
-        </div>
-        {!enabled && (
-          <p className="owner-inline-message">
-            Pilihan tindak lanjut dapat dicatat setelah administrasi laporan
-            selesai. Saat ini: {report.status}.
-          </p>
-        )}
-        <form
-          className="owner-form"
-          onSubmit={(event) => submit(event, 'follow-up')}
-        >
-          <fieldset disabled={!enabled}>
-            <legend>Apa yang kamu butuhkan?</legend>
-            <label htmlFor={`${id}-choice`}>
-              Pilihan tindak lanjut
-              <select
-                id={`${id}-choice`}
-                name="choice"
-                defaultValue={progress?.followUp?.choice ?? 'consultation'}
-              >
-                {Object.entries(followUpLabels).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor={`${id}-follow-note`}>
-              Catatan kebutuhan
-              <textarea
-                id={`${id}-follow-note`}
-                name="note"
-                rows={3}
-                required
-                maxLength={1000}
-                defaultValue={progress?.followUp?.note}
-                placeholder="Contoh: saya perlu penjelasan tentang pemeriksaan lanjutan."
-              />
-            </label>
-            <button className="ws-primary">Simpan pilihan tindak lanjut</button>
-          </fieldset>
-        </form>
-        <SavedProgress
-          title="Pilihanmu"
-          value={progress?.followUp && followUpLabels[progress.followUp.choice]}
-          note={progress?.followUp?.note}
-        />
-        {message && (
-          <p role="status" className="owner-inline-message">
-            {message}
-          </p>
-        )}
-      </section>
-      <aside className="owner-sheet owner-work-note">
-        <h3>Catatan pekerjaan pemilik</h3>
-        <p>
-          Jika persiapan atau pekerjaan sudah dilakukan, catat perkembangannya
-          di sini. Catatan ini tidak menjadi rekomendasi maupun bukti kelayakan
-          bangunan.
-        </p>
-        <form
-          className="owner-form"
-          onSubmit={(event) => submit(event, 'work')}
-        >
-          <fieldset disabled={!enabled}>
-            <legend>Perkembangan yang kamu laporkan</legend>
-            <label htmlFor={`${id}-stage`}>
-              Tahap pekerjaan
-              <select
-                id={`${id}-stage`}
-                name="stage"
-                defaultValue={progress?.work?.stage ?? 'preparing'}
-              >
-                {Object.entries(workLabels).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor={`${id}-work-note`}>
-              Catatan
-              <textarea
-                id={`${id}-work-note`}
-                name="note"
-                required
-                rows={3}
-                maxLength={1000}
-                defaultValue={progress?.work?.note}
-                placeholder="Catat kegiatan contoh dan tanggalnya."
-              />
-            </label>
-            <button className="ws-secondary">Simpan catatan pekerjaan</button>
-          </fieldset>
-        </form>
-        <SavedProgress
-          title="Belum diverifikasi ahli"
-          value={progress?.work && workLabels[progress.work.stage]}
-          note={progress?.work?.note}
-        />
-        <p className="owner-footnote">
-          Perencanaan, pelaksanaan, dan verifikasi perkuatan memerlukan tenaga
-          yang berwenang.
-        </p>
-      </aside>
-    </div>
-  );
-}
-
-function Support({
-  report,
-  save,
-}: {
-  report: Report;
-  save: (action: OwnerAction) => boolean;
-}) {
-  const [message, setMessage] = useState('');
-  const id = useId();
-  const saved = report.ownerProgress?.support;
+  const saved = report.ownerProgress?.followUp;
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const ok = save({
-      type: 'support',
-      need: String(form.get('need')),
+      type: 'follow-up',
+      choice: String(form.get('choice')),
       note: String(form.get('note')),
     });
     setMessage(
       ok
-        ? 'Kebutuhan dukungan dicatat. Ini belum menjadi pengajuan bantuan.'
-        : 'Kebutuhan belum dapat dicatat. Kirim laporan dan lengkapi catatan terlebih dahulu.',
+        ? 'Catatan tersimpan. Ini belum menjadi keputusan atau rujukan ahli.'
+        : 'Catatan belum dapat disimpan. Periksa isian.',
     );
   }
   return (
-    <div className="owner-detail-grid">
-      <section className="owner-sheet">
-        <span className="owner-kicker">Dukungan perkuatan</span>
-        <h2>Mulai dari kebutuhanmu</h2>
+    <div className="owner-detail-grid is-pair">
+      <section className="owner-sheet owner-closed">
+        <h2>Hasil laporan</h2>
+        <dl className="owner-sent-facts">
+          <div>
+            <dt>Screening RVS</dt>
+            <dd>
+              {report.rvs ? 'Simulasi, belum divalidasi ahli' : 'Belum dinilai'}
+            </dd>
+          </div>
+          <div>
+            <dt>Penilaian ahli</dt>
+            <dd>Belum tersedia</dd>
+          </div>
+          <div>
+            <dt>Rujukan pemeriksaan</dt>
+            <dd>Belum ditentukan</dd>
+          </div>
+          <div>
+            <dt>Rencana perkuatan</dt>
+            <dd>Menunggu evaluasi ahli</dd>
+          </div>
+        </dl>
+        {report.rvs && <ReportPassport report={report} limitsOnly />}
+        <ReportNotes report={report} />
+      </section>
+      <section className="owner-sheet owner-closed">
+        <h2>Catat tindak lanjut</h2>
         <p>
-          Pencatatan kebutuhan membantu menyiapkan tindak lanjut ketika program
-          dan mitra tersedia.
+          Beri tahu apa yang kamu butuhkan sesudah survei. Catatan ini dibaca
+          admin, bukan pengajuan bantuan.
         </p>
-        <div className="owner-program-empty">
-          <span className="owner-chip">Belum ada program aktif</span>
-          <h3>Informasi program akan ditampilkan di sini</h3>
-          <p>
-            Penyelenggara, persyaratan, bentuk dukungan, dan cara mengajukan
-            belum ditetapkan. Tidak ada bantuan, potongan pajak, pembiayaan,
-            atau asuransi yang otomatis diberikan.
-          </p>
-        </div>
         <form className="owner-form" onSubmit={submit}>
-          <fieldset disabled={report.status === 'Draf'}>
-            <legend>Catat kebutuhan dukungan</legend>
-            <label htmlFor={`${id}-need`}>
-              Dukungan yang ingin diketahui
-              <select
-                id={`${id}-need`}
-                name="need"
-                defaultValue={saved?.need ?? 'consultation'}
-              >
-                {Object.entries(supportLabels).map(([value, label]) => (
-                  <option key={value} value={value}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label htmlFor={`${id}-support-note`}>
-              Ceritakan kebutuhanmu
-              <textarea
-                id={`${id}-support-note`}
-                name="note"
-                required
-                rows={4}
-                maxLength={1000}
-                defaultValue={saved?.note}
-                placeholder="Contoh: ingin mengetahui pilihan pendampingan dan perkiraan proses pembiayaan."
-              />
-            </label>
-            <button className="ws-primary">Simpan kebutuhan dukungan</button>
-          </fieldset>
+          <label htmlFor={`${id}-choice`}>
+            Yang kamu butuhkan
+            <select
+              id={`${id}-choice`}
+              name="choice"
+              defaultValue={saved?.choice ?? 'consultation'}
+            >
+              {Object.entries(followUpLabels).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label htmlFor={`${id}-note`}>
+            Catatan
+            <textarea
+              id={`${id}-note`}
+              name="note"
+              rows={3}
+              required
+              maxLength={1000}
+              defaultValue={saved?.note}
+              placeholder="Contoh: saya perlu penjelasan tentang pemeriksaan lanjutan."
+            />
+          </label>
+          <button className="ws-primary">Simpan catatan</button>
         </form>
-        {report.status === 'Draf' && (
-          <p className="owner-inline-message">
-            Kirim laporan terlebih dahulu untuk mencatat kebutuhan dukungan.
-          </p>
-        )}
         {message && (
           <p role="status" className="owner-inline-message">
             {message}
           </p>
         )}
-        <SavedProgress
-          title="Kebutuhan tercatat · belum diajukan ke program"
-          value={saved && supportLabels[saved.need]}
-          note={saved?.note}
-        />
       </section>
-      <aside className="owner-side-note">
-        <h3>Saat program tersedia</h3>
-        <ol>
-          <li>Baca penyelenggara dan syarat program.</li>
-          <li>Siapkan dokumen yang diminta.</li>
-          <li>Ajukan melalui jalur resmi.</li>
-          <li>Pantau pemeriksaan dan keputusan penyelenggara.</li>
-        </ol>
-        <p>Skor simulasi bukan dasar otomatis penerimaan dukungan.</p>
-      </aside>
+    </div>
+  );
+}
+
+function osmLink(latitude: number, longitude: number) {
+  return `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`;
+}
+
+type PreviewRow = {
+  label: string;
+  value?: React.ReactNode;
+  // Field key checked by validateReportRegistration, for "Wajib diisi".
+  field?: string;
+  empty?: string;
+};
+
+// Read-only view of what the owner entered, in the same three steps and
+// field order as the Buat laporan form. As the page's main content it gets a
+// heading; folded under "Lihat isi laporan" it shows only the steps.
+function SentReport({
+  report,
+  account,
+  onEdit,
+  onSubmit,
+  folded = false,
+}: {
+  report: Report;
+  account: DemoAccount;
+  onEdit: () => void;
+  onSubmit: () => void;
+  folded?: boolean;
+}) {
+  const point = report.ownerProgress?.point;
+  const editable = ['Draf', 'Perlu dilengkapi'].includes(report.status);
+  // Missing required fields are flagged only while the owner can still fix
+  // them; a sent report already passed validation.
+  const missing = editable ? validateReportRegistration(report) : {};
+  const missingCount = Object.keys(missing).length;
+  const steps: [string, PreviewRow[]][] = [
+    [
+      'Data bangunan',
+      [
+        { label: 'Nama bangunan', value: report.title, field: 'title' },
+        { label: 'Kawasan', value: report.location, field: 'location' },
+        { label: 'Fungsi bangunan', value: report.function, field: 'function' },
+        {
+          label: 'Tahun pembangunan',
+          value: report.year,
+          empty: 'Belum diketahui',
+        },
+        {
+          label: 'Jumlah lantai',
+          value: report.floors && `${report.floors} lantai`,
+          field: 'floors',
+        },
+        { label: 'Material utama', value: report.material, field: 'material' },
+        {
+          label: 'Sistem struktur',
+          value: report.structure,
+          field: 'structure',
+        },
+      ],
+    ],
+    [
+      'Lokasi & akses',
+      [
+        { label: 'Alamat lengkap', value: report.address, field: 'address' },
+        { label: 'Patokan', value: report.landmark, empty: 'Tidak diisi' },
+        {
+          label: 'Nomor kontak',
+          value: report.contactPhone,
+          empty: 'Tidak diisi',
+        },
+        {
+          label: 'Titik peta',
+          value: point ? (
+            <a
+              href={osmLink(point.latitude, point.longitude)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {point.latitude.toFixed(5)}, {point.longitude.toFixed(5)}{' '}
+              <span aria-hidden="true">↗</span>
+            </a>
+          ) : undefined,
+          empty: 'Tidak ditandai',
+        },
+      ],
+    ],
+  ];
+  const consents: [string, boolean | undefined, string][] = [
+    [
+      'Data boleh dipakai untuk pencatatan dan penugasan survei',
+      report.demoConsent,
+      'demoConsent',
+    ],
+    [
+      'Memahami bahwa RVS penyaringan awal, bukan sertifikat aman',
+      report.understandsRvs,
+      'understandsRvs',
+    ],
+  ];
+  const row = ({ label, value, field, empty }: PreviewRow) => {
+    const required = !!field && !!missing[field];
+    return (
+      <div key={label} className={required ? 'is-missing' : undefined}>
+        <dt>{label}</dt>
+        <dd>
+          {value ||
+            (required ? (
+              <span className="owner-missing">Wajib diisi</span>
+            ) : (
+              <span className="owner-empty-value">
+                {empty ?? 'Belum diisi'}
+              </span>
+            ))}
+        </dd>
+      </div>
+    );
+  };
+  const body = (
+    <ol className="owner-preview-steps">
+      {steps.map(([title, rows], index) => (
+        <li className="owner-preview-step" key={title}>
+          <h3>
+            <span aria-hidden="true">{index + 1}</span>
+            {title}
+          </h3>
+          <dl className="owner-sent-facts">{rows.map(row)}</dl>
+          {title === 'Lokasi & akses' && (
+            <>
+              {point && <PointPreviewMap point={point} />}
+              <p className="owner-preview-note">
+                Alamat, patokan, dan nomor hanya terlihat oleh admin dan
+                pesurvei yang ditugaskan. Data ini tidak tampil di profil
+                bangunan maupun QR.
+              </p>
+            </>
+          )}
+        </li>
+      ))}
+      <li className="owner-preview-step is-wide">
+        <h3>
+          <span aria-hidden="true">3</span>
+          Periksa & kirim
+        </h3>
+        <dl className="owner-sent-facts">
+          {row({
+            label: 'Catatan laporan',
+            value: report.description,
+            field: 'description',
+          })}
+          <div>
+            <dt>Persetujuan</dt>
+            <dd>
+              <ul className="owner-consents">
+                {consents.map(([text, given, field]) => (
+                  <li
+                    key={field}
+                    className={
+                      given ? 'is-given' : missing[field] ? 'is-missing' : ''
+                    }
+                  >
+                    <span aria-hidden="true">{given ? '✓' : '–'}</span>
+                    {text}
+                    {!given && (
+                      <span className="owner-visually-hidden">
+                        {' '}
+                        (belum dicentang)
+                      </span>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </dd>
+          </div>
+        </dl>
+        <BuildingPhotos reportId={report.id} ownerId={account.id} readOnly />
+      </li>
+    </ol>
+  );
+  if (folded) return <div className="owner-sent-report is-folded">{body}</div>;
+  return (
+    <section className="owner-sheet owner-sent-report">
+      <div className="owner-sent-head">
+        <div>
+          <h2>
+            {report.status === 'Draf' ? 'Draf laporan' : 'Laporan yang dikirim'}
+          </h2>
+          <p id={`${report.id}-preview-state`}>
+            {!editable
+              ? 'Isi laporan terkunci selama diproses admin dan pesurvei.'
+              : missingCount
+                ? `${missingCount} isian wajib belum diisi. Lengkapi lewat Lengkapi data, lalu kirim ke admin.`
+                : 'Semua isian wajib sudah terisi. Periksa sekali lagi, lalu kirim ke admin.'}
+          </p>
+        </div>
+        <span className="owner-chip">
+          {editable ? 'Bisa diubah' : 'Terkunci'}
+        </span>
+      </div>
+      {body}
+      {editable && (
+        <div className="owner-actions">
+          <button type="button" className="ws-secondary" onClick={onEdit}>
+            Ubah draf
+          </button>
+          <button
+            type="button"
+            className="ws-primary"
+            onClick={onSubmit}
+            disabled={missingCount > 0}
+            aria-describedby={`${report.id}-preview-state`}
+          >
+            Kirim laporan
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
+// Notes addressed to the owner or written after the visit. Shown beside the
+// main content at every stage, never folded away.
+function ReportNotes({ report }: { report: Report }) {
+  if (!report.reviewNote && !report.visitNote) return null;
+  return (
+    <div className="owner-notes">
+      {report.reviewNote && (
+        <div className="owner-saved-note">
+          <strong>{reviewNoteLabel(report.status).title}</strong>
+          <p>{report.reviewNote}</p>
+          {/* The banner above already says what to do when the report is
+              returned to the owner; repeat the hint only when it adds
+              something (e.g. "no change needed" during a revision). */}
+          {report.status !== 'Perlu dilengkapi' &&
+            reviewNoteLabel(report.status).hint && (
+              <p className="owner-note-hint">
+                {reviewNoteLabel(report.status).hint}
+              </p>
+            )}
+        </div>
+      )}
+      {report.visitNote && (
+        <div className="owner-saved-note">
+          <strong>Catatan kunjungan dari pesurvei</strong>
+          <p>{report.visitNote}</p>
+        </div>
+      )}
     </div>
   );
 }
@@ -649,15 +698,33 @@ function Detail({
   onSave: (action: OwnerAction) => boolean;
   onSubmit: () => void;
 }) {
-  const [tab, setTab] = useState(0);
-  const [point, setPoint] = useState(report.ownerProgress?.point);
-  const [message, setMessage] = useState('');
+  const focus = ownerDetailFocus(report.status);
   const id = useId();
   const step = ownerStep(report.status);
+  const fold = (
+    <details className="owner-report-fold">
+      <summary>
+        <span>
+          <strong>Lihat isi laporan yang dikirim</strong>
+          <small>Data bangunan, lokasi, catatan, dan foto</small>
+        </span>
+        <span className="owner-fold-icon" aria-hidden="true">
+          ›
+        </span>
+      </summary>
+      <SentReport
+        report={report}
+        account={account}
+        onEdit={onEdit}
+        onSubmit={onSubmit}
+        folded
+      />
+    </details>
+  );
   return (
     <div className="owner-detail">
       <button type="button" className="owner-back" onClick={onBack}>
-        ← Semua bangunan
+        <span aria-hidden="true">←</span> Semua bangunan
       </button>
       <section className="owner-detail-heading">
         <BuildingMark small />
@@ -667,8 +734,14 @@ function Detail({
             {report.title}
           </h2>
           <p>{report.location || 'Kawasan belum diisi'}</p>
+          {isSampleReport(report) && (
+            <p className="owner-footnote">
+              Bangunan, pin lokasi, jadwal, dan riwayat ini adalah contoh
+              rekaan.
+            </p>
+          )}
         </div>
-        <span className="owner-chip">{report.status}</span>
+        <span className="owner-chip">{ownerStageLabel(report.status)}</span>
       </section>
       <div className="owner-next-banner">
         <span aria-hidden="true">↳</span>
@@ -682,129 +755,34 @@ function Detail({
           </button>
         )}
       </div>
-      <nav className="owner-detail-nav" aria-label="Bagian detail bangunan">
-        {tabs.map((label, index) => (
-          <button
-            type="button"
-            key={label}
-            aria-pressed={tab === index}
-            onClick={() => {
-              setTab(index);
-              setMessage('');
-            }}
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
-      <section aria-label={tabs[tab]} className="owner-tab-content">
-        {tab === 0 && (
-          <div className="owner-detail-grid">
-            <section className="owner-sheet">
-              <ReportPassport report={report} />
-              {['Draf', 'Perlu dilengkapi'].includes(report.status) && (
-                <div className="owner-actions">
-                  <button
-                    type="button"
-                    className="ws-secondary"
-                    onClick={onEdit}
-                  >
-                    Ubah draf
-                  </button>
-                  <button
-                    type="button"
-                    className="ws-primary"
-                    onClick={onSubmit}
-                  >
-                    Kirim laporan
-                  </button>
-                </div>
-              )}
-            </section>
-            <aside className="owner-sheet">
-              <h3>Jejak proses bangunan</h3>
-              <ol className="owner-activity">
-                <li>
-                  <span className="owner-activity-dot" />
-                  <div>
-                    <strong>Status saat ini</strong>
-                    <p>{report.status}</p>
-                  </div>
-                </li>
-                {[...(report.activity ?? [])].reverse().map((event, index) => (
-                  <li key={`${event.at}-${index}`}>
-                    <span className="owner-activity-dot" />
-                    <div>
-                      <strong>{event.action}</strong>
-                      <p>
-                        {event.by} ·{' '}
-                        {new Date(event.at).toLocaleDateString('id-ID')}
-                      </p>
-                      {event.note && <p>{event.note}</p>}
-                    </div>
-                  </li>
-                ))}
-              </ol>
-              {report.visitNote && (
-                <div className="owner-saved-note">
-                  <strong>Catatan kunjungan dari pesurvei</strong>
-                  <p>{report.visitNote}</p>
-                </div>
-              )}
-              {report.reviewNote && (
-                <div className="owner-saved-note">
-                  <strong>{reviewNoteLabel(report.status).title}</strong>
-                  <p>{report.reviewNote}</p>
-                  {reviewNoteLabel(report.status).hint && (
-                    <p className="owner-note-hint">
-                      {reviewNoteLabel(report.status).hint}
-                    </p>
-                  )}
-                </div>
-              )}
-            </aside>
-          </div>
+      <div className="owner-detail-body">
+        {/* Notes to the owner come first, as compact boxes above the
+            stage's main content, so the content keeps the full width. */}
+        {focus !== 'closed' && <ReportNotes report={report} />}
+        {focus === 'report' && (
+          <SentReport
+            report={report}
+            account={account}
+            onEdit={onEdit}
+            onSubmit={onSubmit}
+          />
         )}
-        {tab === 1 && (
-          <section className="owner-sheet">
-            <div className="owner-section-title">
-              <div>
-                <h2>Lokasi & dokumentasi</h2>
-                <p>{report.address || 'Alamat lengkap belum dicatat.'}</p>
-              </div>
-            </div>
-            <BuildingLocation value={point} onChange={setPoint} />
-            <button
-              className="ws-primary"
-              type="button"
-              onClick={() =>
-                setMessage(
-                  onSave({ type: 'location', point })
-                    ? 'Lokasi bangunan tersimpan.'
-                    : 'Lokasi belum dapat disimpan.',
-                )
-              }
-            >
-              Simpan lokasi bangunan
-            </button>
-            {message && (
-              <p role="status" className="owner-inline-message">
-                {message}
-              </p>
-            )}
-            <BuildingPhotos reportId={report.id} ownerId={account.id} />
-          </section>
+        {focus === 'schedule' && (
+          <>
+            <Schedule report={report} accounts={accounts} save={onSave} />
+            {fold}
+          </>
         )}
-        {tab === 2 && (
-          <Schedule report={report} accounts={accounts} save={onSave} />
+        {focus === 'closed' && (
+          <>
+            <Closed report={report} save={onSave} />
+            {fold}
+          </>
         )}
-        {tab === 3 && <FollowUp report={report} save={onSave} />}
-        {tab === 4 && <Support report={report} save={onSave} />}
-      </section>
+      </div>
       <p className="owner-footnote" id={`${id}-limit`}>
         Catatan dan perubahan mengikuti penyimpanan sesi browser. Belum ada
-        pengiriman ke layanan operasional. RVS adalah penyaringan awal, bukan
-        sertifikat aman.
+        pengiriman ke layanan operasional.
       </p>
     </div>
   );
@@ -827,12 +805,33 @@ export default function OwnerWorkspace({
 }) {
   const [selected, setSelected] = useState<string | null>(null);
   const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState<string[]>([]);
   const heading = useRef<HTMLHeadingElement>(null);
   const report = reports.find((item) => item.id === selected);
+  const filterGroups = ownerFilterGroups(reports);
+  // Chip row like a filter bar: each group with several stages is a pill
+  // that opens its stages as checkboxes; a one-stage group is a toggle pill.
+  // Selection holds stage statuses; stages whose reports are gone drop out.
+  const activeFilter = filter.filter((value) =>
+    filterGroups.some((group) =>
+      group.stages.some((stage) => stage.status === value),
+    ),
+  );
+  const inGroup = (group: (typeof filterGroups)[number]) =>
+    activeFilter.filter((value) =>
+      group.stages.some((stage) => stage.status === value),
+    );
+  const setGroupSelection = (
+    group: (typeof filterGroups)[number],
+    next: string[],
+  ) =>
+    setFilter([
+      ...activeFilter.filter((value) => !inGroup(group).includes(value)),
+      ...next,
+    ]);
   const visible = sortByOwnerTurn(reports).filter(
     (item) =>
-      (!filter || item.status === filter) &&
+      (!activeFilter.length || activeFilter.includes(item.status)) &&
       `${item.title} ${item.location} ${item.id}`
         .toLowerCase()
         .includes(search.toLowerCase().trim()),
@@ -862,58 +861,88 @@ export default function OwnerWorkspace({
         />
       ) : (
         <>
-          <section className="owner-intro">
-            <div>
-              <span className="owner-kicker">Ruang pelapor</span>
-              <h2 ref={heading} tabIndex={-1}>
-                Bangunanmu, tercatat.
-                <br />
-                Langkah berikutnya, terlihat.
-              </h2>
-              <p>
-                Simpan ceritanya, ikuti prosesnya, dan siapkan tindak lanjut
-                bersama petugas serta ahli.
-              </p>
-              <a className="ws-primary" href="#/dashboard/new">
-                ＋ Catat bangunan
-              </a>
-            </div>
-            <BuildingMark />
-          </section>
-          <OwnerNextSteps reports={reports} />
           <section className="owner-building-list" aria-label="Daftar bangunan">
-            <div className="owner-section-title">
-              <div>
-                <h2>Bangunan & laporan saya</h2>
-                <p>{reports.length} catatan bangunan · hanya milik akunmu</p>
-              </div>
-            </div>
+            {/* The page title already says "Laporan saya"; this heading stays
+                for screen readers and as the focus target when going back. */}
+            <h2 ref={heading} tabIndex={-1} className="owner-visually-hidden">
+              Bangunan & laporan saya
+            </h2>
             <div className="owner-list-toolbar">
-              <label>
-                Cari bangunan
+              <label className="owner-search">
+                <span className="owner-visually-hidden">Cari bangunan</span>
                 <input
-                  aria-label="Cari bangunan saya"
-                  placeholder="Nama, kawasan, atau nomor laporan"
+                  type="search"
+                  placeholder="Cari nama, kawasan, atau nomor laporan"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                 />
               </label>
-              <label>
-                Status proses
-                <select
-                  aria-label="Status bangunan saya"
-                  value={filter}
-                  onChange={(event) => setFilter(event.target.value)}
-                >
-                  <option value="">Semua status</option>
-                  {[...new Set(reports.map((item) => item.status))].map(
-                    (status) => (
-                      <option key={status}>{status}</option>
-                    ),
-                  )}
-                </select>
-              </label>
             </div>
+            {filterGroups.length > 0 && (
+              <div
+                className="owner-filter-chips"
+                role="group"
+                aria-label="Filter status"
+              >
+                <button
+                  type="button"
+                  className="filter-chip"
+                  aria-pressed={!activeFilter.length}
+                  onClick={() => setFilter([])}
+                >
+                  Semua{' '}
+                  <span className="filter-chip-badge">{reports.length}</span>
+                </button>
+                {filterGroups.map((group) =>
+                  group.stages.length > 1 ? (
+                    <FilterMenu
+                      key={group.group}
+                      label={group.group}
+                      icon={false}
+                      count={
+                        inGroup(group).length
+                          ? group.stages
+                              .filter((stage) =>
+                                inGroup(group).includes(stage.status),
+                              )
+                              .reduce((sum, stage) => sum + stage.count, 0)
+                          : group.count
+                      }
+                      align="start"
+                      summarize={false}
+                      options={group.stages.map((stage) => ({
+                        value: stage.status,
+                        label: stage.label,
+                        count: stage.count,
+                      }))}
+                      selected={inGroup(group)}
+                      onChange={(next) => setGroupSelection(group, next)}
+                    />
+                  ) : (
+                    <button
+                      type="button"
+                      key={group.group}
+                      className="filter-chip"
+                      aria-pressed={inGroup(group).length > 0}
+                      onClick={() =>
+                        setGroupSelection(
+                          group,
+                          inGroup(group).length ? [] : [group.stages[0].status],
+                        )
+                      }
+                    >
+                      {group.group}{' '}
+                      <span className="filter-chip-badge">{group.count}</span>
+                    </button>
+                  ),
+                )}
+              </div>
+            )}
+            <p className="owner-list-count" role="status">
+              {visible.length === reports.length
+                ? `${reports.length} bangunan · hanya milik akunmu`
+                : `${visible.length} dari ${reports.length} bangunan`}
+            </p>
             <div className="owner-building-grid">
               {visible.map((item) => (
                 <article className="owner-building-card" key={item.id}>
@@ -921,7 +950,9 @@ export default function OwnerWorkspace({
                     <span className="owner-house-icon" aria-hidden="true">
                       ⌂
                     </span>
-                    <span className="owner-chip">{item.status}</span>
+                    <span className="owner-chip">
+                      {ownerStageLabel(item.status)}
+                    </span>
                   </div>
                   <h3>{item.title}</h3>
                   <p>{item.location || 'Kawasan belum dicatat'}</p>
@@ -942,7 +973,7 @@ export default function OwnerWorkspace({
                     className="owner-open-button"
                     onClick={() => select(item.id)}
                   >
-                    Lihat perjalanan bangunan <span aria-hidden="true">↗</span>
+                    Lihat laporan <span aria-hidden="true">↗</span>
                   </button>
                 </article>
               ))}

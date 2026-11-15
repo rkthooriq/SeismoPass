@@ -58,23 +58,21 @@
   line-height: 1.7;
   max-width: 44ch;
 }
+/* Key figures sit directly on the panel: no card fill, just a thin soil
+   accent line beside each number. */
 .dz-facts {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
+  gap: 20px 24px;
   margin-top: 28px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  border-radius: var(--radius-control);
-  overflow: hidden;
 }
 .dz-facts > div {
   display: flex;
   flex-direction: column-reverse;
   justify-content: flex-end;
   gap: 4px;
-  background: var(--paper);
-  padding: 16px;
+  padding: 2px 0 2px 14px;
+  border-left: 2px solid var(--line);
 }
 .dz-facts dd {
   margin: 0;
@@ -177,7 +175,7 @@
   min-width: 10px;
   flex-shrink: 1;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: var(--radius-xs);
 }
 .dz-year li:focus-visible {
   outline: 2px solid var(--ink);
@@ -245,7 +243,7 @@
   display: block;
   height: 100%;
   min-width: 4px;
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
 }
 .dz-bar-value {
   min-width: 7ch;
@@ -298,10 +296,10 @@
   color: var(--ink);
 }
 .dz-segment:first-child {
-  border-radius: 4px 0 0 4px;
+  border-radius: var(--radius-xs) 0 0 var(--radius-xs);
 }
 .dz-segment:last-child {
-  border-radius: 0 4px 4px 0;
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
 }
 .dz-segment.dz-tone-2,
 .dz-segment.dz-tone-3 {
@@ -325,7 +323,7 @@
 .dz-swatch {
   width: 14px;
   height: 14px;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
 }
 
 /* Grouped columns. */
@@ -349,7 +347,7 @@
 .dz-column {
   position: relative;
   width: min(48px, 40%);
-  border-radius: 4px 4px 0 0;
+  border-radius: var(--radius-xs) var(--radius-xs) 0 0;
 }
 .dz-column-value {
   position: absolute;
@@ -382,7 +380,7 @@
 .dz-table summary {
   margin-left: -10px;
   padding: 6px 10px;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
@@ -508,7 +506,7 @@
   padding: clamp(16px, 2vw, 24px);
   background: var(--glass-bg);
   border: 1px solid var(--glass-line);
-  border-radius: 20px;
+  border-radius: var(--radius-xl);
   box-shadow: var(--glass-shadow);
   -webkit-backdrop-filter: var(--glass-blur);
   backdrop-filter: var(--glass-blur);
@@ -529,9 +527,6 @@
 }
 .dz-board .dz-facts {
   margin-top: 18px;
-}
-.dz-board .dz-facts > div {
-  padding: 12px 14px;
 }
 .dz-board .dz-facts dd {
   font-size: 20px;
@@ -559,7 +554,7 @@
   position: relative;
   padding: 2px 10px;
   border: 1px solid var(--glass-line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: var(--glass-bg-strong);
   box-shadow: 0 3px 12px -8px rgb(59 42 30 / 0.14);
   -webkit-backdrop-filter: blur(8px);
@@ -576,7 +571,7 @@
   /* The mask clips the row to a pill and fades tabs out at the edges.
      Safari ignores the frame's rounded overflow for glass layers inside a
      scroller; a mask on the scroller itself clips them in every engine. */
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   -webkit-mask-image: linear-gradient(
     to right,
     transparent 0,
@@ -612,7 +607,7 @@
   height: 32px;
   padding: 0;
   border: 1px solid var(--glass-line);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: rgb(255 252 247 / 0.92);
   color: var(--ink);
   box-shadow: 0 4px 12px -4px rgb(59 42 30 / 0.28);
@@ -679,7 +674,7 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 20px;
   padding: 18px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: rgb(255 255 255 / 0.7);
 }
 .dz-board-note {
@@ -703,7 +698,7 @@
 }
 .dz-stat-card {
   padding: 18px 20px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--glass-dark);
   color: #fff;
   box-shadow: 0 12px 28px -16px rgb(30 20 12 / 0.6);
@@ -774,7 +769,7 @@
 }
 .dz-tiles p {
   padding: 12px 14px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: rgb(0 0 0 / 0.22);
   font-family: var(--font-heading);
   font-size: 26px;
@@ -791,7 +786,7 @@
   margin: 10px 0 0 -12px;
   padding: 6px 12px;
   border: 1px solid transparent;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: none;
   color: #f2c27b;
   font: inherit;
@@ -815,7 +810,7 @@
 }
 .dz-accordion details {
   overflow: hidden;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: rgb(0 0 0 / 0.22);
 }
 .dz-accordion summary {
@@ -823,7 +818,7 @@
   justify-content: space-between;
   gap: 12px;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
@@ -848,7 +843,7 @@
   display: block;
   height: 6px;
   margin-bottom: 12px;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
   background: #f2c27b;
 }
 .dz-accordion details p {
@@ -874,7 +869,7 @@
   min-height: 40px;
   padding: 8px 12px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--paper);
   color: var(--ink);
   font: inherit;
@@ -898,7 +893,7 @@
   align-items: center;
   gap: 14px;
   padding: 14px 16px;
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--glass-bg-strong);
   border: 1px solid var(--glass-line);
 }
@@ -928,7 +923,7 @@
   gap: 18px;
   margin: 0;
   padding: 10px 14px;
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   background: var(--surface);
 }
 .dz-events dt {
@@ -942,7 +937,7 @@
 }
 .dz-empty {
   padding: 20px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--surface);
   font-size: 14px;
 }
@@ -985,7 +980,7 @@
   gap: 12px;
   align-items: center;
   padding: 12px 14px;
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   background: var(--paper);
   border: 1px solid var(--line);
 }
@@ -1070,7 +1065,7 @@
   min-height: 44px;
   padding: 8px 14px;
   border: 1px solid rgb(255 255 255 / 0.3);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   background: transparent;
   font: inherit;
   font-size: 12px;
@@ -1277,7 +1272,7 @@
 }
 .dz-damage-bar span {
   flex-basis: 0;
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
 }
 /* Tone 3 = rusak berat (brightest), 2 = sedang, 1 = ringan. */
 .dz-damage-3 {
@@ -1322,7 +1317,7 @@
   grid-row: 1;
   width: 10px;
   height: 10px;
-  border-radius: 3px;
+  border-radius: var(--radius-xs);
 }
 .dz-human-impact {
   grid-template-columns: repeat(2, minmax(0, 1fr));

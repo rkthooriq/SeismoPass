@@ -1,13 +1,13 @@
 .rvs-editor {
   border: 1px solid var(--ws-line);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   background: var(--paper);
   margin: 20px 0;
   padding: var(--space-panel);
 }
 .rvs-editor fieldset {
   border: 1px solid var(--ws-line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   min-width: 0;
   padding: var(--space-panel);
 }
@@ -34,7 +34,7 @@
   margin: 24px 0;
   background: var(--surface);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: var(--radius-md);
   padding: var(--space-panel);
 }
 .rvs-score {
@@ -73,7 +73,7 @@
 }
 .rvs-alert {
   background: var(--surface);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: var(--space-panel) var(--space-panel) var(--space-panel)
     calc(var(--space-panel) * 2);
 }
@@ -99,6 +99,6 @@
 }
 .rvs-observations {
   border: 1px solid var(--ws-line);
-  border-radius: 12px;
+  border-radius: var(--radius-md);
   padding: var(--space-panel);
 }
