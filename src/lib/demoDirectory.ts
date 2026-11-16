@@ -7,7 +7,7 @@ import type { DemoAccount, Report } from './reportDemo';
 import { restoreReports } from './reportSession.ts';
 import type { AccessDecision, AccountStatus } from './surveyorAccess';
 
-export const demoSessionKey = 'seismopass.workflow.demo.v3';
+export const demoSessionKey = 'seismopass.workflow.demo.v4';
 // Hanya tiga akun bawaan (pelapor, admin, pesurvei aktif sebagai jalan pintas).
 // Pesurvei baru dibuat admin lewat Kelola pesurvei dengan sandi sementara.
 export function initialDirectory(): DemoAccount[] {

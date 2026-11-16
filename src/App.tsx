@@ -12,7 +12,7 @@ import ActorLogin from './features/access/ActorLogin';
 import ReportWorkspace from './features/reports/ReportWorkspace';
 import { updateOwnProfile } from './lib/userProfile';
 import type { ProfileInput } from './lib/userProfile';
-import { sampleReports, releaseSurveyorAssignments } from './lib/reportDemo';
+import { releaseSurveyorAssignments } from './lib/reportDemo';
 import type { DemoAccount, Report } from './lib/reportDemo';
 import type { AccountForm } from './lib/accountFlow';
 import { isAccountPage, validateAccountForm } from './lib/accountFlow';
@@ -43,6 +43,8 @@ export default function App() {
   const [accountId, setAccountId] = useState<string | null>(null);
   const [workflow, setWorkflow] = useState(loadWorkflow);
   const [storageFailed, setStorageFailed] = useState(false);
+  // Demo mode: one tap opens the workspace and the header can switch roles.
+  const [demoMode, setDemoMode] = useState(false);
   const account =
     workflow.accounts.find((person) => person.id === accountId) ?? null;
   function updateWorkflow(accounts: DemoAccount[], reports: Report[]) {
@@ -74,7 +76,24 @@ export default function App() {
     setAccountId(person.id);
     window.location.hash = '/dashboard';
   }
+  function startDemo() {
+    const owner = workflow.accounts.find(
+      (person) => person.id === 'owner-demo',
+    );
+    if (!owner) return;
+    setDemoMode(true);
+    enter(owner);
+  }
+  // Same data, another role: no sign-out, so one report can be followed
+  // from reporter to admin to surveyor and back.
+  function switchRole(id: string) {
+    const target = workflow.accounts.find((person) => person.id === id);
+    if (!target || target.status !== 'active') return;
+    setAccountId(target.id);
+    window.location.hash = '/dashboard';
+  }
   function leave() {
+    setDemoMode(false);
     setAccountId(null);
     window.location.hash = '/login';
   }
@@ -254,6 +273,7 @@ export default function App() {
         page={page}
         onSignIn={signIn}
         onRegister={registerOwner}
+        onDemo={startDemo}
       />
     );
   }
@@ -306,6 +326,7 @@ export default function App() {
         onImportSurveyors={importSurveyors}
         onReissuePassword={reissuePassword}
         onLeave={leave}
+        onSwitchRole={demoMode ? switchRole : undefined}
         storageFailed={storageFailed}
         invalidSession={workflow.invalid}
       />
@@ -326,11 +347,11 @@ function loadWorkflow() {
     const raw = window.sessionStorage.getItem(demoSessionKey);
     const legacy = restoreReports(
       window.sessionStorage.getItem('seismopass.reports.demo.v1'),
-      sampleReports,
+      [],
     );
     return restoreDemoSession(raw, legacy);
   } catch {
-    return restoreDemoSession(null, sampleReports);
+    return restoreDemoSession(null, []);
   }
 }
 

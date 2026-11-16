@@ -107,7 +107,7 @@ const PAD = 14; // canvas bleed around the pill, for shadows and ripples
 
 /* ---------- styles ---------- */
 const NIMBUS_CSS = `
-.nimbus-nav{--n-tint:rgba(255,249,240,.55);--n-fg:#3B2A1E;--n-fg-soft:rgba(91,68,49,.8);--n-rim:rgba(255,249,240,.8);
+.nimbus-nav{--n-tint:rgba(255,249,240,.55);--n-fg:#1a1a1a;--n-fg-soft:rgba(91,68,49,.8);--n-rim:rgba(255,249,240,.8);
   position:relative;display:inline-flex;align-items:center;gap:2px;padding:6px;border-radius:999px;isolation:isolate;
   font-family:ui-sans-serif,-apple-system,"SF Pro Text","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased;user-select:none;-webkit-tap-highlight-color:transparent}
 .nimbus-nav[data-tone="dark"]{--n-tint:rgba(59,42,30,.26);--n-fg:#FFF9F0;--n-fg-soft:rgba(255,249,240,.75);--n-rim:rgba(255,249,240,.34)}
@@ -159,7 +159,7 @@ const NIMBUS_CSS = `
 .nimbus-nav[data-material="subtle"] .nimbus-glass{background:rgba(255,252,247,.88);border:1px solid rgba(230,216,198,.9);box-shadow:0 4px 14px -8px rgba(59,42,30,.18);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 .nimbus-nav[data-material="subtle"] .nimbus-item{border-radius:17px;transition:background-color 150ms ease,color 150ms ease}
 .nimbus-nav[data-material="subtle"] .nimbus-item:hover{background:rgba(243,231,214,.45)}
-.nimbus-nav[data-material="subtle"] .nimbus-item:is([aria-current="page"],[aria-selected="true"]){background:#F3E7D6;color:#3B2A1E}
+.nimbus-nav[data-material="subtle"] .nimbus-item:is([aria-current="page"],[aria-selected="true"]){background:#F3E7D6;color:#1a1a1a}
 .nimbus-nav[data-material="subtle"] .nv-ico svg{transform:none;transition:none}
 @media (prefers-reduced-motion:reduce){.nimbus-nav[data-material="subtle"] .nimbus-item{transition:none}}
 `;

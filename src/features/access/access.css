@@ -682,6 +682,9 @@ main.actor-login::before {
   font-size: 14px;
   color: var(--lg-brown-soft);
 }
+.actor-login .account-samples button {
+  margin-top: 16px;
+}
 .actor-login .account-samples ul {
   display: grid;
   gap: 8px;

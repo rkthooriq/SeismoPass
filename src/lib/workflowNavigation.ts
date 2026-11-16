@@ -8,7 +8,6 @@ export const workflowMenus = {
     ['assignments', 'Penugasan survei', '↗'],
     ['review', 'Tinjauan catatan', '✓'],
     ['reports', 'Semua laporan', '▤'],
-    ['pilot', 'Rencana pilot', '◇'],
   ],
   // Pelapor hanya mencatat lalu menunggu, jadi tanpa halaman Ringkasan.
   // Halaman awalnya "Laporan saya" yang memuat langkah berikutnya.

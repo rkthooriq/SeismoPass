@@ -18,6 +18,7 @@ import {
   sortByOwnerTurn,
 } from '../../lib/ownerNextStep';
 import ReportPassport from './ReportPassport';
+import ReportTimeline from './ReportTimeline';
 import FilterMenu from '../../components/FilterMenu';
 import BuildingPhotos from './BuildingPhotos';
 import PointPreviewMap from './PointPreviewMap';
@@ -802,6 +803,12 @@ function Detail({
           </>
         )}
       </div>
+      <ReportTimeline
+        activity={report.activity}
+        accounts={accounts}
+        heading="Perjalanan laporan"
+        defaultOpen={report.status !== 'Draf'}
+      />
       <p className="owner-footnote" id={`${id}-limit`}>
         Catatan dan perubahan mengikuti penyimpanan sesi browser. Belum ada
         pengiriman ke layanan operasional.
@@ -965,6 +972,23 @@ export default function OwnerWorkspace({
                 ? `${reports.length} bangunan · hanya milik akunmu`
                 : `${visible.length} dari ${reports.length} bangunan`}
             </p>
+            {!reports.length && (
+              <div className="owner-empty-note">
+                <span className="owner-empty-symbol" aria-hidden="true">
+                  ⌂
+                </span>
+                <div>
+                  <h3>Belum ada laporan</h3>
+                  <p>
+                    Catat bangunan pertamamu. Setelah dikirim, admin memeriksa
+                    datanya, lalu pesurvei dijadwalkan.
+                  </p>
+                  <a className="ws-primary" href="#/dashboard/new">
+                    Buat laporan
+                  </a>
+                </div>
+              </div>
+            )}
             <div className="owner-building-grid">
               {visible.map((item) => (
                 <article className="owner-building-card" key={item.id}>

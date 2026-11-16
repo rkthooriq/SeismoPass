@@ -8,7 +8,7 @@
 .sp-passport-sheet,
 .sp-roles-section {
   --focus-ring: var(--ink);
-  --muted: #5f4b3e;
+  --muted: #4a443f;
   --line: #d4bfa8;
   --action: var(--ink);
   --surface: #eee1cf;

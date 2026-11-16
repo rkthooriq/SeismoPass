@@ -263,7 +263,13 @@ export function updateOwnerProgress(
     ...(appointment ? { appointment } : {}),
     activity: [
       ...(report.activity ?? []),
-      { by: account.name, action: description, note: '', at },
+      {
+        by: account.name,
+        role: account.role,
+        action: description,
+        note: '',
+        at,
+      },
     ].slice(-500),
   };
 }

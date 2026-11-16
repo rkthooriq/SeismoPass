@@ -15,12 +15,12 @@
 /* Shared SeismoPass tokens. Page files own layout; this file owns the visual theme. */
 :root {
   /* Light earth: cream and white surfaces, brown soil for text and actions. */
-  --ink: #3b2a1e;
-  --muted: #76604f;
+  --ink: #1a1a1a;
+  --muted: #4a443f;
   --accent: #dcbc98;
   --sand: #f3e7d6;
-  --on-dark: #3b2a1e;
-  --muted-on-dark: #76604f;
+  --on-dark: #1a1a1a;
+  --muted-on-dark: #4a443f;
   --line: #e6d8c6;
   --action: #8a5a3b;
   --action-hover: #714a30;
@@ -31,7 +31,7 @@
   --paper: #ffffff;
   --surface: #f4eadc;
   --hover-surface: #efe1cd;
-  --hover-ink: #3b2a1e;
+  --hover-ink: #1a1a1a;
   /* Spacing scale. Use these steps for padding and gap; see
      docs/ui-design-system.md for which tier each component uses. */
   --space-1: 4px;
@@ -124,7 +124,7 @@ textarea:focus-visible {
   object-fit: contain;
 }
 .actor-login {
-  background: var(--canvas) var(--plan-pattern);
+  background: var(--plan-pattern), var(--earth-sky);
   color: var(--ink);
 }
 .actor-intro {

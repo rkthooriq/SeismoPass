@@ -50,12 +50,14 @@ export default function WorkspaceShell({
   account,
   page,
   onLeave,
+  onSwitchRole,
   children,
   counts,
 }: {
   account: AccountIdentity;
   page: WorkflowPage | null;
   onLeave: () => void;
+  onSwitchRole?: (id: string) => void;
   children: ReactNode;
   counts: Partial<Record<WorkflowPage, number>>;
 }) {
@@ -111,6 +113,7 @@ export default function WorkspaceShell({
         account={account}
         profileActive={page === 'profile'}
         onLeave={onLeave}
+        onSwitchRole={onSwitchRole}
       />
       {isAdmin ? (
         <div className="role-layout">

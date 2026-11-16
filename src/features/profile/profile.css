@@ -12,7 +12,7 @@
 .workspace .account-profile-link:is(:hover, :focus-visible),
 .workspace .account-profile-link[aria-current='page'] {
   background: var(--glass-cream);
-  color: #3b2a1e;
+  color: #1a1a1a;
 }
 .workspace .account-profile-name {
   display: grid;

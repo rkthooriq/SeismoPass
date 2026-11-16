@@ -25,13 +25,13 @@ import WorkspaceShell from './WorkspaceShell';
 import ReportCard from './ReportCard';
 import FilterMenu from '../../components/FilterMenu';
 import ReportRegistrationForm from './ReportRegistrationForm';
-import PilotOverview from './PilotOverview';
 import OwnerWorkspace from './OwnerWorkspace';
 import {
   updateOwnerProgress,
   proposeAppointment,
 } from '../../lib/ownerProgress';
 import UserProfilePage from '../profile/UserProfilePage';
+import { emptyListText, nextActionFor } from '../../lib/roleNextAction';
 import { toUserProfile } from '../../lib/userProfile';
 import type { ProfileInput } from '../../lib/userProfile';
 import '../workspace/workspace.css';
@@ -77,6 +77,7 @@ function ReportWorkspaceContent({
     inputs: NewSurveyorInput[],
   ) => { issued: IssuedPassword[] } | { error: string };
   onLeave: () => void;
+  onSwitchRole?: (id: string) => void;
   storageFailed: boolean;
   invalidSession?: boolean;
 }) {
@@ -104,6 +105,14 @@ function ReportWorkspaceContent({
       [report.id, report.title, report.location, report.address ?? ''].some(
         (value) => value.toLowerCase().includes(search.trim().toLowerCase()),
       ),
+  );
+  const pageEmpty = page ? emptyListText[page] : undefined;
+  const nextAction = nextActionFor(
+    account.role,
+    visible,
+    accounts.filter(
+      (person) => person.role === 'surveyor' && person.status === 'active',
+    ).length,
   );
   const count = (statuses: string[]) =>
     visible.filter((report) => statuses.includes(report.status)).length;
@@ -162,7 +171,17 @@ function ReportWorkspaceContent({
       return;
     }
     onChange(reports.map((item) => (item.id === report.id ? next : item)));
-    setMessage(`Status laporan: ${next.status}.`);
+    setMessage(
+      action === 'return'
+        ? 'Laporan dikembalikan ke pelapor beserta catatanmu.'
+        : action === 'revise'
+          ? 'Catatan dikembalikan ke pesurvei untuk direvisi.'
+          : action === 'close'
+            ? 'Administrasi ditutup. Pelapor melihat catatan penutupmu.'
+            : action === 'visit'
+              ? 'Catatan kunjungan terkirim ke admin.'
+              : `Status laporan: ${next.status}.`,
+    );
   }
   function assign(event: FormEvent<HTMLFormElement>, report: Report) {
     event.preventDefault();
@@ -170,14 +189,20 @@ function ReportWorkspaceContent({
     const target = accounts.find(
       (person) => person.id === form.get('surveyorId'),
     );
-    let next = target
-      ? assignReport(
-          report,
-          account,
-          target,
-          String(form.get('assignmentNote') ?? ''),
-        )
-      : null;
+    // From the incoming list one decision approves and assigns at once.
+    const approved =
+      report.status === 'Dikirim'
+        ? advanceReport(report, account, 'verify')
+        : report;
+    let next =
+      target && approved
+        ? assignReport(
+            approved,
+            account,
+            target,
+            String(form.get('assignmentNote') ?? ''),
+          )
+        : null;
     if (next && (form.get('appointmentDate') || form.get('appointmentSlot'))) {
       next = proposeAppointment(
         next,
@@ -188,13 +213,17 @@ function ReportWorkspaceContent({
     }
     if (!next) {
       setMessage(
-        'Pilih pesurvei aktif dan isi catatan penugasan. Jika mengusulkan jadwal, isi tanggal hari ini atau setelahnya beserta rentang waktu.',
+        [
+          report.status === 'Dikirim' && !approved
+            ? 'Data laporan belum lengkap, kembalikan ke pelapor.'
+            : 'Pilih pesurvei aktif dan isi catatan penugasan. Jika mengusulkan jadwal, isi tanggal hari ini atau setelahnya beserta rentang waktu.',
+        ].join(' '),
       );
       return;
     }
     onChange(reports.map((item) => (item.id === report.id ? next : item)));
     setMessage(
-      'Penugasan disimpan. Laporan kini terlihat pada akun pesurvei yang dipilih.',
+      `Laporan diteruskan ke ${target?.name ?? 'pesurvei'}. Kini terlihat di akun pesurvei itu.`,
     );
   }
   function exportReports() {
@@ -441,39 +470,24 @@ function ReportWorkspaceContent({
                   <p>
                     {account.role === 'surveyor'
                       ? 'Admin akan menentukan laporan yang ditugaskan kepadamu.'
-                      : 'Mulai dari mencatat data dasar bangunan contoh.'}
+                      : 'Laporan yang dikirim pelapor akan muncul di sini.'}
                   </p>
                 </div>
               )}
             </section>
-            <aside className="role-next-step">
-              <span className="ws-badge">Langkah berikutnya</span>
-              <h2>
-                {account.role === 'admin'
-                  ? 'Daftarkan pesurvei yang tepat.'
-                  : account.role === 'owner'
-                    ? 'Satu catatan, langkah lebih jelas.'
-                    : 'Penugasan yang jelas, catatan tertata.'}
-              </h2>
-              <p>
-                {account.role === 'admin'
-                  ? 'Daftarkan pesurvei yang berwenang dan siapkan akunnya, lalu tugaskan laporan kepada pesurvei yang aktif.'
-                  : account.role === 'owner'
-                    ? 'Lengkapi data dasar. Admin akan memeriksa dan mengatur kunjungan pesurvei.'
-                    : 'Buka penugasanmu, mulai survei, lalu kirim catatan kunjungan untuk ditinjau admin.'}
-              </p>
-              <a
-                className="ws-primary"
-                href={`#/dashboard/${account.role === 'admin' ? 'surveyors' : account.role === 'owner' ? 'new' : 'tasks'}`}
-              >
-                {account.role === 'admin'
-                  ? 'Kelola pesurvei'
-                  : account.role === 'owner'
-                    ? 'Catat bangunan'
-                    : 'Lihat penugasan'}{' '}
-                →
-              </a>
-            </aside>
+            {nextAction && (
+              <aside className="role-next-step">
+                <span className="ws-badge">Langkah berikutnya</span>
+                <h2>{nextAction.title}</h2>
+                <p>{nextAction.text}</p>
+                <a
+                  className="ws-primary"
+                  href={`#/dashboard/${nextAction.page}`}
+                >
+                  {nextAction.label} →
+                </a>
+              </aside>
+            )}
           </div>
         </>
       )}
@@ -498,7 +512,6 @@ function ReportWorkspaceContent({
           }}
         />
       )}
-      {page === 'pilot' && <PilotOverview />}
       {page === 'reports' && account.role === 'owner' && (
         // Kept mounted while editing so Batal returns to the same report.
         <div hidden={!!editing}>
@@ -586,11 +599,15 @@ function ReportWorkspaceContent({
             ) : (
               <div className="role-empty">
                 <span>▤</span>
-                <h3>Belum ada laporan yang sesuai.</h3>
+                <h3>
+                  {onPage.length || !pageEmpty
+                    ? 'Belum ada laporan yang sesuai.'
+                    : pageEmpty.title}
+                </h3>
                 <p>
-                  {account.role === 'surveyor'
-                    ? 'Hanya laporan yang ditugaskan oleh admin yang muncul di sini.'
-                    : 'Gunakan menu yang sesuai atau ubah pencarian.'}
+                  {onPage.length || !pageEmpty
+                    ? 'Ubah pencarian atau filter status.'
+                    : pageEmpty.text}
                 </p>
               </div>
             )}
@@ -609,7 +626,13 @@ export default function ReportWorkspace(
     'notice' | 'onNotice'
   >,
 ) {
-  const { account, reports, route = 'dashboard', onLeave } = props;
+  const {
+    account,
+    reports,
+    route = 'dashboard',
+    onLeave,
+    onSwitchRole,
+  } = props;
   // A notice is shown on the route it was sent to, then dropped as soon as
   // the user moves on, so it never reappears on a later visit.
   const [notice, setNotice] = useState<{
@@ -644,6 +667,7 @@ export default function ReportWorkspace(
       page={page}
       counts={counts}
       onLeave={onLeave}
+      onSwitchRole={onSwitchRole}
     >
       <ReportWorkspaceContent
         key={route}

@@ -48,7 +48,7 @@
 }
 .topnav-workspace .workspace-liquid-nav {
   --n-tint: rgb(255 255 255 / 0.55);
-  --n-fg: #3b2a1e;
+  --n-fg: #1a1a1a;
   --n-fg-soft: #76604f;
   font-family: var(--font-body);
 }
@@ -104,7 +104,7 @@
 .workspace .workspace-account .ws-secondary {
   --hover-border: transparent;
   --hover-surface: #f3e4cf;
-  --hover-ink: #3b2a1e;
+  --hover-ink: #1a1a1a;
   min-height: 44px;
   padding: 14px 18px;
   line-height: 1;
@@ -360,7 +360,7 @@
 
 /* Dark actions always use light text; supporting text stays readable on cream. */
 .workspace {
-  --muted: #665140;
+  --muted: #4a443f;
   --ws-muted: var(--muted);
 }
 .workspace .ws-primary {
@@ -381,4 +381,34 @@
 }
 .workspace .role-next-step > p {
   color: var(--muted);
+}
+
+/* Demo only: switch between the three roles without signing out. */
+.workspace .demo-role-switch {
+  display: inline-flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: var(--radius-control);
+  background: var(--surface);
+}
+.workspace .demo-role-switch button {
+  min-height: 44px;
+  padding: 0 var(--space-4);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+.workspace .demo-role-switch button[aria-pressed='true'] {
+  background: var(--paper);
+  box-shadow: var(--shadow-card);
+}
+@media (max-width: 720px) {
+  .workspace .workspace-account {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
 }

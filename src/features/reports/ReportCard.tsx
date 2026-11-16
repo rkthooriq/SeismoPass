@@ -3,6 +3,7 @@ import { canSurvey } from '../../lib/surveyorAccess';
 import type { DemoAccount, Report, ReportAction } from '../../lib/reportDemo';
 import type { RvsRecord } from '../../lib/rvs';
 import ReportPassport from './ReportPassport';
+import ReportTimeline from './ReportTimeline';
 import RvsForm from '../rvs/RvsForm';
 import { timeSlots } from '../../lib/ownerProgress';
 import { reviewNoteLabel } from '../../lib/ownerNextStep';
@@ -151,14 +152,26 @@ export default function ReportCard({
           </div>
         )}
         {account.role === 'admin' &&
-          ['Siap disurvei', 'Ditugaskan'].includes(report.status) && (
+          ['Dikirim', 'Siap disurvei', 'Ditugaskan'].includes(
+            report.status,
+          ) && (
             <form
               className="report-form role-assignment-form"
               onSubmit={(event) => onAssign(event, report)}
             >
               <h3>
-                {report.assignee ? 'Ubah penugasan' : 'Tugaskan pesurvei'}
+                {report.status === 'Dikirim'
+                  ? 'Setujui dan teruskan ke pesurvei'
+                  : report.assignee
+                    ? 'Ubah penugasan'
+                    : 'Tugaskan pesurvei'}
               </h3>
+              {report.status === 'Dikirim' && (
+                <p className="ws-muted">
+                  Data sudah kamu periksa? Pilih pesurvei, dan laporan langsung
+                  muncul di akunnya.
+                </p>
+              )}
               <label>
                 Pesurvei aktif
                 <select
@@ -214,7 +227,11 @@ export default function ReportCard({
                   terpisah dari tanggal kunjungan yang dicatat pesurvei.
                 </p>
               </fieldset>
-              <button className="ws-primary">Simpan penugasan</button>
+              <button className="ws-primary">
+                {report.status === 'Dikirim'
+                  ? 'Setujui dan teruskan ke pesurvei'
+                  : 'Simpan penugasan'}
+              </button>
             </form>
           )}
         <form
@@ -235,14 +252,23 @@ export default function ReportCard({
             )}
           {account.role === 'admin' && report.status === 'Dikirim' && (
             <>
+              <h3>Belum lengkap? Kembalikan ke pelapor</h3>
               <label>
-                Catatan untuk pelapor (wajib jika dikembalikan)
-                <textarea name="note" maxLength={1000} />
+                Catatan untuk pelapor
+                <textarea
+                  name="note"
+                  maxLength={1000}
+                  placeholder="Sebutkan data yang perlu diperbaiki"
+                />
               </label>
-              {actions([
-                ['verify', 'Data lengkap, siap ditugaskan'],
-                ['return', 'Minta kelengkapan'],
-              ])}
+              {actions(
+                accounts.some((person) => canSurvey(person))
+                  ? [['return', 'Kembalikan ke pelapor']]
+                  : [
+                      ['return', 'Kembalikan ke pelapor'],
+                      ['verify', 'Setujui, tugaskan nanti'],
+                    ],
+              )}
             </>
           )}
           {account.role === 'surveyor' &&
@@ -305,20 +331,11 @@ export default function ReportCard({
           <summary>Profil bangunan, simulasi RVS, dan QR</summary>
           <ReportPassport report={report} />
         </details>
-        {!!report.activity?.length && (
-          <details>
-            <summary>Riwayat penugasan</summary>
-            <ol className="role-report-history">
-              {report.activity.map((event, index) => (
-                <li key={index}>
-                  <strong>{event.action}</strong>
-                  <p>{event.note}</p>
-                  <small>{event.at}</small>
-                </li>
-              ))}
-            </ol>
-          </details>
-        )}
+        <ReportTimeline
+          activity={report.activity}
+          accounts={accounts}
+          defaultOpen={account.role !== 'owner' && report.status !== 'Selesai'}
+        />
       </div>
     </details>
   );

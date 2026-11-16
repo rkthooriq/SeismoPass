@@ -64,6 +64,14 @@ export type ReportStatus =
   | 'Ditinjau'
   | 'Perlu revisi'
   | 'Selesai';
+export interface ReportActivity {
+  by: string;
+  /** Who wrote the entry. Older entries may lack it; the name is then matched to an account. */
+  role?: ActorRole;
+  action: string;
+  note: string;
+  at: string;
+}
 export interface Report {
   ownerProgress?: OwnerProgress;
   appointment?: SurveyAppointment;
@@ -89,7 +97,7 @@ export interface Report {
   assignee?: string;
   assignedBy?: string;
   assignmentNote?: string;
-  activity?: { by: string; action: string; note: string; at: string }[];
+  activity?: ReportActivity[];
   visitDate?: string;
   visitNote?: string;
   reviewNote?: string;
@@ -379,6 +387,28 @@ export type ReportAction =
   | 'visit'
   | 'revise'
   | 'close';
+// Every hand-over between reporter, admin and surveyor leaves one entry, so
+// all three can read the same thread of notes.
+export function withActivity(
+  report: Report,
+  account: AccountIdentity,
+  action: string,
+  note = '',
+): Report {
+  return {
+    ...report,
+    activity: [
+      ...(report.activity ?? []),
+      {
+        by: account.name,
+        role: account.role,
+        action,
+        note,
+        at: new Date().toISOString(),
+      },
+    ].slice(-500),
+  };
+}
 export function advanceReport(
   report: Report,
   account: AccountIdentity,
@@ -394,16 +424,35 @@ export function advanceReport(
     ['Draf', 'Perlu dilengkapi'].includes(report.status) &&
     Object.keys(validateReportRegistration(report)).length === 0
   ) {
-    return { ...report, reviewNote: undefined, status: 'Dikirim' };
+    return withActivity(
+      { ...report, reviewNote: undefined, status: 'Dikirim' },
+      account,
+      report.status === 'Draf'
+        ? 'Laporan dikirim ke admin'
+        : 'Laporan dikirim ulang ke admin',
+      report.status === 'Draf'
+        ? 'Menunggu pemeriksaan kelengkapan.'
+        : 'Data sudah diperbaiki sesuai catatan admin.',
+    );
   }
   if (account.role === 'admin' && report.status === 'Dikirim') {
     if (
       action === 'verify' &&
       Object.keys(validateReportRegistration(report)).length === 0
     )
-      return { ...report, status: 'Siap disurvei' };
+      return withActivity(
+        { ...report, status: 'Siap disurvei' },
+        account,
+        'Admin menyetujui laporan',
+        'Data lengkap dan siap ditugaskan ke pesurvei.',
+      );
     if (action === 'return' && note)
-      return { ...report, reviewNote: note, status: 'Perlu dilengkapi' };
+      return withActivity(
+        { ...report, reviewNote: note, status: 'Perlu dilengkapi' },
+        account,
+        'Admin meminta pelapor melengkapi',
+        note,
+      );
   }
   if (
     action === 'start' &&
@@ -411,7 +460,11 @@ export function advanceReport(
     report.assignee === account.id &&
     report.status === 'Ditugaskan'
   )
-    return { ...report, status: 'Dalam survei' };
+    return withActivity(
+      { ...report, status: 'Dalam survei' },
+      account,
+      'Pesurvei memulai survei',
+    );
   // Self-claim is deliberately unsupported: an active admin assigns each report.
   if (
     action === 'visit' &&
@@ -422,19 +475,36 @@ export function advanceReport(
     isVisitDate(values.date) &&
     note
   ) {
-    return {
-      ...report,
-      visitDate: values.date,
-      visitNote: note,
-      reviewNote: undefined,
-      status: 'Ditinjau',
-    };
+    return withActivity(
+      {
+        ...report,
+        visitDate: values.date,
+        visitNote: note,
+        reviewNote: undefined,
+        status: 'Ditinjau',
+      },
+      account,
+      report.status === 'Perlu revisi'
+        ? 'Pesurvei mengirim catatan revisi ke admin'
+        : 'Pesurvei mengirim catatan kunjungan ke admin',
+      `Kunjungan ${values.date}. ${note}`,
+    );
   }
   if (account.role === 'admin' && report.status === 'Ditinjau' && note) {
     if (action === 'revise')
-      return { ...report, reviewNote: note, status: 'Perlu revisi' };
+      return withActivity(
+        { ...report, reviewNote: note, status: 'Perlu revisi' },
+        account,
+        'Admin meminta pesurvei merevisi catatan',
+        note,
+      );
     if (action === 'close')
-      return { ...report, reviewNote: note, status: 'Selesai' };
+      return withActivity(
+        { ...report, reviewNote: note, status: 'Selesai' },
+        account,
+        'Admin menutup administrasi laporan',
+        note,
+      );
   }
   return null;
 }
@@ -561,9 +631,10 @@ export function assignReport(
     activity: [
       ...(report.activity ?? []),
       {
-        by: admin.id,
-        action: 'Penugasan oleh admin',
-        note: `${target.name}: ${note.trim()}`,
+        by: admin.name,
+        role: 'admin' as const,
+        action: `Admin meneruskan ke ${target.name}`,
+        note: note.trim(),
         at: new Date().toISOString(),
       },
     ],
@@ -586,7 +657,8 @@ export function releaseSurveyorAssignments(
           activity: [
             ...(report.activity ?? []),
             {
-              by: admin.id,
+              by: admin.name,
+              role: 'admin' as const,
               action: 'Penugasan dikembalikan',
               note: 'Akses pesurvei dinonaktifkan. Menunggu penugasan ulang; catatan sebelumnya dipertahankan.',
               at: new Date().toISOString(),

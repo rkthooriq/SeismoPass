@@ -122,6 +122,9 @@ export function restoreReports(
           return fallback;
         report.activity = record.activity.map((event) => ({
           by: event.by,
+          ...(['owner', 'admin', 'surveyor'].includes(event.role)
+            ? { role: event.role }
+            : {}),
           action: event.action,
           note: event.note,
           at: event.at,

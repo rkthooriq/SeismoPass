@@ -1,16 +1,23 @@
 /* Glass layer, loaded last. Frosted white panels over a faint valley photo,
    with dark-earth glass reserved for headline statistics. */
 :root {
-  --glass-bg: rgb(255 255 255 / 0.64);
-  --glass-bg-strong: rgb(255 255 255 / 0.78);
+  --glass-bg: rgb(254 251 247 / 0.97);
+  --glass-bg-strong: rgb(254 251 247 / 0.98);
   --glass-edge: rgb(255 255 255 / 0.8);
   --glass-line: rgb(230 216 198 / 0.9);
   --glass-blur: blur(16px) saturate(1.25);
   --glass-shadow:
-    0 14px 34px -18px rgb(59 42 30 / 0.35), inset 0 1px 0 rgb(255 255 255 / 0.9);
+    0 14px 34px -16px rgb(59 42 30 / 0.4), inset 0 1px 0 rgb(255 255 255 / 0.9);
   --glass-dark: rgb(52 37 27 / 0.82);
   --earth-hills: url('./assets/earth-hills.svg');
-  --earth-sky: linear-gradient(180deg, #fbf6ef 0%, #f8efe2 55%, #f1e3cf 100%);
+  /* White at the very top, warming to cream toward the animated hills; cards are near-white so they stand out on the cream. */
+  --earth-sky: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #fdf9f3 18%,
+    #f6eddf 48%,
+    #f1e3cf 100%
+  );
 }
 
 .glass-panel,
@@ -107,8 +114,8 @@
   --glass-cream: rgb(243 228 207 / 0.65);
   --glass-control: linear-gradient(
     155deg,
-    rgb(255 255 255 / 0.8),
-    rgb(255 249 240 / 0.52)
+    rgb(255 254 252 / 0.98),
+    rgb(254 250 245 / 0.97)
   );
 }
 
@@ -188,7 +195,7 @@
     rgb(255 246 229 / 0.92),
     rgb(219 187 150 / 0.76)
   );
-  color: #3b2a1e;
+  color: #1a1a1a;
   border-color: rgb(138 90 59 / 0.65);
 }
 
@@ -202,7 +209,7 @@
 /* Native option menus need an opaque surface, even when their select is glass. */
 :is(.dz-board, .workspace, .actor-login) option {
   background: #fff9f0;
-  color: #3b2a1e;
+  color: #1a1a1a;
 }
 
 /* Data tabs: hover changes text only; the liquid pill marks selection. */
@@ -211,7 +218,7 @@
   .dz-liquid-tabs:not([data-material='subtle'])
   .nimbus-item[aria-selected='true'] {
   background: transparent;
-  color: #3b2a1e;
+  color: #1a1a1a;
 }
 .sp-landing
   .dz-board
@@ -351,4 +358,15 @@ select:not([multiple]):not([size]):disabled {
   .workspace .ws-search {
     transition: none;
   }
+}
+
+/* The sticky header floats over the white sky, so it stays white glass. */
+.workspace .workspace-header {
+  background: rgb(255 255 255 / 0.86);
+}
+
+/* Panels that hold lists sit a step darker than the near-white rows inside
+   them, so each row reads as its own card. */
+.workspace .ws-panel {
+  background: rgb(199 175 142 / 0.98);
 }

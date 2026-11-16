@@ -23,7 +23,7 @@
 
 .dz-board {
   --focus-ring: var(--ink);
-  --muted: #5f4b3e;
+  --muted: #4a443f;
   --line: #e2d2c1;
   --surface: #eee1cf;
   --hover-surface: #f1dbc9;
@@ -664,7 +664,7 @@
   background: transparent;
 }
 .dz-board .dz-liquid-tabs .nimbus-item[aria-selected='true'] {
-  color: #3b2a1e;
+  color: #1a1a1a;
   background: transparent;
 }
 .dz-board .dz-panel {
