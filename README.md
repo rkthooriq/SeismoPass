@@ -4,7 +4,7 @@ Paspor ketahanan gempa untuk bangunan di Bandung Raya.
 
 Banyak rumah dan bangunan kecil di kawasan Sesar Lembang dibangun tanpa pernah dicek ketahanannya terhadap gempa. SeismoPass adalah prototipe web yang memperagakan bagaimana pencatatan bangunan, kunjungan survei, dan penyaringan awal (*Rapid Visual Screening*, RVS) bisa berjalan dalam satu alur yang rapi, dari warga yang melapor sampai petugas yang mengunjungi.
 
-> Ini demo portofolio. Semua data fiktif dan tersimpan hanya di browser, belum ada backend. RVS di sini adalah **simulasi pendidikan**, bukan penilaian resmi dan **bukan sertifikat aman**.
+>Semua data fiktif dan tersimpan hanya di browser, belum ada backend. RVS di sini adalah **simulasi pendidikan**, bukan penilaian resmi dan **bukan sertifikat aman**.
 
 ## Alur tiga peran
 
