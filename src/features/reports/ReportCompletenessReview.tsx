@@ -1,17 +1,25 @@
 import { useId, useState } from 'react';
 import type { FormEvent } from 'react';
-import type { Report } from '../../lib/reportDemo';
+import type { DemoAccount, Report } from '../../lib/reportDemo';
+import { canSurvey } from '../../lib/surveyorAccess';
 import ConfirmSubmit from '../../components/ConfirmSubmit';
+import Notice from '../../components/Notice';
+import AssignmentFields from './AssignmentFields';
 
 export default function ReportCompletenessReview({
   report,
+  accounts,
   onUpdate,
 }: {
   report: Report;
+  accounts: DemoAccount[];
   onUpdate: (event: FormEvent<HTMLFormElement>, report: Report) => void;
 }) {
   const id = useId();
   const [decision, setDecision] = useState<'return' | 'verify' | ''>('');
+  const hasSurveyor = accounts.some(
+    (person) => canSurvey(person) && person.emailVerified,
+  );
   return (
     <form
       className="report-form report-completeness-review"
@@ -31,7 +39,11 @@ export default function ReportCompletenessReview({
                 'Perlu perbaikan',
                 'Kembalikan ke pelapor untuk dilengkapi.',
               ],
-              ['verify', 'Data lengkap', 'Lanjutkan ke penugasan pesurvei.'],
+              [
+                'verify',
+                'Data lengkap',
+                'Lanjutkan dengan menugaskan pesurvei.',
+              ],
             ] as const
           ).map(([value, title, text]) => (
             <label className="report-completeness-choice" key={value}>
@@ -62,12 +74,26 @@ export default function ReportCompletenessReview({
           />
         </label>
       )}
-      {decision === 'verify' && (
-        <p className="ws-muted">
-          Setelah disimpan, pilih pesurvei di halaman Penugasan survei. Data
-          lengkap bukan pernyataan keamanan bangunan.
-        </p>
-      )}
+      {decision === 'verify' &&
+        (hasSurveyor ? (
+          <>
+            <p className="ws-muted">
+              Data lengkap bukan pernyataan keamanan bangunan. Pilih pesurvei
+              dan jadwal kunjungan agar laporan langsung ditugaskan.
+            </p>
+            <div className="report-form role-assignment-form">
+              <h3>Tugaskan pesurvei</h3>
+              <AssignmentFields report={report} accounts={accounts} />
+            </div>
+          </>
+        ) : (
+          <Notice tone="warning" title="Belum ada pesurvei aktif">
+            <p>
+              Laporan masuk ke antrean Penugasan survei sampai ada pesurvei
+              aktif. Daftarkan pesurvei di Kelola pesurvei.
+            </p>
+          </Notice>
+        ))}
       {decision === 'return' && (
         <ConfirmSubmit
           value="return"
@@ -79,7 +105,9 @@ export default function ReportCompletenessReview({
       )}
       {decision === 'verify' && (
         <button className="ws-primary" value="verify">
-          Data lengkap, lanjut ke penugasan
+          {hasSurveyor
+            ? 'Setujui dan tugaskan'
+            : 'Data lengkap, simpan ke antrean'}
         </button>
       )}
     </form>

@@ -667,6 +667,13 @@
   background: rgb(243 231 214 / 0.45);
 }
 
+/* Detail tabs: pill tier like the filter chips (documented exception for
+   chips and navigation), control padding. */
+#root .workspace .report-tab {
+  padding: var(--padding-control);
+  border-radius: var(--radius-pill);
+}
+
 /* ---------- Borderless surfaces (all pages) ----------
    Panels, cards, boxes, notices, and badges are separated by fill and shadow,
    not by outline borders. Form fields (input, select, textarea, search) keep

@@ -1399,3 +1399,123 @@ html:has(.report-history-dialog[open]) {
 .schedule-choice > button {
   flex: none;
 }
+
+/* Detail page parts (admin): two tabs, same pill look as the filter chips.
+   The panel inherits the detail grid's gap, so the rhythm inside a part is
+   the same as before the split. */
+.report-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-width: 0;
+}
+#root .workspace .report-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border: 0;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--shadow-card);
+  color: var(--muted);
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  cursor: pointer;
+}
+#root .workspace .report-tab[aria-selected='true'] {
+  background: var(--glass-cream);
+  color: var(--ink);
+  font-weight: 600;
+}
+.report-tab-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: inherit;
+  min-width: 0;
+}
+@media (max-width: 600px) {
+  .report-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Keputusan form and assignment box: one rhythm on the spacing scale and one
+   type scale. Section 16 between blocks; title 18/600 → 8 → hint 14 → 12 →
+   choices; choice title 14/600 over a 13 hint; the schedule is a section of
+   the assignment box (a sub-heading, no second box). #root lifts these above the
+   older fieldset and tier rules. */
+#root .workspace .report-completeness-review {
+  gap: var(--space-4);
+}
+#root .workspace .report-completeness-options {
+  display: grid;
+}
+#root .workspace .report-completeness-options legend {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.025em;
+}
+#root .workspace .report-completeness-options > p {
+  margin: 0 0 var(--space-3);
+  font-size: 14px;
+  line-height: 1.6;
+}
+#root .workspace .report-completeness-choice strong {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+#root .workspace .report-completeness-choice small {
+  font-size: 13px;
+  line-height: 1.5;
+}
+#root .workspace .report-completeness-review > p.ws-muted {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+#root .workspace .role-assignment-form {
+  gap: var(--space-4);
+}
+#root .workspace .role-assignment-form > h3 {
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.025em;
+}
+#root .workspace .role-assignment-form > p.ws-muted {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+#root .workspace .role-assignment-form .report-visit-fields {
+  gap: var(--space-3);
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+#root .workspace .role-assignment-form .report-visit-fields legend {
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+#root .workspace .role-assignment-form .report-visit-fields > .ws-muted {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+#root .workspace .schedule-choice strong {
+  line-height: 1.4;
+}

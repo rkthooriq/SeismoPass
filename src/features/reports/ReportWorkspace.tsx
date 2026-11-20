@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react';
 import type { ComponentProps, FormEvent } from 'react';
 import {
   advanceReport,
-  assignReport,
   saveReportRvs,
   visibleReports,
   validateReportRegistration,
@@ -36,9 +35,9 @@ import type { NoticeTone } from '../../components/Notice';
 import usePagination from '../../components/usePagination';
 import ReportRegistrationForm from './ReportRegistrationForm';
 import OwnerWorkspace from './OwnerWorkspace';
+import { planAssignment, verifyAndAssign } from '../../lib/assignmentFlow';
 import {
   updateOwnerProgress,
-  proposeAppointment,
   recordOwnerConfirmation,
 } from '../../lib/ownerProgress';
 import UserProfilePage from '../profile/UserProfilePage';
@@ -202,6 +201,36 @@ function ReportWorkspaceContent({
     const button = (event.nativeEvent as SubmitEvent).submitter;
     if (!(button instanceof HTMLButtonElement)) return;
     const action = button.value as ReportAction;
+    // "Data lengkap" with a surveyor chosen: approve and assign in one go.
+    if (action === 'verify' && form.has('surveyorId')) {
+      const target = accounts.find(
+        (person) => person.id === form.get('surveyorId'),
+      );
+      const plan = verifyAndAssign(report, account, target, {
+        note: String(form.get('assignmentNote') ?? ''),
+        date: String(form.get('appointmentDate') ?? ''),
+        slot: String(form.get('appointmentSlot') ?? ''),
+      });
+      if (!plan) {
+        setMessage(
+          'Belum dapat ditugaskan. Pilih pesurvei aktif, isi catatan penugasan, serta tanggal kunjungan (hari ini atau setelahnya) dan rentang waktunya.',
+          'error',
+        );
+        return;
+      }
+      replace(plan.report);
+      const route = reportDetailRoute('assignments', report.id);
+      onNotice(
+        `Data laporan dinyatakan lengkap dan diteruskan ke ${target?.name ?? 'pesurvei'}. ${
+          plan.agreed
+            ? 'Jadwal mengikuti pilihan pelapor dan langsung disepakati.'
+            : 'Pelapor perlu mengonfirmasi jadwal sebelum survei dimulai.'
+        }`,
+        route.slice(2),
+      );
+      window.location.assign(route);
+      return;
+    }
     const next = advanceReport(report, account, action, {
       date: String(form.get('date') ?? ''),
       note: String(form.get('note') ?? ''),
@@ -257,47 +286,20 @@ function ReportWorkspaceContent({
     const target = accounts.find(
       (person) => person.id === form.get('surveyorId'),
     );
-    const date = String(form.get('appointmentDate') ?? '');
-    const slot = String(form.get('appointmentSlot') ?? '');
-    let next = target
-      ? assignReport(
-          report,
-          account,
-          target,
-          String(form.get('assignmentNote') ?? ''),
-        )
-      : null;
-    // Saving the same date again (e.g. only the note changed) keeps the
-    // reporter's confirmation; a new date or surveyor needs a new answer.
-    const current = next?.appointment;
-    // A pending proposal that equals the reporter's own choice is not
-    // "unchanged": saving it agrees the schedule (see proposeAppointment).
-    const choice = report.ownerProgress?.availability;
-    const pendingChoice =
-      current?.response === 'proposed' &&
-      choice?.date === date &&
-      choice.slot === slot;
-    const unchanged =
-      current &&
-      current.date === date &&
-      current.slot === slot &&
-      current.response !== 'change-requested' &&
-      !pendingChoice;
-    if (next && !unchanged)
-      next =
-        date && slot ? proposeAppointment(next, account, date, slot) : null;
-    if (!next) {
+    const plan = planAssignment(report, account, target, {
+      note: String(form.get('assignmentNote') ?? ''),
+      date: String(form.get('appointmentDate') ?? ''),
+      slot: String(form.get('appointmentSlot') ?? ''),
+    });
+    if (!plan) {
       setMessage(
         'Pilih pesurvei aktif, isi catatan penugasan, serta tanggal kunjungan (hari ini atau setelahnya) dan rentang waktunya.',
         'error',
       );
       return;
     }
-    onChange(reports.map((item) => (item.id === report.id ? next : item)));
-    const agreed =
-      next.appointment?.response === 'confirmed' &&
-      next.appointment.confirmedBy === 'owner' &&
-      !unchanged;
+    replace(plan.report);
+    const { agreed, unchanged } = plan;
     setMessage(
       report.assignee !== target?.id
         ? agreed
