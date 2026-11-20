@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import { reportBuildingFields } from '../../lib/reportDemo';
 import type { Report } from '../../lib/reportDemo';
-import RvsResult from '../rvs/RvsResult';
+import SavedRvsResult from '../rvs/SavedRvsResult';
 import QrPanel from '../rvs/QrPanel';
-import { observationFields, hazardFields } from '../../lib/rvs';
 import '../rvs/rvs.css';
 
 // limitsOnly renders only the saved RVS simulation (with its QR preview),
@@ -52,45 +51,7 @@ export default function ReportPassport({
     ],
   ];
   const saved = report.rvs && (
-    <details className="rvs-saved">
-      <summary>Lihat input dan hasil simulasi tersimpan</summary>
-      <p>Dicatat oleh {report.rvs.recordedBy}. Belum divalidasi ahli.</p>
-      <RvsResult inputs={report.rvs.inputs} />
-      <dl className="report-facts">
-        <div>
-          <dt>Tipe FEMA</dt>
-          <dd>{report.rvs.inputs.buildingType}</dd>
-        </div>
-        <div>
-          <dt>Tanah</dt>
-          <dd>{report.rvs.inputs.soil}</dd>
-        </div>
-      </dl>
-      <details>
-        <summary>Data survei dan catatan yang disimpan</summary>
-        <dl className="report-facts">
-          {hazardFields.map(([key, label]) => (
-            <div key={key}>
-              <dt>{label}</dt>
-              <dd>
-                {report.rvs!.inputs[key] === 'DNK'
-                  ? 'Belum diketahui'
-                  : report.rvs!.inputs[key] === 'yes'
-                    ? 'Ya'
-                    : 'Tidak'}
-              </dd>
-            </div>
-          ))}
-          {observationFields.map(([key, label]) => (
-            <div key={key}>
-              <dt>{label}</dt>
-              <dd>{report.rvs!.observations[key] || 'Belum diisi'}</dd>
-            </div>
-          ))}
-        </dl>
-      </details>
-      <QrPanel inputs={report.rvs.inputs} />
-    </details>
+    <SavedRvsResult record={report.rvs} reportTitle={report.title} />
   );
   if (limitsOnly) return saved || null;
   return (

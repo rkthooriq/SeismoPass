@@ -16,6 +16,8 @@ import {
 } from '../../lib/disasterData';
 import type { SeismicEvent, Source } from '../../lib/disasterData';
 import { LiquidNavbar } from '../../components/ui/liquid-glass-navbar';
+import Pagination from '../../components/Pagination';
+import usePagination from '../../components/usePagination';
 import './disaster.css';
 
 const months = [
@@ -797,6 +799,7 @@ function Latest() {
         event.magnitude >= minimum,
     )
     .reverse();
+  const pager = usePagination(rows, `${year}|${minimum}`);
   return (
     <div className="dz-latest">
       <div className="dz-filters">
@@ -827,8 +830,8 @@ function Latest() {
         </span>
       </div>
       {rows.length ? (
-        <ol className="dz-events">
-          {rows.map((event) => (
+        <ol className="dz-events" id={pager.listId}>
+          {pager.items.map((event) => (
             <li key={`${event.date}-${event.number}`}>
               <span className="dz-mag" aria-hidden="true">
                 {decimal(event.magnitude)}
@@ -857,6 +860,7 @@ function Latest() {
           Tidak ada kejadian untuk filter ini. Pilih tahun atau magnitudo lain.
         </p>
       )}
+      <Pagination pager={pager} label="riwayat gempa" unit="kejadian" />
       <p className="dz-note">
         Disalin dari label peta seismisitas BMKG. Lokasi persis tiap kejadian
         tidak dicantumkan.

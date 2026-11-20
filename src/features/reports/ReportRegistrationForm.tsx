@@ -9,9 +9,16 @@ import type { Report } from '../../lib/reportDemo';
 import BuildingLocation from './BuildingLocation';
 import BuildingPhotos from './BuildingPhotos';
 import type { BuildingPoint } from '../../lib/ownerProgress';
+import {
+  localToday,
+  timeSlots,
+  visitPreferenceErrors,
+} from '../../lib/ownerProgress';
+import type { TimeSlot } from '../../lib/ownerProgress';
 import { clearBuildingPhotos } from '../../lib/buildingPhotos';
 import { focusAndReveal } from '../../lib/reveal';
 import './owner-workspace.css';
+import { formatDate } from '../../lib/dateFormat';
 
 function fieldStep(key: string): number {
   if (
@@ -22,7 +29,15 @@ function fieldStep(key: string): number {
     ].includes(key)
   )
     return 0;
-  return ['address', 'landmark', 'contactPhone'].includes(key) ? 1 : 2;
+  return [
+    'address',
+    'landmark',
+    'contactPhone',
+    'visitDate',
+    'visitSlot',
+  ].includes(key)
+    ? 1
+    : 2;
 }
 
 export default function ReportRegistrationForm({
@@ -70,7 +85,7 @@ export default function ReportRegistrationForm({
     )
       return;
     if (!errors[field.name]) return;
-    const next = validateReportRegistration(readReport(event.currentTarget));
+    const next = validate(event.currentTarget, readReport(event.currentTarget));
     setErrors((current) => {
       const updated = { ...current };
       if (next[field.name]) updated[field.name] = next[field.name];
@@ -78,9 +93,42 @@ export default function ReportRegistrationForm({
       return updated;
     });
   }
+  // The visit time the reporter wants, read raw so a half-filled pair can be
+  // reported back as an error instead of silently dropped.
+  function readPreference(element: HTMLFormElement) {
+    const form = new FormData(element);
+    const read = (key: string) => String(form.get(key) ?? '').trim();
+    return {
+      date: read('visitDate'),
+      slot: read('visitSlot'),
+      note: read('visitNote'),
+    };
+  }
+  function validate(element: HTMLFormElement, report: Report, draft = false) {
+    return {
+      ...validateReportRegistration(report, draft),
+      ...visitPreferenceErrors(readPreference(element), draft),
+    };
+  }
   function readReport(element: HTMLFormElement): Report {
     const form = new FormData(element);
     const read = (key: string) => String(form.get(key) ?? '').trim();
+    const preference = readPreference(element);
+    const previous = initial?.ownerProgress?.availability;
+    const availability =
+      preference.date && timeSlots.includes(preference.slot as TimeSlot)
+        ? {
+            date: preference.date,
+            slot: preference.slot as TimeSlot,
+            note: preference.note.slice(0, 1000),
+            at:
+              previous?.date === preference.date &&
+              previous.slot === preference.slot &&
+              previous.note === preference.note
+                ? previous.at
+                : new Date().toISOString(),
+          }
+        : undefined;
     return {
       ...initial,
       id: reportId,
@@ -99,13 +147,13 @@ export default function ReportRegistrationForm({
       demoConsent: form.get('demoConsent') === 'on',
       understandsRvs: form.get('understandsRvs') === 'on',
       status: initial?.status ?? 'Draf',
-      ownerProgress: { ...initial?.ownerProgress, point },
+      ownerProgress: { ...initial?.ownerProgress, point, availability },
     };
   }
   function goNext() {
     if (!formRef.current) return;
     const report = readReport(formRef.current);
-    const all = validateReportRegistration(report);
+    const all = validate(formRef.current, report);
     const current = Object.fromEntries(
       Object.entries(all).filter(([key]) => fieldStep(key) === step),
     );
@@ -132,7 +180,7 @@ export default function ReportRegistrationForm({
     const send = !draft && step === 2;
     const report = readReport(event.currentTarget);
     setReview(report);
-    const next = validateReportRegistration(report, !send);
+    const next = validate(event.currentTarget, report, !send);
     setErrors(next);
     if (Object.keys(next).length) {
       setStep(Math.min(...Object.keys(next).map(fieldStep)));
@@ -340,6 +388,71 @@ export default function ReportRegistrationForm({
             bangunan.
           </p>
         </fieldset>
+        <fieldset className="report-visit-fields">
+          <legend>Kapan pesurvei bisa datang?</legend>
+          <p className="ws-muted" id="report-visit-hint">
+            Pilih waktu saat ada orang di lokasi. Jika admin memakai waktu ini,
+            jadwal langsung disepakati tanpa konfirmasi ulang. Jika tidak cocok,
+            admin mengusulkan waktu lain untuk kamu konfirmasi.
+          </p>
+          <div className="owner-form-grid">
+            <label htmlFor="report-visitDate">
+              Tanggal kunjungan *
+              <input
+                id="report-visitDate"
+                name="visitDate"
+                type="date"
+                min={localToday()}
+                defaultValue={initial?.ownerProgress?.availability?.date ?? ''}
+                aria-invalid={!!errors.visitDate}
+                aria-describedby={
+                  errors.visitDate
+                    ? 'report-error-visitDate'
+                    : 'report-visit-hint'
+                }
+              />
+              {errors.visitDate && (
+                <small className="ws-error" id="report-error-visitDate">
+                  {errors.visitDate}
+                </small>
+              )}
+            </label>
+            <label htmlFor="report-visitSlot">
+              Rentang waktu *
+              <select
+                id="report-visitSlot"
+                name="visitSlot"
+                defaultValue={initial?.ownerProgress?.availability?.slot ?? ''}
+                aria-invalid={!!errors.visitSlot}
+                aria-describedby={
+                  errors.visitSlot
+                    ? 'report-error-visitSlot'
+                    : 'report-visit-hint'
+                }
+              >
+                <option value="">Pilih waktu</option>
+                {timeSlots.map((slot) => (
+                  <option key={slot}>{slot}</option>
+                ))}
+              </select>
+              {errors.visitSlot && (
+                <small className="ws-error" id="report-error-visitSlot">
+                  {errors.visitSlot}
+                </small>
+              )}
+            </label>
+          </div>
+          <label htmlFor="report-visitNote">
+            Catatan waktu (opsional)
+            <input
+              id="report-visitNote"
+              name="visitNote"
+              maxLength={1000}
+              defaultValue={initial?.ownerProgress?.availability?.note ?? ''}
+              placeholder="Contoh: pemilik ada setelah pukul 09.00"
+            />
+          </label>
+        </fieldset>
         {step === 1 && <BuildingLocation value={point} onChange={setPoint} />}
       </div>
       <datalist id="options-function">
@@ -384,6 +497,11 @@ export default function ReportRegistrationForm({
             </span>
             <span>{review?.floors || initial?.floors || '—'} lantai</span>
             <span>{point ? 'Titik lokasi dicatat' : 'Tanpa titik peta'}</span>
+            <span>
+              {review?.ownerProgress?.availability
+                ? `Kunjungan ${formatDate(review.ownerProgress.availability.date)} · ${review.ownerProgress.availability.slot}`
+                : 'Waktu kunjungan belum dipilih'}
+            </span>
           </div>
         </div>
         {step === 2 && (

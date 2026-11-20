@@ -876,7 +876,7 @@
 }
 
 /* In the preview photos are thumbnails, not full-width panels. */
-.owner-sent-report .owner-photo-grid {
+.report-submission .owner-photo-grid {
   grid-template-columns: repeat(auto-fill, minmax(140px, 220px));
 }
 
@@ -980,9 +980,14 @@
 .owner-consents li.is-given {
   color: var(--ink);
 }
-.owner-consents li.is-given > span {
+.owner-consents li.is-given > span:first-child {
   color: var(--action);
   font-weight: 700;
+}
+.report-consent-state {
+  display: block;
+  color: var(--muted);
+  font-weight: 400;
 }
 .owner-consents li.is-missing {
   color: var(--ink);

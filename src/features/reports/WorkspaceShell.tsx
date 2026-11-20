@@ -3,7 +3,7 @@ import { LiquidNavbar } from '../../components/ui/liquid-glass-navbar';
 import { useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { getActor } from '../../lib/actorAccess';
-import { workflowMenus } from '../../lib/workflowNavigation';
+import { workflowMenus, workflowPageTitle } from '../../lib/workflowNavigation';
 import type { WorkflowPage } from '../../lib/workflowNavigation';
 import type { AccountIdentity } from '../../lib/reportDemo';
 
@@ -66,10 +66,7 @@ export default function WorkspaceShell({
   const role = getActor(account.role);
   const menus = workflowMenus[account.role];
   const isAdmin = account.role === 'admin';
-  const title =
-    page === 'profile'
-      ? 'Profil saya'
-      : (menus.find(([id]) => id === page)?.[1] ?? 'Halaman tidak tersedia');
+  const title = workflowPageTitle(account.role, page);
   const intro =
     page === 'profile'
       ? 'Lihat informasi akun dan perbarui identitasmu.'
@@ -193,7 +190,15 @@ export default function WorkspaceShell({
               )}
               {account.role === 'surveyor' && (
                 <a className="ws-secondary workspace-training" href="#/rvs-lab">
-                  Latihan RVS & QR <span aria-hidden="true">↗</span>
+                  Latihan RVS & QR
+                </a>
+              )}
+              {account.role === 'owner' && page !== 'new' && (
+                <a
+                  className="ws-primary workspace-training"
+                  href="#/dashboard/new"
+                >
+                  <span aria-hidden="true">＋</span> Buat laporan
                 </a>
               )}
             </div>

@@ -1,4 +1,5 @@
 import type { ReportStatus } from './reportDemo';
+import { statusToneClass } from './statusTone.ts';
 
 // Teks langkah berikutnya untuk pelapor. Ini status administratif,
 // bukan hasil screening atau kategori risiko.
@@ -60,6 +61,41 @@ export function ownerStep(status: ReportStatus): OwnerStep {
   return ownerSteps[status];
 }
 
+// While assigned, the visit waits on the reporter's answer to the proposed
+// date, so the step reads from the appointment as well as the status.
+export function ownerStepFor(report: {
+  status: ReportStatus;
+  appointment?: { response: string };
+}): OwnerStep {
+  if (report.status === 'Ditugaskan') {
+    const response = report.appointment?.response;
+    if (response === 'proposed')
+      return {
+        turn: 'owner',
+        title: 'Konfirmasi jadwal kunjungan',
+        text: 'Pesurvei baru bisa datang setelah kamu memilih Jadwal ini cocok atau meminta jadwal lain.',
+      };
+    if (response === 'change-requested')
+      return {
+        turn: 'waiting',
+        title: 'Menunggu jadwal baru dari admin',
+        text: 'Admin akan mengusulkan jadwal berdasarkan waktu yang kamu minta.',
+      };
+    if (response === 'confirmed')
+      return {
+        turn: 'waiting',
+        title: 'Jadwal kunjungan disepakati',
+        text: 'Siapkan akses ke lokasi bangunan pada jadwal yang kamu setujui.',
+      };
+    return {
+      turn: 'waiting',
+      title: 'Menunggu usulan jadwal',
+      text: 'Admin akan mengusulkan jadwal kunjungan untuk kamu konfirmasi.',
+    };
+  }
+  return ownerSteps[report.status];
+}
+
 // Owner list filter: three groups that answer "what do I need to do?".
 // The card chip still names the exact stage (ownerStageLabel).
 export const ownerStatusFilters = [
@@ -76,12 +112,47 @@ export function ownerStatusFilter(status: ReportStatus): OwnerStatusFilter {
   return 'Sedang diproses';
 }
 
+// A proposed visit date waits on the reporter, so that report is the
+// reporter's turn even though its status still reads "Ditugaskan".
+type OwnerStageInput = {
+  status: ReportStatus;
+  appointment?: { response: string };
+};
+export const confirmScheduleStage = 'Konfirmasi jadwal';
+export function awaitingOwnerConfirmation(report: OwnerStageInput): boolean {
+  return (
+    report.status === 'Ditugaskan' &&
+    report.appointment?.response === 'proposed'
+  );
+}
+export function ownerStageKey(report: OwnerStageInput): string {
+  return awaitingOwnerConfirmation(report)
+    ? confirmScheduleStage
+    : report.status;
+}
+export function ownerStageLabelFor(report: OwnerStageInput): string {
+  return awaitingOwnerConfirmation(report)
+    ? confirmScheduleStage
+    : ownerStageLabel(report.status);
+}
+export function ownerStatusFilterFor(
+  report: OwnerStageInput,
+): OwnerStatusFilter {
+  return awaitingOwnerConfirmation(report)
+    ? 'Perlu tindakanmu'
+    : ownerStatusFilter(report.status);
+}
+export function ownerChipClass(report: OwnerStageInput): string {
+  return awaitingOwnerConfirmation(report)
+    ? 'status-action'
+    : statusToneClass(report.status, 'owner');
+}
+
 // Laporan yang menunggu tindakan pelapor ditampilkan lebih dulu.
-export function sortByOwnerTurn<T extends { status: ReportStatus }>(
-  reports: T[],
-): T[] {
-  const rank = (report: T) =>
-    ownerStep(report.status).turn === 'owner' ? 0 : 1;
+export function sortByOwnerTurn<
+  T extends { status: ReportStatus; appointment?: { response: string } },
+>(reports: T[]): T[] {
+  const rank = (report: T) => (ownerStepFor(report).turn === 'owner' ? 0 : 1);
   return reports
     .map((report, index) => ({ report, index }))
     .sort((a, b) => rank(a.report) - rank(b.report) || a.index - b.index)
@@ -121,7 +192,10 @@ export function reviewNoteLabel(status: ReportStatus): ReviewNoteLabel {
 export type OwnerDetailFocus = 'report' | 'schedule' | 'closed';
 export function ownerDetailFocus(status: ReportStatus): OwnerDetailFocus {
   if (status === 'Selesai') return 'closed';
-  if (['Siap disurvei', 'Ditugaskan', 'Dalam survei'].includes(status))
+  // From "Dikirim" the reporter can already pick or change the visit time.
+  if (
+    ['Dikirim', 'Siap disurvei', 'Ditugaskan', 'Dalam survei'].includes(status)
+  )
     return 'schedule';
   return 'report';
 }
@@ -150,20 +224,32 @@ export function ownerStageLabel(status: ReportStatus): string {
 export interface OwnerFilterGroup {
   group: OwnerStatusFilter;
   count: number;
-  stages: { status: ReportStatus; label: string; count: number }[];
+  /** `status` is the stage key: a report status, or confirmScheduleStage. */
+  stages: { status: string; label: string; count: number }[];
 }
-const stageOrder = Object.keys(ownerStageLabels) as ReportStatus[];
+const stageOrder: string[] = Object.keys(ownerStageLabels).flatMap((status) =>
+  status === 'Perlu dilengkapi' ? [status, confirmScheduleStage] : [status],
+);
+const stageGroup = (key: string): OwnerStatusFilter =>
+  key === confirmScheduleStage
+    ? 'Perlu tindakanmu'
+    : ownerStatusFilter(key as ReportStatus);
+const stageLabel = (key: string): string =>
+  key === confirmScheduleStage
+    ? confirmScheduleStage
+    : ownerStageLabel(key as ReportStatus);
 export function ownerFilterGroups(
-  reports: { status: ReportStatus }[],
+  reports: OwnerStageInput[],
 ): OwnerFilterGroup[] {
   const groups = ownerStatusFilters
     .map((group) => {
       const stages = stageOrder
-        .filter((status) => ownerStatusFilter(status) === group)
-        .map((status) => ({
-          status,
-          label: ownerStageLabel(status),
-          count: reports.filter((report) => report.status === status).length,
+        .filter((key) => stageGroup(key) === group)
+        .map((key) => ({
+          status: key,
+          label: stageLabel(key),
+          count: reports.filter((report) => ownerStageKey(report) === key)
+            .length,
         }))
         .filter((stage) => stage.count > 0);
       return {

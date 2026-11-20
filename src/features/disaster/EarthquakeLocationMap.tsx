@@ -11,9 +11,12 @@ import './earthquake-map.css';
 export default function EarthquakeLocationMap({
   coordinates,
   region,
+  marker = true,
 }: {
   coordinates: BmkgCoordinates | null;
   region: string;
+  /** false shows the area only, when no matching epicenter exists. */
+  marker?: boolean;
 }) {
   const view = earthquakeMapView(coordinates);
   const canvas = useRef<HTMLDivElement>(null);
@@ -56,16 +59,17 @@ export default function EarthquakeLocationMap({
           attribution:
             '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noreferrer">OpenStreetMap</a>',
         }).addTo(map);
-        L.marker(current.center, {
-          icon: L.divIcon({
-            className: 'eq-map-pin',
-            html: '<span></span>',
-            iconSize: [22, 22],
-            iconAnchor: [11, 11],
-          }),
-          keyboard: false,
-          interactive: false,
-        }).addTo(map);
+        if (marker)
+          L.marker(current.center, {
+            icon: L.divIcon({
+              className: 'eq-map-pin',
+              html: '<span></span>',
+              iconSize: [22, 22],
+              iconAnchor: [11, 11],
+            }),
+            keyboard: false,
+            interactive: false,
+          }).addTo(map);
         map.fitBounds(current.bounds);
       })
       .catch(() => {
@@ -75,7 +79,7 @@ export default function EarthquakeLocationMap({
       cancelled = true;
       map?.remove();
     };
-  }, [latitude, longitude]);
+  }, [latitude, longitude, marker]);
 
   if (!view || failed)
     return (
@@ -100,11 +104,27 @@ export default function EarthquakeLocationMap({
         ref={canvas}
         className="eq-map-canvas"
         role="region"
-        aria-label={`Peta lokasi pusat gempa: ${region}`}
+        aria-label={
+          marker
+            ? `Peta lokasi pusat gempa: ${region}`
+            : `Peta wilayah ${region}`
+        }
       />
       <figcaption>
-        <span>Lokasi pusat gempa</span>
-        <a href={view.full} target="_blank" rel="noreferrer">
+        <span>
+          {marker
+            ? 'Lokasi pusat gempa'
+            : 'Wilayah Bandung Raya · belum ada titik gempa yang sesuai'}
+        </span>
+        <a
+          href={
+            marker
+              ? view.full
+              : `https://www.openstreetmap.org/#map=10/${view.center[0]}/${view.center[1]}`
+          }
+          target="_blank"
+          rel="noreferrer"
+        >
           <svg viewBox="0 0 20 20" fill="none" aria-hidden="true">
             <circle cx="8" cy="8" r="5" />
             <path d="M8 5v6M5 8h6m6 6-5-5" />

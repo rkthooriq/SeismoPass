@@ -1,31 +1,69 @@
+import { useState } from 'react';
 import type { FormEvent } from 'react';
+import Notice from '../../components/Notice';
 import { canSurvey } from '../../lib/surveyorAccess';
+import { scheduleConfirmed } from '../../lib/reportDemo';
 import type { DemoAccount, Report, ReportAction } from '../../lib/reportDemo';
-import type { RvsRecord } from '../../lib/rvs';
 import ReportPassport from './ReportPassport';
 import ReportTimeline from './ReportTimeline';
-import RvsForm from '../rvs/RvsForm';
-import { timeSlots } from '../../lib/ownerProgress';
+import ReportCompletenessReview from './ReportCompletenessReview';
+import ReportSubmissionDetails from './ReportSubmissionDetails';
+import { surveyRoute } from '../../lib/workflowNavigation';
+import { localToday, timeSlots } from '../../lib/ownerProgress';
 import { reviewNoteLabel } from '../../lib/ownerNextStep';
 import { statusToneClass } from '../../lib/statusTone';
+import { formatDate } from '../../lib/dateFormat';
+import ConfirmSubmit from '../../components/ConfirmSubmit';
 export default function ReportCard({
   report,
   account,
   accounts,
   onUpdate,
   onAssign,
+  onConfirmSchedule,
   onEdit,
-  onRvs,
+  focused = false,
+  detailHref,
 }: {
   report: Report;
   account: DemoAccount;
   accounts: DemoAccount[];
   onUpdate: (event: FormEvent<HTMLFormElement>, report: Report) => void;
   onAssign: (event: FormEvent<HTMLFormElement>, report: Report) => void;
+  onConfirmSchedule: (
+    event: FormEvent<HTMLFormElement>,
+    report: Report,
+  ) => void;
   onEdit: () => void;
-  onRvs: (record: RvsRecord) => boolean;
+  focused?: boolean;
+  detailHref: string;
 }) {
   const surveyor = accounts.find((person) => person.id === report.assignee);
+  const availability = report.ownerProgress?.availability;
+  const rescheduleRequested =
+    report.appointment?.response === 'change-requested';
+  // Until a schedule exists (or when the reporter asked for another), the
+  // form starts from the reporter's own chosen time; keeping it agrees the
+  // schedule at once, changing it sends a proposal the reporter confirms.
+  // A proposal still waiting for an answer although it is exactly the
+  // reporter's own choice (assigned before choices existed) is treated the
+  // same: keeping it agrees the schedule.
+  const proposalIsChoice =
+    report.appointment?.response === 'proposed' &&
+    report.appointment.date === availability?.date &&
+    report.appointment.slot === availability?.slot;
+  const useChoice =
+    !!availability &&
+    availability.date >= localToday() &&
+    (!report.appointment || rescheduleRequested || proposalIsChoice);
+  // With the reporter's own time available the admin just keeps it; the date
+  // fields only appear after "Ganti jadwal" (e.g. the surveyor cannot come).
+  const [changingSchedule, setChangingSchedule] = useState(false);
+  const showChoice = useChoice && !changingSchedule;
+  const proposedDate = useChoice ? availability.date : report.appointment?.date;
+  const proposedSlot = useChoice
+    ? availability.slot
+    : (report.appointment?.slot ?? '');
   const actions = (items: [ReportAction, string][]) => (
     <div className="report-actions">
       {items.map(([value, label], i) => (
@@ -39,54 +77,74 @@ export default function ReportCard({
       ))}
     </div>
   );
-  return (
-    <details className="report-item">
-      <summary>
-        <span className="report-building-icon" aria-hidden="true">
-          ⌂
-        </span>
-        <span className="report-summary-name">
+  const identity = (
+    <>
+      <span className="report-building-icon" aria-hidden="true">
+        ⌂
+      </span>
+      <div className="report-summary-name">
+        {focused ? (
+          <h1 id="report-focus-title" tabIndex={-1}>
+            {report.title}
+          </h1>
+        ) : (
           <strong>{report.title}</strong>
-          <small>{report.location || 'Lokasi belum diisi'}</small>
-        </span>
-        <span className={`ws-badge ${statusToneClass(report.status)}`}>
-          {report.status}
-        </span>
-        <span className="report-summary-arrow" aria-hidden="true">
-          ↗
-        </span>
-      </summary>
+        )}
+        <small>{report.location || 'Lokasi belum diisi'}</small>
+      </div>
+      <span className={`ws-badge ${statusToneClass(report.status)}`}>
+        {report.status}
+      </span>
+    </>
+  );
+  if (!focused)
+    return (
+      <a
+        className="report-item report-list-item"
+        id={`report-link-${report.id}`}
+        href={detailHref}
+        aria-label={`Buka laporan ${report.title}`}
+      >
+        {identity}
+        <svg
+          className="report-summary-arrow"
+          width="18"
+          height="18"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m9 5 7 7-7 7" />
+        </svg>
+      </a>
+    );
+  return (
+    <article
+      className="report-item report-focus-card"
+      aria-labelledby="report-focus-title"
+    >
+      <header className="report-focus-heading">{identity}</header>
       <div className="report-detail">
-        <p className="ws-muted">
-          {report.id} · Pelapor:{' '}
-          {accounts.find((person) => person.id === report.reporterId)?.name ??
-            'Akun contoh'}
-        </p>
-        <p>{report.description || 'Catatan belum diisi.'}</p>
-        <dl className="report-visit-info">
-          <div>
-            <dt>Alamat kunjungan</dt>
-            <dd>
-              {report.address || 'Belum diisi. Minta pelapor melengkapi.'}
-            </dd>
-          </div>
-          {report.landmark && (
-            <div>
-              <dt>Patokan</dt>
-              <dd>{report.landmark}</dd>
-            </div>
-          )}
-          {report.contactPhone && (
-            <div>
-              <dt>Nomor yang bisa dihubungi</dt>
-              <dd>
-                <a href={`tel:${report.contactPhone.replace(/[^\d+]/g, '')}`}>
-                  {report.contactPhone}
-                </a>
-              </dd>
-            </div>
-          )}
-        </dl>
+        <div className="report-detail-heading">
+          <p className="ws-muted">
+            {report.id} · Pelapor:{' '}
+            {accounts.find((person) => person.id === report.reporterId)?.name ??
+              'Akun contoh'}
+          </p>
+          <ReportTimeline
+            activity={report.activity}
+            accounts={accounts}
+            reportTitle={report.title}
+          />
+        </div>
+        <ReportSubmissionDetails
+          report={report}
+          markMissing={account.role === 'admin' && report.status === 'Dikirim'}
+        />
         {surveyor && (
           <div className="role-assignment-note">
             <strong>Pesurvei: {surveyor.name}</strong>
@@ -98,44 +156,86 @@ export default function ReportCard({
         )}
         {report.visitDate && (
           <p>
-            <strong>Kunjungan {report.visitDate}</strong> · {report.visitNote}
+            <strong>Kunjungan {formatDate(report.visitDate)}</strong> ·{' '}
+            {report.visitNote}
           </p>
         )}
         {report.reviewNote && (
-          <div className="ws-disclaimer report-review-note">
-            <strong>{reviewNoteLabel(report.status).title}</strong>
+          <Notice
+            tone={
+              ['Perlu dilengkapi', 'Perlu revisi'].includes(report.status)
+                ? 'warning'
+                : 'info'
+            }
+            title={reviewNoteLabel(report.status).title}
+          >
             <p>{report.reviewNote}</p>
             {reviewNoteLabel(report.status).hint && (
               <p className="report-note-hint">
                 {reviewNoteLabel(report.status).hint}
               </p>
             )}
-          </div>
+          </Notice>
         )}
-        {report.ownerProgress?.availability && (
-          <div className="role-assignment-note">
-            <strong>Waktu tersedia dari pelapor</strong>
-            <p>
-              {report.ownerProgress.availability.date} ·{' '}
-              {report.ownerProgress.availability.slot}
-            </p>
-            <p>{report.ownerProgress.availability.note}</p>
-          </div>
+        {/* The reporter's chosen time is the admin's input for scheduling;
+            the surveyor only needs the schedule that applies (below). */}
+        {account.role === 'surveyor' ? null : rescheduleRequested ? (
+          <Notice tone="warning" title="Pelapor meminta jadwal lain">
+            {availability ? (
+              <>
+                <p>
+                  {formatDate(availability.date)} · {availability.slot}
+                </p>
+                {availability.note && <p>{availability.note}</p>}
+              </>
+            ) : (
+              <p>Usulkan jadwal baru untuk dikonfirmasi pelapor.</p>
+            )}
+          </Notice>
+        ) : (
+          report.ownerProgress?.availability && (
+            <div className="role-assignment-note">
+              <strong>Waktu kunjungan pilihan pelapor</strong>
+              <p>
+                {formatDate(report.ownerProgress.availability.date)} ·{' '}
+                {report.ownerProgress.availability.slot}
+              </p>
+              <p>{report.ownerProgress.availability.note}</p>
+            </div>
+          )
         )}
         {report.appointment && (
-          <div className="role-assignment-note">
-            <strong>Usulan jadwal kunjungan</strong>
+          <Notice
+            tone={
+              report.appointment.response === 'confirmed' ? 'success' : 'info'
+            }
+            title={
+              report.appointment.response === 'change-requested'
+                ? 'Jadwal sebelumnya'
+                : report.appointment.response === 'confirmed'
+                  ? 'Jadwal kunjungan dikonfirmasi'
+                  : 'Usulan jadwal kunjungan'
+            }
+          >
             <p>
-              {report.appointment.date} · {report.appointment.slot}
+              {formatDate(report.appointment.date)} · {report.appointment.slot}
             </p>
+            {account.role === 'surveyor' &&
+              report.ownerProgress?.availability?.note &&
+              report.appointment.date ===
+                report.ownerProgress.availability.date && (
+                <p>Catatan pelapor: {report.ownerProgress.availability.note}</p>
+              )}
             <p>
               {report.appointment.response === 'confirmed'
-                ? 'Dikonfirmasi pelapor'
+                ? report.appointment.confirmedBy === 'admin'
+                  ? `Dikonfirmasi pelapor, dicatat admin: ${report.appointment.confirmationNote ?? ''}`
+                  : 'Dikonfirmasi pelapor'
                 : report.appointment.response === 'change-requested'
                   ? 'Pelapor meminta perubahan'
                   : 'Menunggu konfirmasi pelapor'}
             </p>
-          </div>
+          </Notice>
         )}
         {report.ownerProgress?.support && (
           <div className="role-assignment-note">
@@ -151,25 +251,34 @@ export default function ReportCard({
             <p>{report.ownerProgress.followUp.note}</p>
           </div>
         )}
+        {account.role === 'admin' && report.status === 'Dikirim' && (
+          <ReportCompletenessReview report={report} onUpdate={onUpdate} />
+        )}
         {account.role === 'admin' &&
-          ['Dikirim', 'Siap disurvei', 'Ditugaskan'].includes(
-            report.status,
-          ) && (
+          ['Siap disurvei', 'Ditugaskan'].includes(report.status) && (
             <form
               className="report-form role-assignment-form"
               onSubmit={(event) => onAssign(event, report)}
             >
               <h3>
-                {report.status === 'Dikirim'
-                  ? 'Setujui dan teruskan ke pesurvei'
-                  : report.assignee
-                    ? 'Ubah penugasan'
-                    : 'Tugaskan pesurvei'}
+                {report.assignee ? 'Ubah penugasan' : 'Tugaskan pesurvei'}
               </h3>
-              {report.status === 'Dikirim' && (
+              {rescheduleRequested ? (
                 <p className="ws-muted">
-                  Data sudah kamu periksa? Pilih pesurvei, dan laporan langsung
-                  muncul di akunnya.
+                  Pelapor meminta jadwal lain. Jadwal usulan di bawah sudah
+                  diisi dengan waktu yang diminta; ubah bila perlu, lalu simpan
+                  agar pelapor bisa mengonfirmasinya.
+                </p>
+              ) : useChoice ? (
+                <p className="ws-muted">
+                  Jadwal di bawah terisi waktu pilihan pelapor. Jika tetap
+                  dipakai, jadwal langsung disepakati dan pesurvei bisa mulai
+                  sesuai jadwal. Jika diubah, pelapor perlu mengonfirmasi lagi.
+                </p>
+              ) : (
+                <p className="ws-muted">
+                  Kelengkapan data sudah diperiksa. Pilih pesurvei dan isi
+                  catatan penugasan agar laporan muncul di akunnya.
                 </p>
               )}
               <label>
@@ -197,146 +306,224 @@ export default function ReportCard({
                   name="assignmentNote"
                   maxLength={1000}
                   required
+                  defaultValue={report.assignmentNote}
                   placeholder="Lingkup kunjungan dan koordinasi supervisi"
                 />
               </label>
               <fieldset className="report-visit-fields">
-                <legend>Usulkan jadwal kunjungan (opsional)</legend>
-                <label>
-                  Tanggal usulan
-                  <input
-                    name="appointmentDate"
-                    type="date"
-                    defaultValue={report.appointment?.date}
-                  />
-                </label>
-                <label>
-                  Rentang waktu
-                  <select
-                    name="appointmentSlot"
-                    defaultValue={report.appointment?.slot ?? ''}
-                  >
-                    <option value="">Belum ditentukan</option>
-                    {timeSlots.map((slot) => (
-                      <option key={slot}>{slot}</option>
-                    ))}
-                  </select>
-                </label>
-                <p className="ws-muted">
-                  Pelapor dapat mengonfirmasi atau meminta perubahan. Ini
-                  terpisah dari tanggal kunjungan yang dicatat pesurvei.
-                </p>
+                <legend>
+                  {rescheduleRequested && !showChoice
+                    ? 'Usulkan jadwal baru'
+                    : 'Jadwal kunjungan'}
+                </legend>
+                {showChoice && availability ? (
+                  <div className="schedule-choice">
+                    <div>
+                      <strong>
+                        {formatDate(availability.date)} · {availability.slot}
+                      </strong>
+                      <p className="ws-muted">
+                        Pilihan pelapor. Langsung disepakati saat disimpan.
+                      </p>
+                    </div>
+                    <input
+                      type="hidden"
+                      name="appointmentDate"
+                      value={availability.date}
+                    />
+                    <input
+                      type="hidden"
+                      name="appointmentSlot"
+                      value={availability.slot}
+                    />
+                    <button
+                      type="button"
+                      className="ws-secondary"
+                      onClick={() => setChangingSchedule(true)}
+                    >
+                      Ganti jadwal
+                    </button>
+                  </div>
+                ) : (
+                  <>
+                    <label>
+                      Tanggal usulan
+                      <input
+                        name="appointmentDate"
+                        type="date"
+                        min={localToday()}
+                        required
+                        defaultValue={proposedDate}
+                      />
+                    </label>
+                    <label>
+                      Rentang waktu
+                      <select
+                        name="appointmentSlot"
+                        required
+                        defaultValue={proposedSlot}
+                      >
+                        <option value="" disabled>
+                          Pilih rentang waktu
+                        </option>
+                        {timeSlots.map((slot) => (
+                          <option key={slot}>{slot}</option>
+                        ))}
+                      </select>
+                    </label>
+                    <p className="ws-muted">
+                      {useChoice
+                        ? 'Jadwal selain pilihan pelapor perlu dikonfirmasi pelapor sebelum pesurvei bisa mulai.'
+                        : 'Wajib. Pesurvei baru bisa memulai survei setelah pelapor mengonfirmasi jadwal ini. Pelapor juga dapat meminta jadwal lain.'}
+                    </p>
+                    {useChoice && (
+                      <div className="report-actions">
+                        <button
+                          type="button"
+                          className="ws-secondary"
+                          onClick={() => setChangingSchedule(false)}
+                        >
+                          Pakai pilihan pelapor
+                        </button>
+                      </div>
+                    )}
+                  </>
+                )}
               </fieldset>
               <button className="ws-primary">
-                {report.status === 'Dikirim'
-                  ? 'Setujui dan teruskan ke pesurvei'
-                  : 'Simpan penugasan'}
+                {report.assignee ? 'Simpan penugasan' : 'Teruskan ke pesurvei'}
               </button>
             </form>
           )}
-        <form
-          className="report-form"
-          key={report.status}
-          onSubmit={(event) => onUpdate(event, report)}
-        >
-          {account.role === 'owner' &&
-            ['Draf', 'Perlu dilengkapi'].includes(report.status) && (
-              <div className="report-actions">
-                <button type="button" className="ws-secondary" onClick={onEdit}>
-                  Ubah draf
-                </button>
-                <button className="ws-primary" value="submit">
-                  Kirim laporan
-                </button>
-              </div>
-            )}
-          {account.role === 'admin' && report.status === 'Dikirim' && (
-            <>
-              <h3>Belum lengkap? Kembalikan ke pelapor</h3>
+        {account.role === 'admin' &&
+          report.status === 'Ditugaskan' &&
+          report.appointment?.response === 'proposed' &&
+          !proposalIsChoice && (
+            <form
+              className="report-form role-assignment-form"
+              onSubmit={(event) => onConfirmSchedule(event, report)}
+            >
+              <h3>Pelapor sudah setuju di luar aplikasi?</h3>
+              <p className="ws-muted">
+                Jika pelapor menyetujui jadwal{' '}
+                {formatDate(report.appointment.date)} ·{' '}
+                {report.appointment.slot} lewat telepon atau pesan, catat di
+                sini agar pesurvei bisa memulai survei. Pelapor tetap dapat
+                meminta jadwal lain.
+              </p>
               <label>
-                Catatan untuk pelapor
+                Bagaimana pelapor menyetujui?
                 <textarea
-                  name="note"
+                  name="confirmationNote"
+                  required
                   maxLength={1000}
-                  placeholder="Sebutkan data yang perlu diperbaiki"
+                  placeholder="Contoh: ditelepon 20 November pukul 10.00, pelapor setuju."
                 />
               </label>
-              {actions(
-                accounts.some((person) => canSurvey(person))
-                  ? [['return', 'Kembalikan ke pelapor']]
-                  : [
-                      ['return', 'Kembalikan ke pelapor'],
-                      ['verify', 'Setujui, tugaskan nanti'],
-                    ],
-              )}
-            </>
+              <div className="report-actions">
+                <button className="ws-secondary">
+                  Catat konfirmasi pelapor
+                </button>
+              </div>
+            </form>
           )}
-          {account.role === 'surveyor' &&
+        {((account.role === 'owner' &&
+          ['Draf', 'Perlu dilengkapi'].includes(report.status)) ||
+          (account.role === 'surveyor' &&
             report.assignee === account.id &&
             report.status === 'Ditugaskan' &&
-            actions([['start', 'Mulai survei']])}
-          {account.role === 'surveyor' &&
-            report.assignee === account.id &&
-            ['Dalam survei', 'Perlu revisi'].includes(report.status) && (
+            scheduleConfirmed(report)) ||
+          (account.role === 'admin' && report.status === 'Ditinjau')) && (
+          <form
+            className="report-form"
+            key={report.status}
+            onSubmit={(event) => onUpdate(event, report)}
+          >
+            {account.role === 'owner' &&
+              ['Draf', 'Perlu dilengkapi'].includes(report.status) && (
+                <div className="report-actions">
+                  <button
+                    type="button"
+                    className="ws-secondary"
+                    onClick={onEdit}
+                  >
+                    Ubah draf
+                  </button>
+                  <button className="ws-primary" value="submit">
+                    Kirim laporan
+                  </button>
+                </div>
+              )}
+            {account.role === 'surveyor' &&
+              report.assignee === account.id &&
+              report.status === 'Ditugaskan' && (
+                <>
+                  <p className="ws-muted">
+                    Jadwal sudah dikonfirmasi pelapor. Tekan Mulai survei saat
+                    kamu tiba di lokasi.
+                  </p>
+                  {actions([['start', 'Mulai survei']])}
+                </>
+              )}
+            {account.role === 'admin' && report.status === 'Ditinjau' && (
               <>
                 <label>
-                  Tanggal kunjungan
-                  <input
-                    type="date"
-                    name="date"
-                    defaultValue={report.visitDate}
-                    required
-                  />
+                  Catatan tinjauan administrasi
+                  <textarea name="note" required maxLength={1000} />
                 </label>
-                <label>
-                  Catatan kunjungan
-                  <textarea
-                    name="note"
-                    required
-                    maxLength={1000}
-                    defaultValue={report.visitNote}
-                    placeholder="Catat kunjungan dan kebutuhan tindak lanjut. Simulasi RVS belum menjadi hasil resmi."
+                <div className="report-actions">
+                  <ConfirmSubmit
+                    value="close"
+                    label="Tutup administrasi laporan"
+                    title="Tutup administrasi laporan?"
+                    description="Laporan menjadi Selesai dan pelapor membaca catatan penutupmu. Laporan yang sudah ditutup tidak dapat dibuka kembali."
+                    confirmLabel="Ya, tutup laporan"
                   />
-                </label>
-                {actions([['visit', 'Kirim catatan ke admin']])}
+                  <button className="ws-secondary" value="revise">
+                    Minta revisi
+                  </button>
+                </div>
               </>
             )}
-          {account.role === 'admin' && report.status === 'Ditinjau' && (
-            <>
-              <label>
-                Catatan tinjauan administrasi
-                <textarea name="note" required maxLength={1000} />
-              </label>
-              {actions([
-                ['close', 'Tutup administrasi laporan'],
-                ['revise', 'Minta revisi'],
-              ])}
-            </>
+          </form>
+        )}
+        {account.role === 'surveyor' &&
+          report.assignee === account.id &&
+          report.status === 'Ditugaskan' &&
+          !scheduleConfirmed(report) && (
+            <Notice tone="warning" title="Survei belum bisa dimulai">
+              <p>
+                {report.appointment?.response === 'change-requested'
+                  ? 'Pelapor meminta jadwal lain. Tunggu admin mengusulkan jadwal baru dan pelapor mengonfirmasinya.'
+                  : report.appointment
+                    ? 'Jadwal masih menunggu konfirmasi pelapor. Jangan berkunjung sebelum jadwal dikonfirmasi.'
+                    : 'Admin belum mengusulkan jadwal kunjungan.'}
+              </p>
+            </Notice>
           )}
-        </form>
         {account.role === 'surveyor' &&
           report.assignee === account.id &&
           ['Dalam survei', 'Perlu revisi'].includes(report.status) && (
-            <details className="role-rvs-entry">
-              <summary>Isi input RVS dan lihat hasil simulasi</summary>
-              <RvsForm
-                initial={report.rvs}
-                stories={report.floors}
-                screener={account.name}
-                onSave={onRvs}
-              />
-            </details>
+            <div className="report-form">
+              <p className="ws-muted">
+                {report.status === 'Perlu revisi'
+                  ? 'Baca catatan revisi di atas, lalu perbaiki hasil survei di halaman survei.'
+                  : 'Catat kunjungan dan input RVS di halaman survei, lalu kirim untuk ditinjau admin.'}
+              </p>
+              <div className="report-actions">
+                <a className="ws-primary" href={surveyRoute(report.id)}>
+                  {report.status === 'Perlu revisi'
+                    ? 'Perbaiki hasil survei'
+                    : 'Isi hasil survei'}
+                </a>
+              </div>
+            </div>
           )}
-        <details className="role-passport-entry">
-          <summary>Profil bangunan, simulasi RVS, dan QR</summary>
-          <ReportPassport report={report} />
-        </details>
-        <ReportTimeline
-          activity={report.activity}
-          accounts={accounts}
-          defaultOpen={account.role !== 'owner' && report.status !== 'Selesai'}
-        />
+        {report.rvs &&
+          ['Dalam survei', 'Perlu revisi', 'Ditinjau', 'Selesai'].includes(
+            report.status,
+          ) && <ReportPassport report={report} limitsOnly />}
       </div>
-    </details>
+    </article>
   );
 }

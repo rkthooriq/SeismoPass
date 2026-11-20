@@ -1,11 +1,22 @@
 import { calculateRvs, rvsSource } from '../../lib/rvs';
 import type { RvsInputs } from '../../lib/rvs';
+import Notice from '../../components/Notice';
 
-export default function RvsResult({ inputs }: { inputs: RvsInputs }) {
+export default function RvsResult({
+  inputs,
+  showStatus = true,
+}: {
+  inputs: RvsInputs;
+  showStatus?: boolean;
+}) {
   const result = calculateRvs(inputs);
   return (
     <section className="rvs-result" aria-label="Hasil simulasi RVS">
-      <span className="ws-badge">SIMULASI · BELUM DIVALIDASI AHLI</span>
+      {showStatus && (
+        <span className="rvs-saved-status">
+          Simulasi · belum divalidasi ahli
+        </span>
+      )}
       <h3>Hasil perhitungan Level 1</h3>
       {result.score === null ? (
         <p>Skor belum dapat dihitung.</p>
@@ -56,18 +67,30 @@ export default function RvsResult({ inputs }: { inputs: RvsInputs }) {
         </>
       )}
       {!!result.blockers.length && (
-        <ul className="rvs-alert">
-          {result.blockers.map((text) => (
-            <li key={text}>{text}</li>
-          ))}
-        </ul>
+        <Notice
+          tone="error"
+          title="Kendala perhitungan"
+          className="rvs-alert rvs-blockers"
+        >
+          <ul>
+            {result.blockers.map((text) => (
+              <li key={text}>{text}</li>
+            ))}
+          </ul>
+        </Notice>
       )}
       {!!result.warnings.length && (
-        <ul className="rvs-alert">
-          {result.warnings.map((text) => (
-            <li key={text}>{text}</li>
-          ))}
-        </ul>
+        <Notice
+          tone="warning"
+          title="Hal yang perlu diperiksa"
+          className="rvs-alert rvs-warnings"
+        >
+          <ul>
+            {result.warnings.map((text) => (
+              <li key={text}>{text}</li>
+            ))}
+          </ul>
+        </Notice>
       )}
       <p className="ws-disclaimer">
         <strong>RVS adalah penyaringan awal, bukan sertifikat aman.</strong> Ini

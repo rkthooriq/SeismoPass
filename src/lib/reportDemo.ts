@@ -4,6 +4,7 @@ import { parseRvsRecord } from './rvs.ts';
 import type { RvsRecord } from './rvs';
 import type { ActorRole } from './actorAccess';
 import type { OwnerProgress, SurveyAppointment } from './ownerProgress';
+import { formatDate } from './dateFormat.ts';
 
 export interface DemoAccount {
   id: string;
@@ -389,6 +390,14 @@ export type ReportAction =
   | 'close';
 // Every hand-over between reporter, admin and surveyor leaves one entry, so
 // all three can read the same thread of notes.
+// A visit starts only on a date the reporter has agreed to, so the surveyor
+// never travels to a time that is still being negotiated.
+export function scheduleConfirmed(
+  report: Pick<Report, 'appointment'>,
+): boolean {
+  return report.appointment?.response === 'confirmed';
+}
+
 export function withActivity(
   report: Report,
   account: AccountIdentity,
@@ -458,7 +467,8 @@ export function advanceReport(
     action === 'start' &&
     canSurvey(account) &&
     report.assignee === account.id &&
-    report.status === 'Ditugaskan'
+    report.status === 'Ditugaskan' &&
+    scheduleConfirmed(report)
   )
     return withActivity(
       { ...report, status: 'Dalam survei' },
@@ -487,7 +497,7 @@ export function advanceReport(
       report.status === 'Perlu revisi'
         ? 'Pesurvei mengirim catatan revisi ke admin'
         : 'Pesurvei mengirim catatan kunjungan ke admin',
-      `Kunjungan ${values.date}. ${note}`,
+      `Kunjungan ${formatDate(values.date)}. ${note}`,
     );
   }
   if (account.role === 'admin' && report.status === 'Ditinjau' && note) {

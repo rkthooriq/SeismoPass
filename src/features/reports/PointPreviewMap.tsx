@@ -16,6 +16,11 @@ export default function PointPreviewMap({ point }: { point: BuildingPoint }) {
     if (!target) return;
     let cancelled = false;
     let map: LeafletMap | undefined;
+    const resize = new ResizeObserver(() => {
+      if (target.clientWidth && target.clientHeight)
+        map?.invalidateSize({ animate: false });
+    });
+    resize.observe(target);
     import('leaflet')
       .then(({ default: L }) => {
         if (cancelled) return;
@@ -46,6 +51,7 @@ export default function PointPreviewMap({ point }: { point: BuildingPoint }) {
       });
     return () => {
       cancelled = true;
+      resize.disconnect();
       map?.remove();
     };
   }, [latitude, longitude]);

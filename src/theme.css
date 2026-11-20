@@ -68,6 +68,15 @@
   --fill-note: #f3e7d6;
   --fill-alert: #f6e0cf;
   --fill-attention: #f5dfb8;
+  /* Message tones describe process feedback, never building safety. */
+  --notice-warning-fill: #fff3cd;
+  --notice-warning-ink: #664d03;
+  --notice-info-fill: #e8f1fb;
+  --notice-info-ink: #244b6b;
+  --notice-error-fill: #fce8e6;
+  --notice-error-ink: #8a2820;
+  --notice-success-fill: #e6f2e8;
+  --notice-success-ink: #285c38;
   /* Report status tones: who holds the report now. Text is 6:1 or more. */
   --status-draft-fill: var(--surface);
   --status-draft-ink: #5f4b3c;

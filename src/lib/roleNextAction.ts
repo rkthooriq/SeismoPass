@@ -15,18 +15,37 @@ const n = (reports: Pick<Report, 'status'>[], status: Report['status']) =>
   reports.filter((report) => report.status === status).length;
 
 export function adminNextAction(
-  reports: Pick<Report, 'status'>[],
+  reports: Pick<Report, 'status' | 'appointment'>[],
   activeSurveyors: number,
 ): NextAction {
   const incoming = n(reports, 'Dikirim');
+  const unanswered = reports.filter(
+    (report) =>
+      report.status === 'Ditugaskan' &&
+      report.appointment?.response === 'proposed',
+  ).length;
+  const reschedule = reports.filter(
+    (report) =>
+      report.status === 'Ditugaskan' &&
+      report.appointment?.response === 'change-requested',
+  ).length;
   const review = n(reports, 'Ditinjau');
   const ready = n(reports, 'Siap disurvei');
   if (incoming)
     return {
       title: `${incoming} laporan menunggu keputusanmu`,
-      text: 'Periksa datanya. Setujui dan teruskan ke pesurvei, atau kembalikan ke pelapor dengan catatan.',
+      text: 'Periksa kelengkapan data. Kembalikan ke pelapor jika perlu perbaikan, atau tandai lengkap untuk masuk ke Penugasan survei.',
       page: 'incoming',
       label: 'Buka laporan masuk',
+    };
+  // A reporter waiting on a new date blocks the visit, so it comes before
+  // reviewing notes that are already in hand.
+  if (reschedule)
+    return {
+      title: `${reschedule} pelapor meminta jadwal lain`,
+      text: 'Buka laporan, lihat waktu yang diminta pelapor, lalu simpan usulan jadwal baru di Ubah penugasan.',
+      page: 'assignments',
+      label: 'Buka penugasan',
     };
   if (review)
     return {
@@ -49,6 +68,13 @@ export function adminNextAction(
           page: 'surveyors',
           label: 'Kelola pesurvei',
         };
+  if (unanswered)
+    return {
+      title: `${unanswered} jadwal belum dikonfirmasi pelapor`,
+      text: 'Pesurvei belum bisa mulai. Hubungi pelapor; jika setuju lewat telepon atau pesan, catat konfirmasinya di laporan.',
+      page: 'assignments',
+      label: 'Buka penugasan',
+    };
   return {
     title: 'Tidak ada yang menunggumu',
     text: 'Laporan baru dari pelapor muncul di Laporan masuk. Pesurvei sedang mengerjakan sisanya.',
@@ -58,31 +84,41 @@ export function adminNextAction(
 }
 
 export function surveyorNextAction(
-  reports: Pick<Report, 'status'>[],
+  reports: Pick<Report, 'status' | 'appointment'>[],
 ): NextAction {
   const revision = n(reports, 'Perlu revisi');
   const working = n(reports, 'Dalam survei');
-  const assigned = n(reports, 'Ditugaskan');
+  const assigned = reports.filter((report) => report.status === 'Ditugaskan');
+  const ready = assigned.filter(
+    (report) => report.appointment?.response === 'confirmed',
+  ).length;
   if (revision)
     return {
       title: `${revision} catatan diminta direvisi admin`,
-      text: 'Baca arahan admin, perbaiki catatan kunjungan, lalu kirim ulang.',
+      text: 'Baca arahan admin, perbaiki hasil survei di halaman survei, lalu kirim ulang.',
       page: 'tasks',
       label: 'Buka penugasan',
     };
   if (working)
     return {
       title: `${working} kunjungan sedang kamu kerjakan`,
-      text: 'Isi tanggal dan catatan kunjungan, lalu kirim ke admin.',
+      text: 'Buka halaman survei: catat kunjungan, isi input RVS bila perlu, lalu kirim untuk ditinjau admin.',
       page: 'tasks',
-      label: 'Lanjutkan catatan',
+      label: 'Lanjutkan survei',
     };
-  if (assigned)
+  if (ready)
     return {
-      title: `${assigned} penugasan baru dari admin`,
-      text: 'Baca catatan penugasan dan jadwal, lalu mulai survei.',
+      title: `${ready} kunjungan siap dimulai`,
+      text: 'Jadwal sudah dikonfirmasi pelapor. Datang sesuai jadwal, lalu mulai survei.',
       page: 'tasks',
       label: 'Buka penugasan',
+    };
+  if (assigned.length)
+    return {
+      title: `${assigned.length} penugasan menunggu jadwal`,
+      text: 'Pelapor belum mengonfirmasi jadwal kunjungan. Survei bisa dimulai setelah jadwal disepakati.',
+      page: 'tasks',
+      label: 'Lihat penugasan',
     };
   return {
     title: 'Belum ada tugas untukmu',
@@ -94,7 +130,7 @@ export function surveyorNextAction(
 
 export function nextActionFor(
   role: ActorRole,
-  reports: Pick<Report, 'status'>[],
+  reports: Pick<Report, 'status' | 'appointment'>[],
   activeSurveyors: number,
 ): NextAction | null {
   if (role === 'admin') return adminNextAction(reports, activeSurveyors);

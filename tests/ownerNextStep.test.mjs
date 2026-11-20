@@ -93,8 +93,11 @@ test('reports waiting on the owner are listed first, order otherwise kept', () =
 test('owner has no overview page and lands on "Laporan saya"', () => {
   assert.deepEqual(
     workflowMenus.owner.map(([id]) => id),
-    ['reports', 'new'],
+    ['reports'],
   );
+  // "Buat laporan" is an action button, but its page still resolves.
+  assert.equal(resolveWorkflowPage('owner', 'dashboard/new'), 'new');
+  assert.equal(resolveWorkflowPage('admin', 'dashboard/new'), null);
   assert.equal(resolveWorkflowPage('owner', 'dashboard'), 'reports');
   assert.equal(resolveWorkflowPage('owner', 'dashboard/overview'), null);
   assert.equal(resolveWorkflowPage('admin', 'dashboard'), 'overview');
@@ -111,15 +114,14 @@ test('admin notes name who must act, so reporters are not asked to fix visit rec
 
 test('detail page leads with what the stage needs', async () => {
   const { ownerDetailFocus } = await import('../src/lib/ownerNextStep.ts');
-  for (const status of [
-    'Draf',
-    'Dikirim',
-    'Perlu dilengkapi',
-    'Ditinjau',
-    'Perlu revisi',
-  ])
+  for (const status of ['Draf', 'Perlu dilengkapi', 'Ditinjau', 'Perlu revisi'])
     assert.equal(ownerDetailFocus(status), 'report', status);
-  for (const status of ['Siap disurvei', 'Ditugaskan', 'Dalam survei'])
+  for (const status of [
+    'Dikirim',
+    'Siap disurvei',
+    'Ditugaskan',
+    'Dalam survei',
+  ])
     assert.equal(ownerDetailFocus(status), 'schedule', status);
   assert.equal(ownerDetailFocus('Selesai'), 'closed');
 });

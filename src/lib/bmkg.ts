@@ -34,6 +34,13 @@ export type EarthquakeMapView = {
   full: string;
 };
 
+// Pusat tampilan peta kawasan Bandung Raya saat belum ada laporan yang
+// sesuai. Hanya titik tengah peta, bukan lokasi gempa.
+export const bandungRayaCenter: BmkgCoordinates = {
+  latitude: -6.9175,
+  longitude: 107.6191,
+};
+
 export function earthquakeMapView(
   point: BmkgCoordinates | null,
 ): EarthquakeMapView | null {

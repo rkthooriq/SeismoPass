@@ -9,6 +9,8 @@ import { exportBuildingDemo } from '../../lib/buildingSession';
 import { parseWorkspaceRoute } from '../../lib/workspaceRoute';
 import { focusAndReveal } from '../../lib/reveal';
 import './workspace.css';
+import Pagination from '../../components/Pagination';
+import usePagination from '../../components/usePagination';
 import {
   canOpenPage,
   canManageBuildings,
@@ -130,6 +132,7 @@ export default function Workspace({
         .includes(query.toLowerCase()) &&
       (filter === 'Semua status' || b.status === filter),
   );
+  const pager = usePagination(visible, `${query}|${filter}`);
   return (
     <div className="workspace">
       <a
@@ -393,7 +396,7 @@ export default function Workspace({
                     tercatat. Tidak yakin? Pilih “Belum diketahui”.
                   </p>
                   <a className="ws-secondary" href="#/buildings">
-                    Periksa catatan bangunan →
+                    Periksa catatan bangunan
                   </a>
                   <div className="ws-next-note">
                     ◎ Data dasar bukan hasil screening.
@@ -427,7 +430,7 @@ export default function Workspace({
                     ))}
                   </select>
                 </div>
-                <div className="ws-table-scroll">
+                <div className="ws-table-scroll" id={pager.listId}>
                   <table>
                     <thead>
                       <tr>
@@ -441,7 +444,7 @@ export default function Workspace({
                       </tr>
                     </thead>
                     <tbody>
-                      {visible.map((b) => (
+                      {pager.items.map((b) => (
                         <tr key={b.id}>
                           <td>
                             <a href={`#/profile/${b.id}`}>
@@ -472,6 +475,7 @@ export default function Workspace({
                     </tbody>
                   </table>
                 </div>
+                <Pagination pager={pager} label="bangunan" unit="bangunan" />
                 {visible.length === 0 && (
                   <div className="ws-empty">
                     <h2>Belum ada yang cocok.</h2>
@@ -528,7 +532,7 @@ export default function Workspace({
                       className="ws-secondary"
                       href={`#/profile/${selected.id}/edit`}
                     >
-                      Ubah data bangunan ↗
+                      Ubah data bangunan
                     </a>
                   </div>
                 </div>
@@ -569,7 +573,7 @@ export default function Workspace({
                       berbagi masih perlu ditetapkan.
                     </p>
                     <a className="ws-secondary" href="#/qr">
-                      Lihat pratinjau terbatas ↗
+                      Lihat pratinjau terbatas
                     </a>
                   </section>
                 </div>
@@ -866,7 +870,7 @@ function Empty({ title, text }: { title: string; text: string }) {
       <h2>{title}</h2>
       <p>{text}</p>
       <a href="#/dashboard" className="ws-secondary">
-        Kembali ke dashboard →
+        Kembali ke dashboard
       </a>
     </section>
   );
@@ -1089,7 +1093,7 @@ function BuildingForm({
             Simpan draf
           </button>
           <button className="ws-primary" type="submit" value="complete">
-            Simpan data bangunan →
+            Simpan data bangunan
           </button>
         </div>
       </form>

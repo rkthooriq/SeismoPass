@@ -13,6 +13,15 @@ import {
   visibleReports,
 } from '../src/lib/reportDemo.ts';
 
+const confirmed = (report) => ({
+  ...report,
+  appointment: {
+    date: '2026-11-12',
+    slot: 'Pagi (08.00–11.00)',
+    response: 'confirmed',
+  },
+});
+
 const [owner, admin, surveyor] = demoAccounts;
 const draft = { ...sampleReports[0], status: 'Draf' };
 
@@ -41,7 +50,7 @@ test('a report can go through admin assignment, requested revision, and administ
     surveyor,
     'Kunjungan contoh dengan supervisi.',
   );
-  const assigned = advanceReport(assignment, surveyor, 'start');
+  const assigned = advanceReport(confirmed(assignment), surveyor, 'start');
   const visited = advanceReport(assigned, surveyor, 'visit', {
     date: '2026-11-11',
     note: 'Kunjungan tercatat.',
@@ -96,7 +105,7 @@ test('report visibility and updates respect ownership, assignment and status', (
     surveyor,
     'Kunjungan contoh dengan supervisi.',
   );
-  const assigned = advanceReport(assignment, surveyor, 'start');
+  const assigned = advanceReport(confirmed(assignment), surveyor, 'start');
   const anotherSurveyor = { ...surveyor, id: 'other-surveyor' };
   assert.equal(advanceReport(assigned, anotherSurveyor, 'claim'), null);
   assert.deepEqual(visibleReports([assigned], anotherSurveyor), []);

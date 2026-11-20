@@ -259,3 +259,58 @@ test('the building pin changes only while the owner may still edit the report', 
       null,
     );
 });
+
+test('admin keeping the reporter chosen time agrees the schedule at once', async () => {
+  const { visitPreferenceErrors } = await import('../src/lib/ownerProgress.ts');
+  const chosen = {
+    date: '2026-12-02',
+    slot: 'Pagi (08.00–11.00)',
+    note: 'Pemilik ada di rumah',
+    at: '2026-11-20T01:00:00.000Z',
+  };
+  const assigned = {
+    ...sent,
+    status: 'Ditugaskan',
+    assignee: surveyor.id,
+    ownerProgress: { ...sent.ownerProgress, availability: chosen },
+  };
+  const kept = proposeAppointment(
+    assigned,
+    admin,
+    chosen.date,
+    chosen.slot,
+    now,
+  );
+  assert.equal(kept.appointment.response, 'confirmed');
+  assert.equal(kept.appointment.confirmedBy, 'owner');
+  const changed = proposeAppointment(
+    assigned,
+    admin,
+    chosen.date,
+    'Sore (14.00–17.00)',
+    now,
+  );
+  assert.equal(changed.appointment.response, 'proposed');
+
+  assert.deepEqual(visitPreferenceErrors(undefined, true, now), {});
+  assert.ok(visitPreferenceErrors(undefined, false, now).visitDate);
+  assert.ok(
+    visitPreferenceErrors({ date: '2026-12-02', slot: '' }, true, now)
+      .visitSlot,
+  );
+  assert.ok(
+    visitPreferenceErrors(
+      { date: '2020-01-01', slot: 'Pagi (08.00–11.00)' },
+      false,
+      now,
+    ).visitDate,
+  );
+  assert.deepEqual(
+    visitPreferenceErrors(
+      { date: '2026-12-02', slot: 'Pagi (08.00–11.00)' },
+      false,
+      now,
+    ),
+    {},
+  );
+});

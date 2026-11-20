@@ -11,6 +11,8 @@
     .role-sidebar,
     .ws-welcome,
     .directory-dialog,
+    .report-history-dialog,
+    .rvs-saved-dialog,
     .owner-building-card,
     .owner-sheet,
     .owner-side-note,
@@ -33,6 +35,8 @@
     .role-sidebar,
     .ws-welcome,
     .directory-dialog,
+    .report-history-dialog,
+    .rvs-saved-dialog,
     .owner-building-card,
     .owner-sheet,
     .owner-side-note,
@@ -71,6 +75,7 @@
     .dz-quality-grid > div,
     .role-context,
     .role-assignment-form,
+    .rvs-saved-card,
     .report-passport,
     .report-journey li,
     .report-visit-fields,
@@ -102,6 +107,29 @@
 
 /* Flush-edge content uses the same curve as its immediate container. */
 #root .workspace .report-item {
+  border-radius: var(--radius-card);
+}
+#root .workspace .report-list-item {
+  padding: var(--space-card);
+}
+#root .workspace .report-focused-detail .report-focus-card {
+  margin: 0;
+  padding: 0;
+  border-radius: var(--radius-panel);
+}
+#root .workspace .report-focused-detail .report-focus-heading {
+  padding: var(--space-panel);
+  border-radius: var(--radius-panel) var(--radius-panel) 0 0;
+}
+#root .workspace .report-focused-detail .report-focus-card > .report-detail {
+  padding: var(--space-panel);
+  border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+}
+#root
+  .workspace
+  .report-focused-detail
+  :is(.report-submission > .owner-preview-step, .rvs-saved-card) {
+  padding: var(--space-card);
   border-radius: var(--radius-card);
 }
 #root .workspace .report-item > summary {
@@ -145,6 +173,7 @@
     .actor-enter,
     .role-mobile-menu,
     .directory-action,
+    .report-history-trigger,
     input:not([type='checkbox']):not([type='radio']):not([type='range']):not(
         [type='file']
       ):not(.ws-search input),
@@ -154,6 +183,32 @@
   border-radius: var(--radius-control);
   padding: var(--padding-control);
 }
+/* One look for every action, whether it is a <button> or a link styled as
+   one: the workspace resets <button> borders and weight, which links never
+   got, so link buttons showed a light edge and heavier text. Primary keeps a
+   transparent border so both kinds share the same 48px height. */
+#root .workspace :is(a, button):is(.ws-primary, .ws-secondary) {
+  min-height: 48px;
+  font-size: 14px;
+  line-height: 1.6;
+  white-space: normal;
+}
+/* Primary actions show no edge at all: the gradient also paints under the
+   transparent border (otherwise the tile repeats there as a dark rim), and
+   the glass top highlight is dropped, leaving only the soft drop shadow. */
+#root .workspace :is(a, button).ws-primary,
+#root
+  .workspace
+  :is(a, button).ws-primary:not(:disabled):is(:hover, :focus-visible, :active) {
+  border: 1px solid transparent;
+  background-origin: border-box;
+  box-shadow: 0 14px 34px -16px rgb(59 42 30 / 0.4);
+  font-weight: 600;
+}
+#root .workspace :is(a, button).ws-secondary {
+  font-weight: 400;
+}
+
 #root .sp-header .sp-nav-account .sp-account-action,
 #root
   .workspace
@@ -168,11 +223,13 @@
   :is(.workspace, .sp-landing)
   :is(
     .ws-notice,
+    .feedback-notice,
     .ws-disclaimer,
+    .rvs-alert,
     .owner-inline-message,
     .role-assignment-note,
-    .report-thread-note,
     .report-visit-info,
+    .report-completeness-choice,
     .dz-events dl,
     .dz-empty
   ) {
@@ -213,6 +270,32 @@
 #root .workspace .report-item .report-detail .report-passport {
   padding: var(--space-box);
   border-radius: var(--radius-box);
+}
+#root .workspace .report-detail .report-submission > .owner-preview-step {
+  padding: var(--space-box);
+  border-radius: var(--radius-box);
+}
+#root .workspace .report-detail .rvs-saved-card {
+  padding: var(--space-box);
+  border-radius: var(--radius-box);
+}
+#root .workspace .rvs-saved-body > .rvs-result {
+  padding: var(--space-card);
+  border-radius: var(--radius-card);
+}
+#root .workspace .rvs-saved-status {
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
+}
+#root .workspace .rvs-saved-disclosure {
+  border-radius: var(--radius-card);
+}
+#root .workspace .rvs-saved-disclosure > summary {
+  padding: var(--space-card);
+  border-radius: var(--radius-card);
+}
+#root .workspace .rvs-saved-disclosure > .rvs-saved-data {
+  padding: 0 var(--space-card) var(--space-card);
 }
 #root .workspace .owner-upload input[type='file'] {
   padding: 0;
@@ -343,8 +426,16 @@
 #root .workspace .role-footer {
   padding-block: var(--space-4) var(--space-2);
 }
+/* Sample-data strip (older building pages): a box-tier note with its own
+   padding, not a filled band with text pinned to the top edge. */
 #root .workspace .ws-demo-strip {
-  padding-bottom: var(--space-4);
+  padding: var(--space-box) var(--space-4);
+  margin-bottom: var(--space-6);
+  border: 0;
+  border-radius: var(--radius-box);
+  font-size: 13px;
+}
+#root .workspace .rvs-lab-notice {
   margin-bottom: var(--space-6);
 }
 
@@ -534,6 +625,48 @@
   margin-top: var(--space-2);
 }
 
+/* Visit scheduling: one rhythm between the appointment card, its status
+   message, the request form, and the footnote, so nothing touches. */
+#root .workspace .owner-schedule {
+  display: grid;
+  gap: var(--space-5);
+}
+#root .workspace .owner-schedule > *,
+#root .workspace .owner-schedule .owner-appointment > .owner-saved-note,
+#root .workspace .owner-schedule .owner-form > .owner-actions {
+  margin-block: 0;
+}
+#root .workspace .owner-schedule .owner-appointment {
+  display: grid;
+  gap: var(--space-3);
+}
+#root .workspace .owner-schedule .owner-appointment > * {
+  margin-block: 0;
+}
+#root .workspace .owner-schedule .owner-appointment > .owner-actions {
+  margin-top: var(--space-2);
+}
+
+/* Pagination controls: control tier at the 44px minimum touch target. */
+#root .pagination .pagination-page {
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-control);
+}
+#root .pagination .pagination-position {
+  padding: 0 var(--space-2);
+}
+#root .pagination .pagination-size select {
+  padding-block: var(--space-2);
+  border-radius: var(--radius-control);
+}
+
+/* RVS input section rows: box tier, same quiet fill as the grouping boxes. */
+#root .workspace .rvs-section-row {
+  padding: var(--space-box);
+  border-radius: var(--radius-box);
+  background: rgb(243 231 214 / 0.45);
+}
+
 /* ---------- Borderless surfaces (all pages) ----------
    Panels, cards, boxes, notices, and badges are separated by fill and shadow,
    not by outline borders. Form fields (input, select, textarea, search) keep
@@ -635,8 +768,35 @@
   box-shadow: none;
 }
 #root :is(.workspace, .actor-login) :is(.ws-errors, .account-errors) {
-  background: var(--fill-alert);
+  background: var(--notice-error-fill);
+  color: var(--notice-error-ink);
   box-shadow: none;
+}
+#root :is(.workspace, .actor-login) .ws-error {
+  color: var(--notice-error-ink);
+}
+#root .workspace .feedback-notice {
+  border: 0;
+  background: var(--notice-fill);
+  color: var(--notice-ink);
+  box-shadow: none;
+}
+#root .workspace .feedback-notice .notice-title {
+  color: inherit;
+}
+/* Result surfaces stay neutral; only calculation blockers receive a warm tint. */
+#root .workspace .rvs-result {
+  background: var(--paper);
+  color: var(--ink);
+}
+#root .workspace .rvs-result > .ws-disclaimer {
+  display: block;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  padding: var(--space-4) 0 0;
+  margin: 0;
+  background: transparent;
+  color: var(--muted);
 }
 #root .workspace .owner-saved-note {
   border-radius: var(--radius-box);

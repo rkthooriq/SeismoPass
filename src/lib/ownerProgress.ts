@@ -1,4 +1,5 @@
 import type { AccountIdentity, Report } from './reportDemo';
+import { formatDate } from './dateFormat.ts';
 
 export type BuildingPoint = { latitude: number; longitude: number };
 export const timeSlots = [
@@ -11,6 +12,10 @@ export interface SurveyAppointment {
   date: string;
   slot: TimeSlot;
   response: 'proposed' | 'confirmed' | 'change-requested';
+  /** Who recorded the reporter's agreement: the reporter, or an admin who
+   *  heard it outside the app (phone, message). */
+  confirmedBy?: 'owner' | 'admin';
+  confirmationNote?: string;
 }
 export interface OwnerProgress {
   point?: BuildingPoint;
@@ -82,10 +87,20 @@ export function parseAppointment(
     )
   )
     return undefined;
+  const response = value.response as SurveyAppointment['response'];
   return {
     date: value.date,
     slot: value.slot as TimeSlot,
-    response: value.response as SurveyAppointment['response'],
+    response,
+    ...(response === 'confirmed' &&
+    (value.confirmedBy === 'owner' || value.confirmedBy === 'admin')
+      ? { confirmedBy: value.confirmedBy }
+      : {}),
+    ...(response === 'confirmed' &&
+    validText(value.confirmationNote) &&
+    value.confirmationNote.trim()
+      ? { confirmationNote: value.confirmationNote.trim() }
+      : {}),
   };
 }
 export function parseOwnerProgress(value: unknown): OwnerProgress | undefined {
@@ -205,7 +220,13 @@ export function updateOwnerProgress(
       !['confirmed', 'change-requested'].includes(action.response)
     )
       return null;
-    appointment = { ...appointment, response: action.response };
+    appointment = {
+      ...appointment,
+      response: action.response,
+      ...(action.response === 'confirmed'
+        ? { confirmedBy: 'owner' as const }
+        : {}),
+    };
     description =
       action.response === 'confirmed'
         ? 'Pelapor mengonfirmasi jadwal yang diusulkan admin.'
@@ -291,8 +312,86 @@ export function proposeAppointment(
     !timeSlots.includes(slot as TimeSlot)
   )
     return null;
+  // The reporter already chose this exact time, so it needs no second
+  // answer: the schedule is agreed as soon as the admin keeps it. Any other
+  // time waits for the reporter to confirm or ask for another.
+  const chosen = report.ownerProgress?.availability;
+  const matchesChoice = chosen?.date === date && chosen.slot === slot;
   return {
     ...report,
-    appointment: { date, slot: slot as TimeSlot, response: 'proposed' },
+    appointment: matchesChoice
+      ? {
+          date,
+          slot: slot as TimeSlot,
+          response: 'confirmed',
+          confirmedBy: 'owner',
+        }
+      : { date, slot: slot as TimeSlot, response: 'proposed' },
+  };
+}
+
+// The visit time the reporter picks while writing the report. Required when
+// sending (a draft may leave it empty); date and slot always go together.
+export function visitPreferenceErrors(
+  preference: { date: string; slot: string } | undefined,
+  draft = false,
+  today = localToday(),
+): Record<string, string> {
+  const errors: Record<string, string> = {};
+  const date = preference?.date ?? '';
+  const slot = preference?.slot ?? '';
+  if (!date && !slot) {
+    if (!draft)
+      errors.visitDate = 'Pilih tanggal kunjungan yang kamu inginkan.';
+    return errors;
+  }
+  if (!validDate(date)) errors.visitDate = 'Pilih tanggal kunjungan.';
+  else if (date < today)
+    errors.visitDate = 'Pilih tanggal hari ini atau setelahnya.';
+  if (!timeSlots.includes(slot as TimeSlot))
+    errors.visitSlot = 'Pilih rentang waktu kunjungan.';
+  return errors;
+}
+
+// A reporter who agreed by phone or message never presses the button, so the
+// admin records that answer with a note saying how it was given. Only a date
+// still waiting for an answer can be confirmed this way.
+export function recordOwnerConfirmation(
+  report: Report,
+  account: AccountIdentity,
+  note: string,
+  today = localToday(),
+): Report | null {
+  const appointment = report.appointment;
+  const text = note.trim();
+  if (
+    account.role !== 'admin' ||
+    account.status !== 'active' ||
+    report.status !== 'Ditugaskan' ||
+    !appointment ||
+    appointment.response !== 'proposed' ||
+    appointment.date < today ||
+    !text ||
+    text.length > 1000
+  )
+    return null;
+  return {
+    ...report,
+    appointment: {
+      ...appointment,
+      response: 'confirmed',
+      confirmedBy: 'admin',
+      confirmationNote: text,
+    },
+    activity: [
+      ...(report.activity ?? []),
+      {
+        by: account.name,
+        role: account.role,
+        action: 'Admin mencatat konfirmasi jadwal dari pelapor',
+        note: `${formatDate(appointment.date)} · ${appointment.slot}. ${text}`,
+        at: new Date().toISOString(),
+      },
+    ].slice(-500),
   };
 }

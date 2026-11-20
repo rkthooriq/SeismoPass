@@ -24,18 +24,30 @@
 .rvs-editor .report-checkbox input {
   width: 18px;
 }
-.rvs-editor summary,
-.rvs-saved summary {
+.rvs-editor summary {
   cursor: pointer;
   font-weight: 650;
   padding: var(--padding-control);
 }
 .rvs-result {
-  margin: 24px 0;
-  background: var(--surface);
+  display: grid;
+  gap: var(--space-4);
+  margin: var(--space-6) 0;
+  background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--radius-md);
   padding: var(--space-panel);
+}
+.rvs-result > :is(h3, p) {
+  margin: 0;
+}
+.rvs-result > .rvs-saved-status {
+  justify-self: start;
+}
+.rvs-result > a {
+  justify-self: start;
+  color: var(--action);
+  text-underline-offset: 0.2em;
 }
 .rvs-score {
   display: flex;
@@ -71,14 +83,18 @@
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
-.rvs-alert {
-  background: var(--surface);
-  border-radius: var(--radius-sm);
-  padding: var(--space-panel) var(--space-panel) var(--space-panel)
-    calc(var(--space-panel) * 2);
+.workspace .rvs-calculation thead th {
+  background: var(--canvas);
+}
+.workspace .rvs-calculation tbody th {
+  background: transparent;
+  color: var(--ink);
+}
+.workspace .rvs-calculation tbody tr:last-child :is(th, td) {
+  font-weight: 650;
 }
 .rvs-alert li + li {
-  margin-top: 8px;
+  margin-top: var(--space-2);
 }
 .rvs-qr svg {
   display: block;
@@ -94,11 +110,395 @@
 .rvs-qr input {
   width: 100%;
 }
-.rvs-saved {
-  margin: 16px 0;
-}
 .rvs-observations {
   border: 1px solid var(--ws-line);
   border-radius: var(--radius-md);
   padding: var(--space-panel);
+}
+
+.rvs-saved-card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+  background: var(--surface);
+}
+.rvs-saved-copy {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  min-width: 0;
+  flex: 1 1 16rem;
+  overflow-wrap: anywhere;
+}
+.rvs-saved-copy :is(h3, p),
+.rvs-saved-heading :is(h2, p),
+.rvs-saved-data :is(h3, p) {
+  margin: 0;
+}
+.rvs-saved-copy p,
+.rvs-saved-heading p {
+  color: var(--muted);
+  font-size: 13px;
+}
+.rvs-saved-card > button,
+.rvs-saved-heading > button {
+  flex: none;
+  min-height: 44px;
+}
+.workspace .rvs-saved-dialog {
+  width: min(52rem, calc(100% - var(--space-8)));
+  height: min(48rem, calc(100dvh - var(--space-8)));
+  max-width: none;
+  max-height: none;
+  margin: auto;
+  overflow: hidden;
+  border: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  box-shadow: var(--glass-shadow);
+}
+.rvs-saved-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.rvs-saved-dialog::backdrop {
+  background: rgb(59 42 30 / 0.38);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+html:has(.rvs-saved-dialog[open]) {
+  overflow: hidden;
+}
+.rvs-saved-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.rvs-saved-heading > div {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.rvs-saved-body {
+  display: grid;
+  align-content: start;
+  gap: var(--space-4);
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.rvs-saved-body > .rvs-result {
+  margin: 0;
+}
+.rvs-saved-body .rvs-calculation {
+  white-space: normal;
+}
+.rvs-saved-body .rvs-calculation :is(th, td) {
+  padding: var(--space-3);
+  font-size: 13px;
+  letter-spacing: normal;
+  line-height: 1.5;
+  text-transform: none;
+}
+.rvs-saved-body .rvs-calculation thead th:last-child {
+  text-align: right;
+}
+.rvs-saved-body .rvs-calculation :is(th, td):last-child {
+  width: 4rem;
+  white-space: nowrap;
+}
+.rvs-saved-body .ws-disclaimer {
+  display: block;
+}
+#root .workspace .rvs-saved-status {
+  display: inline-flex;
+  align-items: center;
+  border: 0;
+  background: var(--paper);
+  color: var(--status-draft-ink);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-transform: none;
+  letter-spacing: normal;
+  white-space: normal;
+}
+#root .workspace :is(.rvs-saved-heading, .rvs-result) .rvs-saved-status {
+  background: var(--status-draft-fill);
+}
+.rvs-saved-disclosure {
+  min-width: 0;
+  background: var(--paper);
+}
+.rvs-saved-disclosure > summary {
+  /* Same disclosure as the owner's "Lihat isi laporan yang dikirim": title
+     and hint on the left, a round chevron on the right that turns when open. */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  min-height: 44px;
+  list-style: none;
+  cursor: pointer;
+}
+.rvs-saved-disclosure > summary::-webkit-details-marker {
+  display: none;
+}
+.rvs-saved-disclosure > summary > span:first-child {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.rvs-saved-disclosure > summary strong {
+  font-weight: 600;
+}
+.rvs-saved-disclosure > summary small {
+  color: var(--muted);
+  font-size: 13px;
+}
+.rvs-saved-fold-icon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  flex: none;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 18px;
+  transition: transform 180ms ease;
+}
+.rvs-saved-disclosure[open] .rvs-saved-fold-icon {
+  transform: rotate(90deg);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rvs-saved-fold-icon {
+    transition: none;
+  }
+}
+.rvs-saved-data {
+  display: grid;
+  gap: var(--space-4);
+}
+.rvs-saved-facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin: 0;
+}
+.rvs-saved-facts > div {
+  display: grid;
+  gap: var(--space-1);
+  align-content: start;
+  min-width: 0;
+}
+.rvs-saved-facts dt {
+  color: var(--muted);
+  font-size: 13px;
+}
+.rvs-saved-facts dd {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+@media (max-width: 600px) {
+  .workspace .rvs-saved-dialog {
+    width: calc(100% - var(--space-4));
+    height: calc(100dvh - var(--space-4));
+  }
+  .rvs-saved-facts {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* RVS input sections: summary rows on the page, fields in a dialog.
+   Row = box tier (geometry.css); title and progress left, action right;
+   the action drops below on narrow cards. */
+.rvs-section-list {
+  display: grid;
+  gap: var(--space-3);
+}
+.rvs-section-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+  min-width: 0;
+}
+.rvs-section-copy {
+  display: grid;
+  gap: var(--space-1);
+  flex: 1 1 18rem;
+  min-width: 0;
+}
+.rvs-section-copy :is(h3, p) {
+  margin: 0;
+}
+.rvs-section-copy h3 {
+  font-size: 15px;
+  text-wrap: balance;
+}
+.rvs-section-copy p {
+  color: var(--muted);
+  font-size: 13px;
+}
+.rvs-section-chosen {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.rvs-section-chosen li {
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.rvs-section-row > button {
+  flex: none;
+}
+/* Short sections need no fixed tall dialog. A modal dialog is pinned to
+   both screen edges, so "auto" would stretch it; fit-content sizes it to the
+   fields and still scrolls inside once it reaches the max height. */
+.workspace .rvs-saved-dialog.rvs-section-dialog {
+  height: fit-content;
+  max-height: calc(100dvh - var(--space-8));
+}
+.rvs-section-dialog .rvs-saved-heading p {
+  color: var(--muted);
+  font-size: 14px;
+  max-width: 60ch;
+}
+.rvs-section-actions {
+  justify-content: flex-end;
+}
+
+/* Type and spacing of the RVS editor, fixed here so it reads the same on
+   the survey page (inside the reporter-form styles) and on the practice
+   page. #root lifts these above `.owner-registration h2/h3`.
+   Rhythm: label 8 → title 8 → intro 4 → guide link 20 → sections. */
+#root .workspace .rvs-editor > * {
+  margin: 0;
+}
+#root .workspace .rvs-editor > .ws-badge {
+  padding: var(--space-1) var(--space-3);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+}
+#root .workspace .rvs-editor > h2 {
+  margin-top: var(--space-2);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+#root .workspace .rvs-editor > h2 + p {
+  margin-top: var(--space-2);
+  max-width: 72ch;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+#root .workspace .rvs-editor > p + p {
+  margin-top: var(--space-1);
+  font-size: 14px;
+}
+#root .workspace .rvs-editor > p a {
+  color: var(--action);
+  font-weight: 500;
+}
+#root .workspace .rvs-editor > .report-form {
+  margin-top: var(--space-5);
+  gap: var(--space-4);
+}
+#root .workspace .rvs-editor > .report-form > .ws-muted {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+}
+/* Section rows: title 16/600, progress 13 muted, chips 8 below. */
+#root .workspace .rvs-section-copy h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.015em;
+}
+#root .workspace .rvs-section-copy p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+#root .workspace .rvs-section-chosen {
+  margin-top: var(--space-2);
+}
+/* Dialog title matches the editor title, not the page heading. */
+#root .workspace .rvs-section-dialog .rvs-saved-heading h2 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+#root .workspace .rvs-section-dialog .rvs-saved-heading p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* Survey page: a heading and its hint read as one unit (8px), as in the
+   reporter form's sections. */
+#root .workspace .survey-form-head {
+  display: grid;
+  gap: var(--space-2);
+}
+#root .workspace .survey-form-head > * {
+  margin: 0;
+}
+#root .workspace .survey-form-head > p {
+  font-size: 13px;
+}
+
+/* Practice and QR pages: the panel opens with its title at the panel
+   padding, and the intro sits 8px under it (heading → hint rule). */
+#root .workspace .rvs-lab-panel > h1 {
+  margin: 0;
+  font-size: clamp(24px, 3vw, 30px);
+  line-height: 1.2;
+}
+#root .workspace .rvs-lab-panel > h1 + p {
+  margin: var(--space-2) 0 0;
+  max-width: 72ch;
+  color: var(--muted);
+  line-height: 1.6;
+}
+#root .workspace .rvs-lab-panel > * + * {
+  margin-top: var(--space-4);
+}
+#root .workspace .rvs-lab-panel > h1 + p {
+  margin-top: var(--space-2);
+}
+#root .workspace .rvs-lab-panel > :is(p, .ws-disclaimer) {
+  margin-bottom: 0;
+}
+#root .workspace .rvs-lab-panel > .rvs-editor {
+  margin-top: var(--space-6);
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ComponentProps, FormEvent } from 'react';
 import {
   advanceReport,
@@ -9,10 +9,15 @@ import {
 } from '../../lib/reportDemo';
 import type { DemoAccount, Report, ReportAction } from '../../lib/reportDemo';
 import {
+  parseSurveyRoute,
+  isReportDetailPage,
+  parseReportDetailRoute,
+  reportDetailRoute,
   reportsOnPage,
   resolveWorkflowPage,
   statusFilterOptions,
-  workflowMenus,
+  surveyRoute,
+  workflowPageTitle,
 } from '../../lib/workflowNavigation';
 import type { WorkflowPage } from '../../lib/workflowNavigation';
 import type {
@@ -23,12 +28,18 @@ import type { NewSurveyorInput } from '../../lib/surveyorAccess';
 import SurveyorManagement from '../onboarding/SurveyorManagement';
 import WorkspaceShell from './WorkspaceShell';
 import ReportCard from './ReportCard';
+import SurveyForm from './SurveyForm';
 import FilterMenu from '../../components/FilterMenu';
+import Pagination from '../../components/Pagination';
+import Notice from '../../components/Notice';
+import type { NoticeTone } from '../../components/Notice';
+import usePagination from '../../components/usePagination';
 import ReportRegistrationForm from './ReportRegistrationForm';
 import OwnerWorkspace from './OwnerWorkspace';
 import {
   updateOwnerProgress,
   proposeAppointment,
+  recordOwnerConfirmation,
 } from '../../lib/ownerProgress';
 import UserProfilePage from '../profile/UserProfilePage';
 import { emptyListText, nextActionFor } from '../../lib/roleNextAction';
@@ -82,6 +93,15 @@ function ReportWorkspaceContent({
   invalidSession?: boolean;
 }) {
   const page = resolveWorkflowPage(account.role, route);
+  const surveyId = account.role === 'surveyor' ? parseSurveyRoute(route) : null;
+  const detailRoute =
+    page && account.role !== 'owner' ? parseReportDetailRoute(route) : null;
+  // The reporter's report detail has its own address too, so Back, refresh
+  // and shared links work like on any other page.
+  const ownerDetailId =
+    account.role === 'owner' && page === 'reports'
+      ? (parseReportDetailRoute(route)?.reportId ?? null)
+      : null;
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState<string[]>([]);
   // A status chosen on one list must not silently empty the next one.
@@ -91,8 +111,35 @@ function ReportWorkspaceContent({
     setStatus([]);
   }
   const [editing, setEditing] = useState<Report | null>(null);
-  const [message, setMessage] = useState('');
+  // Feedback after an action: green when it worked, red when it did not, so
+  // a refusal never looks like a confirmation.
+  const [feedback, setFeedback] = useState<{
+    text: string;
+    tone: NoticeTone;
+  }>({ text: '', tone: 'success' });
+  const message = feedback.text;
+  const setMessage = (text: string, tone: NoticeTone = 'success') =>
+    setFeedback({ text, tone });
   const visible = visibleReports(reports, account);
+  const detailReport = detailRoute
+    ? visible.find((item) => item.id === detailRoute.reportId)
+    : undefined;
+  const lastDetail = useRef<string | null>(null);
+  const detailId = detailRoute?.reportId;
+  useEffect(() => {
+    if (detailId) {
+      lastDetail.current = detailId;
+      document
+        .getElementById('report-focus-title')
+        ?.focus({ preventScroll: true });
+    } else if (lastDetail.current) {
+      const target =
+        document.getElementById(`report-link-${lastDetail.current}`) ??
+        document.getElementById('role-main');
+      target?.focus();
+      lastDetail.current = null;
+    }
+  }, [detailId]);
   const onPage = reportsOnPage(page, visible);
   const statusOptions = statusFilterOptions(page, onPage);
   // A chosen status that no longer has reports drops out of the selection.
@@ -106,6 +153,10 @@ function ReportWorkspaceContent({
         (value) => value.toLowerCase().includes(search.trim().toLowerCase()),
       ),
   );
+  const pager = usePagination(
+    filtered,
+    `${page}|${search.trim()}|${activeStatus.join(',')}`,
+  );
   const pageEmpty = page ? emptyListText[page] : undefined;
   const nextAction = nextActionFor(
     account.role,
@@ -116,11 +167,7 @@ function ReportWorkspaceContent({
   );
   const count = (statuses: string[]) =>
     visible.filter((report) => statuses.includes(report.status)).length;
-  const title =
-    page === 'profile'
-      ? 'Profil saya'
-      : (workflowMenus[account.role].find(([id]) => id === page)?.[1] ??
-        'Halaman tidak tersedia');
+  const title = workflowPageTitle(account.role, page);
   function saveDraft(draft: Report, send: boolean) {
     if (account.role !== 'owner' || draft.reporterId !== account.id) return;
     const original = editing
@@ -167,10 +214,23 @@ function ReportWorkspaceContent({
             ? Object.values(validateReportRegistration(report))
             : ['Periksa isian, tanggal, status, dan penugasan.']),
         ].join(' '),
+        'error',
       );
       return;
     }
     onChange(reports.map((item) => (item.id === report.id ? next : item)));
+    if (action === 'start') {
+      openSurvey(report.id);
+      return;
+    }
+    if (action === 'verify') {
+      onNotice(
+        'Data laporan dinyatakan lengkap. Pilih pesurvei untuk meneruskan laporan.',
+        'dashboard/assignments',
+      );
+      window.location.assign('#/dashboard/assignments');
+      return;
+    }
     setMessage(
       action === 'return'
         ? 'Laporan dikembalikan ke pelapor beserta catatanmu.'
@@ -178,10 +238,18 @@ function ReportWorkspaceContent({
           ? 'Catatan dikembalikan ke pesurvei untuk direvisi.'
           : action === 'close'
             ? 'Administrasi ditutup. Pelapor melihat catatan penutupmu.'
-            : action === 'visit'
-              ? 'Catatan kunjungan terkirim ke admin.'
-              : `Status laporan: ${next.status}.`,
+            : `Status laporan: ${next.status}.`,
     );
+  }
+  function openSurvey(id: string) {
+    onNotice(
+      'Survei dimulai. Catat kunjungan dan input RVS, lalu kirim untuk ditinjau admin.',
+      surveyRoute(id).slice(2),
+    );
+    window.location.assign(surveyRoute(id));
+  }
+  function replace(next: Report) {
+    onChange(reports.map((item) => (item.id === next.id ? next : item)));
   }
   function assign(event: FormEvent<HTMLFormElement>, report: Report) {
     event.preventDefault();
@@ -189,41 +257,57 @@ function ReportWorkspaceContent({
     const target = accounts.find(
       (person) => person.id === form.get('surveyorId'),
     );
-    // From the incoming list one decision approves and assigns at once.
-    const approved =
-      report.status === 'Dikirim'
-        ? advanceReport(report, account, 'verify')
-        : report;
-    let next =
-      target && approved
-        ? assignReport(
-            approved,
-            account,
-            target,
-            String(form.get('assignmentNote') ?? ''),
-          )
-        : null;
-    if (next && (form.get('appointmentDate') || form.get('appointmentSlot'))) {
-      next = proposeAppointment(
-        next,
-        account,
-        String(form.get('appointmentDate') ?? ''),
-        String(form.get('appointmentSlot') ?? ''),
-      );
-    }
+    const date = String(form.get('appointmentDate') ?? '');
+    const slot = String(form.get('appointmentSlot') ?? '');
+    let next = target
+      ? assignReport(
+          report,
+          account,
+          target,
+          String(form.get('assignmentNote') ?? ''),
+        )
+      : null;
+    // Saving the same date again (e.g. only the note changed) keeps the
+    // reporter's confirmation; a new date or surveyor needs a new answer.
+    const current = next?.appointment;
+    // A pending proposal that equals the reporter's own choice is not
+    // "unchanged": saving it agrees the schedule (see proposeAppointment).
+    const choice = report.ownerProgress?.availability;
+    const pendingChoice =
+      current?.response === 'proposed' &&
+      choice?.date === date &&
+      choice.slot === slot;
+    const unchanged =
+      current &&
+      current.date === date &&
+      current.slot === slot &&
+      current.response !== 'change-requested' &&
+      !pendingChoice;
+    if (next && !unchanged)
+      next =
+        date && slot ? proposeAppointment(next, account, date, slot) : null;
     if (!next) {
       setMessage(
-        [
-          report.status === 'Dikirim' && !approved
-            ? 'Data laporan belum lengkap, kembalikan ke pelapor.'
-            : 'Pilih pesurvei aktif dan isi catatan penugasan. Jika mengusulkan jadwal, isi tanggal hari ini atau setelahnya beserta rentang waktu.',
-        ].join(' '),
+        'Pilih pesurvei aktif, isi catatan penugasan, serta tanggal kunjungan (hari ini atau setelahnya) dan rentang waktunya.',
+        'error',
       );
       return;
     }
     onChange(reports.map((item) => (item.id === report.id ? next : item)));
+    const agreed =
+      next.appointment?.response === 'confirmed' &&
+      next.appointment.confirmedBy === 'owner' &&
+      !unchanged;
     setMessage(
-      `Laporan diteruskan ke ${target?.name ?? 'pesurvei'}. Kini terlihat di akun pesurvei itu.`,
+      report.assignee !== target?.id
+        ? agreed
+          ? `Laporan diteruskan ke ${target?.name ?? 'pesurvei'}. Jadwal mengikuti pilihan pelapor dan langsung disepakati.`
+          : `Laporan diteruskan ke ${target?.name ?? 'pesurvei'}. Pelapor perlu mengonfirmasi jadwal sebelum survei dimulai.`
+        : unchanged
+          ? 'Penugasan diperbarui. Jadwal tetap sama.'
+          : agreed
+            ? 'Jadwal pilihan pelapor dipakai dan langsung disepakati.'
+            : 'Jadwal baru diusulkan. Pesurvei menunggu konfirmasi pelapor.',
     );
   }
   function exportReports() {
@@ -257,8 +341,35 @@ function ReportWorkspaceContent({
       report={report}
       account={account}
       accounts={accounts}
+      focused={!!detailRoute}
+      detailHref={reportDetailRoute(
+        isReportDetailPage(page)
+          ? page
+          : account.role === 'admin'
+            ? 'reports'
+            : 'tasks',
+        report.id,
+      )}
       onUpdate={update}
       onAssign={assign}
+      onConfirmSchedule={(event, item) => {
+        event.preventDefault();
+        const note = String(
+          new FormData(event.currentTarget).get('confirmationNote') ?? '',
+        );
+        const next = recordOwnerConfirmation(item, account, note);
+        if (!next) {
+          setMessage(
+            'Konfirmasi belum dicatat. Tulis cara pelapor menyetujui, dan pastikan jadwal belum lewat.',
+            'error',
+          );
+          return;
+        }
+        replace(next);
+        setMessage(
+          'Konfirmasi pelapor dicatat. Pesurvei kini bisa memulai survei sesuai jadwal.',
+        );
+      }}
       onEdit={() => {
         setEditing(report);
         requestAnimationFrame(() =>
@@ -266,12 +377,6 @@ function ReportWorkspaceContent({
             .getElementById('edit-report')
             ?.scrollIntoView({ behavior: 'instant', block: 'start' }),
         );
-      }}
-      onRvs={(record) => {
-        const next = saveReportRvs(report, account, record);
-        if (!next) return false;
-        onChange(reports.map((item) => (item.id === report.id ? next : item)));
-        return true;
       }}
     />
   );
@@ -382,21 +487,25 @@ function ReportWorkspaceContent({
   return (
     <>
       {storageFailed && (
-        <p role="status" className="ws-disclaimer">
-          Penyimpanan tab tidak tersedia. Perubahan hanya bertahan selama
-          aplikasi terbuka.
-        </p>
+        <Notice tone="warning" role="status">
+          <p>
+            Penyimpanan tab tidak tersedia. Perubahan hanya bertahan selama
+            aplikasi terbuka.
+          </p>
+        </Notice>
       )}
       {invalidSession && (
-        <p role="status" className="ws-disclaimer">
-          Sesi sebelumnya tidak dapat dipulihkan; data contoh dipakai. Simpan
-          perubahan untuk memulai sesi baru.
-        </p>
+        <Notice tone="warning" role="status">
+          <p>
+            Sesi sebelumnya tidak dapat dipulihkan; data contoh dipakai. Simpan
+            perubahan untuk memulai sesi baru.
+          </p>
+        </Notice>
       )}
       {(message || notice) && (
-        <p role="status" className="ws-notice">
-          {message || notice}
-        </p>
+        <Notice tone={message ? feedback.tone : 'success'} role="status">
+          <p>{message || notice}</p>
+        </Notice>
       )}
       {page === 'profile' && (
         <UserProfilePage
@@ -423,7 +532,32 @@ function ReportWorkspaceContent({
         </div>
       )}
 
-      {page === 'overview' && (
+      {detailRoute && (
+        <div className="report-focused-detail">
+          <div className="report-detail-heading">
+            <a
+              className="ws-secondary"
+              href={`#/dashboard/${detailRoute.page}`}
+            >
+              <span aria-hidden="true">←</span> Kembali ke {title}
+            </a>
+          </div>
+          {detailReport ? (
+            card(detailReport)
+          ) : (
+            <section className="ws-panel">
+              <h1 id="report-focus-title" tabIndex={-1}>
+                Laporan tidak ditemukan
+              </h1>
+              <p>
+                Laporan ini tidak tersedia atau tidak berada dalam cakupan
+                aksesmu.
+              </p>
+            </section>
+          )}
+        </div>
+      )}
+      {page === 'overview' && !detailRoute && (
         <>
           <section
             className="role-stat-grid"
@@ -484,7 +618,7 @@ function ReportWorkspaceContent({
                   className="ws-primary"
                   href={`#/dashboard/${nextAction.page}`}
                 >
-                  {nextAction.label} →
+                  {nextAction.label}
                 </a>
               </aside>
             )}
@@ -517,8 +651,13 @@ function ReportWorkspaceContent({
         <div hidden={!!editing}>
           <OwnerWorkspace
             reports={visible}
-            account={account}
             accounts={accounts}
+            selectedId={ownerDetailId}
+            onSelect={(id) =>
+              window.location.assign(
+                id ? reportDetailRoute('reports', id) : '#/dashboard/reports',
+              )
+            }
             onEdit={(report) => {
               setEditing(report);
               requestAnimationFrame(() =>
@@ -543,6 +682,7 @@ function ReportWorkspaceContent({
                     'Lengkapi data sebelum mengirim.',
                     ...Object.values(validateReportRegistration(report)),
                   ].join(' '),
+                  'error',
                 );
                 return;
               }
@@ -554,72 +694,119 @@ function ReportWorkspaceContent({
           />
         </div>
       )}
-      {page && listPages.includes(page) && account.role !== 'owner' && (
-        <>
-          <section className="ws-panel role-report-list">
-            <div className="ws-section-head">
-              <div>
-                <h2>{title}</h2>
-                <p>{filtered.length} laporan dalam daftar ini.</p>
-              </div>
-              {account.role === 'admin' && (
-                <button
-                  className="ws-secondary"
-                  onClick={exportReports}
-                  disabled={!filtered.length}
-                >
-                  Unduh daftar ↓
-                </button>
-              )}
-            </div>
-            <div className="ws-toolbar">
-              <label className="ws-search">
-                <input
-                  aria-label="Cari laporan"
-                  placeholder="Cari nama bangunan, lokasi, atau ID"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                />
-              </label>
-              {statusOptions.length > 0 && (
-                <FilterMenu
-                  label="Status"
-                  options={statusOptions.map((option) => ({
-                    value: option.status,
-                    label: option.status,
-                    count: option.count,
-                  }))}
-                  selected={activeStatus}
-                  onChange={setStatus}
-                />
-              )}
-            </div>
-            {filtered.length ? (
-              filtered.map(card)
-            ) : (
-              <div className="role-empty">
-                <span>▤</span>
-                <h3>
-                  {onPage.length || !pageEmpty
-                    ? 'Belum ada laporan yang sesuai.'
-                    : pageEmpty.title}
-                </h3>
-                <p>
-                  {onPage.length || !pageEmpty
-                    ? 'Ubah pencarian atau filter status.'
-                    : pageEmpty.text}
-                </p>
-              </div>
-            )}
-          </section>
-        </>
+      {surveyId && (
+        <SurveyForm
+          key={surveyId}
+          report={visible.find((item) => item.id === surveyId)}
+          account={account}
+          accounts={accounts}
+          onStart={(report) => {
+            const next = advanceReport(report, account, 'start');
+            if (!next) return false;
+            replace(next);
+            setMessage(
+              'Survei dimulai. Catat kunjungan dan input RVS, lalu kirim untuk ditinjau admin.',
+            );
+            return true;
+          }}
+          onRvs={(report, record) => {
+            const next = saveReportRvs(report, account, record);
+            if (!next) return false;
+            replace(next);
+            return true;
+          }}
+          onSubmit={(report, date, note) => {
+            const next = advanceReport(report, account, 'visit', {
+              date,
+              note,
+            });
+            if (!next) return false;
+            replace(next);
+            onNotice(
+              'Hasil survei terkirim. Laporan pindah ke Riwayat survei selama ditinjau admin.',
+              'dashboard/history',
+            );
+            window.location.assign('#/dashboard/history');
+            return true;
+          }}
+        />
       )}
+      {page &&
+        !surveyId &&
+        !detailRoute &&
+        listPages.includes(page) &&
+        account.role !== 'owner' && (
+          <>
+            <section className="ws-panel role-report-list">
+              <div className="ws-section-head">
+                <div>
+                  <h2>{title}</h2>
+                  <p>{filtered.length} laporan dalam daftar ini.</p>
+                </div>
+                {account.role === 'admin' && (
+                  <button
+                    className="ws-secondary"
+                    onClick={exportReports}
+                    disabled={!filtered.length}
+                  >
+                    Unduh daftar ↓
+                  </button>
+                )}
+              </div>
+              <div className="ws-toolbar">
+                <label className="ws-search">
+                  <input
+                    aria-label="Cari laporan"
+                    placeholder="Cari nama bangunan, lokasi, atau ID"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                  />
+                </label>
+                {statusOptions.length > 0 && (
+                  <FilterMenu
+                    label="Status"
+                    options={statusOptions.map((option) => ({
+                      value: option.status,
+                      label: option.status,
+                      count: option.count,
+                    }))}
+                    selected={activeStatus}
+                    onChange={setStatus}
+                  />
+                )}
+              </div>
+              {filtered.length ? (
+                <>
+                  <div className="role-report-items" id={pager.listId}>
+                    {pager.items.map(card)}
+                  </div>
+                  <Pagination pager={pager} label="laporan" unit="laporan" />
+                </>
+              ) : (
+                <div className="role-empty">
+                  <span>▤</span>
+                  <h3>
+                    {onPage.length || !pageEmpty
+                      ? 'Belum ada laporan yang sesuai.'
+                      : pageEmpty.title}
+                  </h3>
+                  <p>
+                    {onPage.length || !pageEmpty
+                      ? 'Ubah pencarian atau filter status.'
+                      : pageEmpty.text}
+                  </p>
+                </div>
+              )}
+            </section>
+          </>
+        )}
     </>
   );
 }
 
 // Keep the shell mounted so the liquid indicator can travel between destinations.
-// Route-local forms and filters still reset through the keyed content below.
+// A list and its detail share the same content state, preserving filters and
+// pagination when returning. Other destinations start their own form state.
 export default function ReportWorkspace(
   props: Omit<
     ComponentProps<typeof ReportWorkspaceContent>,
@@ -670,7 +857,7 @@ export default function ReportWorkspace(
       onSwitchRole={onSwitchRole}
     >
       <ReportWorkspaceContent
-        key={route}
+        key={parseSurveyRoute(route) || !page ? route : `dashboard/${page}`}
         {...props}
         notice={notice?.route === route ? notice.text : ''}
         onNotice={(text, target) =>

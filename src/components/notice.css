@@ -1,0 +1,48 @@
+.feedback-notice {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: var(--space-3);
+  min-width: 0;
+  font-size: 14px;
+  line-height: 1.65;
+}
+.notice-icon {
+  flex: none;
+  margin-top: var(--space-1);
+}
+.notice-content {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.notice-content > :is(p, ul) {
+  margin: 0;
+  font-size: inherit;
+  color: inherit;
+}
+.notice-content > ul {
+  padding-inline-start: var(--space-5);
+}
+.notice-title {
+  font-size: inherit;
+  font-weight: 650;
+  color: inherit;
+}
+.notice-warning {
+  --notice-fill: var(--notice-warning-fill);
+  --notice-ink: var(--notice-warning-ink);
+}
+.notice-info {
+  --notice-fill: var(--notice-info-fill);
+  --notice-ink: var(--notice-info-ink);
+}
+.notice-error {
+  --notice-fill: var(--notice-error-fill);
+  --notice-ink: var(--notice-error-ink);
+}
+.notice-success {
+  --notice-fill: var(--notice-success-fill);
+  --notice-ink: var(--notice-success-ink);
+}

@@ -1,5 +1,8 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import type { FormEvent } from 'react';
+import Pagination from '../../components/Pagination';
+import Notice from '../../components/Notice';
+import usePagination from '../../components/usePagination';
 import { accountStatusLabels } from '../../lib/surveyorAccess';
 import type { NewSurveyorInput } from '../../lib/surveyorAccess';
 import type { DemoAccount, Report } from '../../lib/reportDemo';
@@ -61,6 +64,7 @@ export default function SurveyorManagement({
   const [filters, setFilters] = useState<DirectoryFilters>(emptyFilters);
   const [view, setView] = useState<DialogView | null>(null);
   const [message, setMessage] = useState('');
+  const [messageOk, setMessageOk] = useState(true);
   const [addError, setAddError] = useState('');
   // Temporary credentials are only present while the result dialog is open.
   const [issued, setIssued] = useState<IssuedPassword[] | null>(null);
@@ -70,6 +74,7 @@ export default function SurveyorManagement({
   const searchRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const candidates = accountDirectory(accounts, filters, mode);
+  const pager = usePagination(candidates, JSON.stringify(filters));
   const total = accountDirectory(accounts, emptyFilters, mode).length;
   const filterOptions = directoryFilterOptions(accounts, mode);
   const selected =
@@ -126,6 +131,7 @@ export default function SurveyorManagement({
     const result = onReissue(candidate.id);
     if ('error' in result) {
       setMessage(result.error);
+      setMessageOk(false);
       return;
     }
     setMessage('');
@@ -143,6 +149,7 @@ export default function SurveyorManagement({
       String(form.get('note') ?? ''),
       form.get('checked') === 'on',
     );
+    setMessageOk(success);
     setMessage(
       success
         ? `Status ${candidate.name} diperbarui.`
@@ -263,6 +270,7 @@ export default function SurveyorManagement({
         )}
       </div>
       <div
+        id={pager.listId}
         className="ws-panel directory-table-wrap"
         role="region"
         aria-label="Daftar akun"
@@ -282,7 +290,7 @@ export default function SurveyorManagement({
             </tr>
           </thead>
           <tbody>
-            {candidates.map((candidate) => (
+            {pager.items.map((candidate) => (
               <tr key={candidate.id}>
                 <th scope="row">
                   <strong>{candidate.name}</strong>
@@ -327,6 +335,7 @@ export default function SurveyorManagement({
           </tbody>
         </table>
       </div>
+      <Pagination pager={pager} label="akun" unit="akun" />
       <dialog
         ref={dialogRef}
         className={`directory-dialog ${view?.type === 'import' ? 'directory-dialog-wide' : ''}`}
@@ -409,9 +418,9 @@ export default function SurveyorManagement({
                   supervisi ahli.
                 </p>
                 {addError && (
-                  <p role="alert" className="ws-disclaimer">
-                    {addError}
-                  </p>
+                  <Notice tone="error" role="alert">
+                    <p>{addError}</p>
+                  </Notice>
                 )}
                 <div className="report-actions">
                   <button className="ws-primary" type="submit">
@@ -509,9 +518,9 @@ export default function SurveyorManagement({
               />
             )}
             {message && (
-              <p role="status" className="ws-notice">
-                {message}
-              </p>
+              <Notice tone={messageOk ? 'success' : 'error'} role="status">
+                <p>{message}</p>
+              </Notice>
             )}
           </>
         )}

@@ -155,7 +155,12 @@ const roles = [
   },
 ];
 
-export default function LandingPage() {
+export default function LandingPage({
+  signedIn = false,
+}: {
+  /** A signed-in visitor gets a way back to the workspace, not sign-in. */
+  signedIn?: boolean;
+}) {
   const [activeSection, setActiveSection] = useState(currentSection);
   // While a nav click scrolls the page, ignore scroll-spy so the drop does not
   // stop at every section on the way.
@@ -250,15 +255,26 @@ export default function LandingPage() {
           onChange={goTo}
         />
         <div className="sp-nav-account" role="group" aria-label="Akses akun">
-          <a className="sp-account-action sp-account-signin" href="#/login">
-            Masuk
-          </a>
-          <a
-            className="sp-account-action sp-account-register"
-            href="#/register"
-          >
-            Daftar
-          </a>
+          {signedIn ? (
+            <a
+              className="sp-account-action sp-account-register"
+              href="#/dashboard"
+            >
+              Buka dashboard
+            </a>
+          ) : (
+            <>
+              <a className="sp-account-action sp-account-signin" href="#/login">
+                Masuk
+              </a>
+              <a
+                className="sp-account-action sp-account-register"
+                href="#/register"
+              >
+                Daftar
+              </a>
+            </>
+          )}
         </div>
       </header>
       <main id="main">

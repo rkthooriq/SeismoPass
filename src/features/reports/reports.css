@@ -593,6 +593,69 @@
   font-size: 15px;
   color: var(--muted);
 }
+.report-list-item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--ink);
+  text-decoration: none;
+}
+.report-list-item > .ws-badge {
+  margin: 0;
+}
+.report-list-item .report-summary-arrow {
+  flex: none;
+}
+.report-focused-detail {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.workspace:has(.report-focused-detail) .role-page-heading {
+  display: none;
+}
+.report-focus-heading {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+.report-focus-heading h1 {
+  margin: 0;
+}
+@media (max-width: 600px) {
+  .report-list-item {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .report-list-item .report-building-icon {
+    grid-row: 1 / 3;
+  }
+  .report-list-item .report-summary-name {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .report-list-item > .ws-badge {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+  .report-list-item .report-summary-arrow {
+    grid-column: 3;
+    grid-row: 1 / 3;
+  }
+  .report-focus-heading {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .report-focus-heading .report-building-icon {
+    grid-row: 1 / 3;
+  }
+  .report-focus-heading > .ws-badge {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
 .role-workspace .report-item summary .ws-badge {
   font-size: 12px;
   white-space: nowrap;
@@ -616,6 +679,54 @@
 }
 .role-assignment-form h3 {
   margin: 0;
+}
+.report-completeness-review {
+  border-top: 1px solid var(--ws-line);
+  padding-top: var(--space-card);
+}
+.report-completeness-options {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.report-completeness-options legend {
+  font-family: var(--font-heading);
+  font-size: 1.125rem;
+  font-weight: 650;
+}
+.report-completeness-choices {
+  display: grid;
+  gap: var(--space-3);
+}
+.report-form .report-completeness-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 44px;
+  background: var(--surface);
+  cursor: pointer;
+}
+.report-completeness-choice:has(input:checked) {
+  background: var(--status-admin-fill);
+}
+.report-completeness-choice:focus-within {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.report-form .report-completeness-choice input {
+  flex: 0 0 auto;
+  width: auto;
+  margin: 0;
+  accent-color: var(--action);
+}
+.report-completeness-choice span {
+  display: grid;
+  gap: var(--space-1);
+}
+.report-completeness-choice small {
+  color: var(--muted);
+  font-weight: 400;
 }
 .role-assignment-note p {
   margin: 4px 0 0;
@@ -1085,9 +1196,115 @@
 }
 
 /* Riwayat bersama pelapor, admin, dan pesurvei */
-.report-thread summary {
-  cursor: pointer;
+.report-detail-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.report-detail-heading > p {
+  flex: 1 1 20rem;
+  min-width: 0;
+  margin: 0;
+}
+#root .workspace .report-history-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  flex: none;
+  min-height: var(--space-12);
+  font-family: var(--font-body);
   font-size: 14px;
+  font-weight: 500;
+  line-height: 1.2;
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  color: var(--action);
+  cursor: pointer;
+}
+#root .workspace .report-history-trigger:is(:hover, :focus-visible, :active) {
+  background: transparent;
+  color: var(--action-hover);
+}
+#root
+  .workspace
+  .report-history-trigger:is(:hover, :focus-visible)
+  .report-history-label {
+  text-decoration: underline;
+  text-underline-offset: var(--space-1);
+}
+.report-thread-icon {
+  flex: none;
+  width: var(--space-4);
+  height: var(--space-4);
+  color: var(--action);
+}
+.workspace .report-history-dialog {
+  position: fixed;
+  inset: var(--space-4) var(--space-4) var(--space-4) auto;
+  width: min(32rem, calc(100% - var(--space-8)));
+  height: calc(100dvh - var(--space-8));
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  overflow: hidden;
+  border: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  box-shadow: var(--glass-shadow);
+}
+.report-history-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.report-history-dialog::backdrop {
+  background: rgb(59 42 30 / 0.38);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.report-history-heading {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.report-history-heading > div {
+  display: grid;
+  gap: var(--space-2);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.report-history-heading h2 {
+  margin: 0;
+}
+.report-history-heading > button {
+  flex: none;
+}
+.report-history-heading p {
+  color: var(--muted);
+}
+.report-thread-count,
+.report-thread .report-thread-order {
+  color: var(--muted);
+  font-size: 12px;
+}
+.report-thread-body {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  overflow-wrap: anywhere;
+}
+html:has(.report-history-dialog[open]) {
+  overflow: hidden;
 }
 .report-thread ol {
   list-style: none;
@@ -1099,7 +1316,10 @@
   position: relative;
   display: flex;
   gap: var(--space-3);
-  padding-bottom: var(--space-5);
+  padding-bottom: var(--space-4);
+}
+.report-thread li:last-child {
+  padding-bottom: 0;
 }
 .report-thread li:not(:last-child)::before {
   content: '';
@@ -1131,13 +1351,51 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-2);
+  color: var(--muted);
+  font-size: 12px;
 }
 .report-thread-note {
-  background: var(--surface);
+  max-width: 70ch;
   white-space: pre-line;
   overflow-wrap: anywhere;
 }
-.report-thread small {
+.report-thread time {
   color: var(--ws-muted);
   font-size: 12px;
+}
+@media (max-width: 600px) {
+  .workspace .report-history-dialog {
+    inset: var(--space-2);
+    width: calc(100% - var(--space-4));
+    height: calc(100dvh - var(--space-4));
+  }
+}
+
+/* Admin schedule when the reporter already chose a time: the time on the
+   left, "Ganti jadwal" on the right; the action drops below when narrow. */
+.schedule-choice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3) var(--space-4);
+}
+.schedule-choice > div {
+  display: grid;
+  gap: var(--space-1);
+  flex: 1 1 16rem;
+  min-width: 0;
+}
+.schedule-choice :is(strong, p) {
+  margin: 0;
+}
+.schedule-choice strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+.schedule-choice p {
+  font-size: 13px;
+}
+.schedule-choice > button {
+  flex: none;
 }

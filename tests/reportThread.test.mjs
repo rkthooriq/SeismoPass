@@ -9,6 +9,15 @@ import {
 } from '../src/lib/reportDemo.ts';
 import { restoreReports } from '../src/lib/reportSession.ts';
 
+const confirmed = (report) => ({
+  ...report,
+  appointment: {
+    date: '2026-11-12',
+    slot: 'Pagi (08.00–11.00)',
+    response: 'confirmed',
+  },
+});
+
 const [owner, admin, surveyor] = demoAccounts;
 const draft = { ...sampleReports[0], status: 'Draf', activity: [] };
 
@@ -25,7 +34,7 @@ test('every hand-over between the three roles is written to the shared thread', 
     surveyor,
     'Hubungi pengelola.',
   );
-  const started = advanceReport(assigned, surveyor, 'start');
+  const started = advanceReport(confirmed(assigned), surveyor, 'start');
   const visited = advanceReport(started, surveyor, 'visit', {
     date: '2026-11-11',
     note: 'Kunjungan tercatat.',

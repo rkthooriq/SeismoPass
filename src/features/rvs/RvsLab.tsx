@@ -2,6 +2,7 @@ import Brand from '../../components/Brand';
 import RvsForm from './RvsForm';
 import QrPanel from './QrPanel';
 import RvsResult from './RvsResult';
+import Notice from '../../components/Notice';
 import { parseRvsDemoPath } from '../../lib/rvsQr';
 import '../workspace/workspace.css';
 import '../reports/reports.css';
@@ -23,11 +24,19 @@ export default function RvsLab({ path }: { path: string }) {
         </a>
       </header>
       <main className="ws-main">
-        <div className="ws-demo-strip">
-          <strong>SIMULASI PENDIDIKAN · BUKAN PENILAIAN RESMI</strong>
-        </div>
+        <Notice
+          tone="info"
+          title="Simulasi pendidikan"
+          className="rvs-lab-notice"
+        >
+          <p>
+            {shared
+              ? 'Bukan penilaian resmi. Data halaman ini berasal dari tautan QR, dapat diubah, dan tidak disahkan ahli.'
+              : 'Bukan penilaian resmi. Isian di halaman ini tidak tersimpan ke laporan mana pun dan hilang saat halaman dimuat ulang.'}
+          </p>
+        </Notice>
         {shared ? (
-          <section className="ws-panel">
+          <section className="ws-panel rvs-lab-panel">
             <h1>Profil simulasi SeismoPass</h1>
             <p>
               Halaman contoh QR tanpa identitas bangunan atau pemilik. Data dari
@@ -54,7 +63,7 @@ export default function RvsLab({ path }: { path: string }) {
           </section>
         ) : (
           <>
-            <section className="ws-panel">
+            <section className="ws-panel rvs-lab-panel">
               <h1>Latihan input dan hasil RVS</h1>
               <p>
                 Latihan ini berdiri sendiri dan tidak terkait bangunan nyata.

@@ -8,6 +8,15 @@ import {
   validateReportRegistration,
 } from '../src/lib/reportDemo.ts';
 import { restoreReports } from '../src/lib/reportSession.ts';
+
+const confirmed = (report) => ({
+  ...report,
+  appointment: {
+    date: '2026-11-12',
+    slot: 'Pagi (08.00–11.00)',
+    response: 'confirmed',
+  },
+});
 const [owner, admin, surveyor] = demoAccounts;
 const complete = { ...sampleReports[0], status: 'Draf' };
 
@@ -100,7 +109,7 @@ test('surveyor must be assigned before recording a valid calendar date; closure 
     surveyor,
     'Catatan penugasan demo.',
   );
-  const assigned = advanceReport(assignment, surveyor, 'start');
+  const assigned = advanceReport(confirmed(assignment), surveyor, 'start');
   for (const date of ['2026-02-30', 'invalid', '2026-13-01'])
     assert.equal(
       advanceReport(assigned, surveyor, 'visit', {

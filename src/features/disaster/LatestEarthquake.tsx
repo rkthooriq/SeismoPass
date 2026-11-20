@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import {
+  bandungRayaCenter,
   bmkgPageUrl,
   bmkgRefreshMs,
   loadBandungEarthquakes,
@@ -136,6 +137,13 @@ export default function LatestEarthquake() {
             ini.
           </p>
         </div>
+      )}
+      {earthquakes?.length === 0 && (
+        <EarthquakeLocationMap
+          coordinates={bandungRayaCenter}
+          region="Bandung Raya"
+          marker={false}
+        />
       )}
 
       <details className="eq-scope">

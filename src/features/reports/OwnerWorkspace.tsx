@@ -1,4 +1,4 @@
-import { useId, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import type React from 'react';
 import type { FormEvent } from 'react';
 import {
@@ -8,11 +8,12 @@ import {
 import type { DemoAccount, Report } from '../../lib/reportDemo';
 import type { OwnerAction } from '../../lib/ownerProgress';
 import { timeSlots } from '../../lib/ownerProgress';
-import { statusToneClass } from '../../lib/statusTone';
 import {
   ownerDetailFocus,
-  ownerStageLabel,
-  ownerStep,
+  ownerChipClass,
+  ownerStageKey,
+  ownerStageLabelFor,
+  ownerStepFor,
   ownerFilterGroups,
   reviewNoteLabel,
   sortByOwnerTurn,
@@ -20,9 +21,13 @@ import {
 import ReportPassport from './ReportPassport';
 import ReportTimeline from './ReportTimeline';
 import FilterMenu from '../../components/FilterMenu';
-import BuildingPhotos from './BuildingPhotos';
-import PointPreviewMap from './PointPreviewMap';
+import Pagination from '../../components/Pagination';
+import Notice from '../../components/Notice';
+import type { NoticeTone } from '../../components/Notice';
+import usePagination from '../../components/usePagination';
+import ReportSubmissionDetails from './ReportSubmissionDetails';
 import './owner-workspace.css';
+import { formatDate } from '../../lib/dateFormat';
 
 // Lokasi, foto, and the building data are entered in Buat laporan. The
 // detail page has no tabs; ownerDetailFocus picks its main content per stage.
@@ -31,12 +36,7 @@ const followUpLabels = {
   explanation: 'Butuh penjelasan',
   later: 'Melanjutkan nanti',
 };
-const displayDate = (value: string) =>
-  new Date(`${value}T00:00:00`).toLocaleDateString('id-ID', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric',
-  });
+const displayDate = formatDate;
 const today = () => {
   const date = new Date();
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
@@ -157,16 +157,38 @@ function Schedule({
   accounts: DemoAccount[];
   save: (action: OwnerAction) => boolean;
 }) {
-  const [message, setMessage] = useState('');
+  const [feedback, setFeedback] = useState<{
+    text: string;
+    tone: NoticeTone;
+  }>({ text: '', tone: 'success' });
+  const message = feedback.text;
+  const setMessage = (text: string, tone: NoticeTone = 'success') =>
+    setFeedback({ text, tone });
+  // "Minta jadwal lain" only opens the form; nothing is recorded until the
+  // owner sends an alternative time, so a request never arrives empty.
+  const [changing, setChanging] = useState(false);
   const appointment = report.appointment;
   const available = report.ownerProgress?.availability;
-  // Availability is asked only after the admin accepts the report.
-  const canRequest = ['Siap disurvei', 'Ditugaskan'].includes(report.status);
-  // Saving a new time after agreeing reopens the agreed schedule, so the form
-  // says so instead of looking like a harmless preference edit.
+  // The visit time can be chosen or changed from the moment the report is
+  // sent, so the admin can use it while reviewing and assigning.
+  const canRequest =
+    ['Dikirim', 'Siap disurvei', 'Ditugaskan'].includes(report.status) &&
+    !report.visitDate;
   const confirmed = appointment?.response === 'confirmed';
+  const pending = appointment?.response === 'change-requested';
+  const canConfirm =
+    appointment?.response === 'proposed' &&
+    report.status === 'Ditugaskan' &&
+    appointment.date >= today();
+  const showForm = canRequest && (!appointment || changing);
   const surveyor = accounts.find((person) => person.id === report.assignee);
   const id = useId();
+  const dateRef = useRef<HTMLInputElement>(null);
+  function openForm() {
+    setMessage('');
+    setChanging(true);
+    requestAnimationFrame(() => dateRef.current?.focus());
+  }
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -176,26 +198,39 @@ function Schedule({
       slot: String(form.get('slot')),
       note: String(form.get('note')),
     });
+    if (!ok) {
+      setMessage(
+        'Pilih tanggal hari ini atau setelahnya dan rentang waktu.',
+        'error',
+      );
+      return;
+    }
+    setChanging(false);
     setMessage(
-      !ok
-        ? 'Pilih tanggal hari ini atau setelahnya dan lengkapi waktu.'
-        : confirmed
-          ? 'Permintaan jadwal lain dicatat. Admin akan mengusulkan jadwal baru.'
-          : 'Waktu tersedia dicatat. Jadwal belum disepakati sampai ada usulan dari admin.',
+      appointment
+        ? 'Permintaan jadwal lain terkirim. Admin akan mengusulkan jadwal baru di halaman ini.'
+        : 'Waktu kunjungan disimpan. Admin memakainya saat menugaskan pesurvei.',
     );
   }
+  const status = message && (
+    <Notice tone={feedback.tone} role="status">
+      <p>{message}</p>
+    </Notice>
+  );
   return (
     <div className="owner-detail-grid is-single">
-      <section className="owner-sheet">
+      <section className="owner-sheet owner-schedule">
         <div className="owner-section-title">
           <div>
             <span className="owner-kicker">Koordinasi kunjungan</span>
             <h2>Atur waktu yang cocok</h2>
           </div>
           <span className="owner-chip">
-            {appointment?.response === 'confirmed'
+            {confirmed
               ? 'Dikonfirmasi'
-              : 'Koordinasi'}
+              : pending
+                ? 'Menunggu jadwal baru'
+                : 'Koordinasi'}
           </span>
         </div>
         {report.visitDate ? (
@@ -205,7 +240,9 @@ function Schedule({
           </EmptyNotice>
         ) : appointment ? (
           <div className="owner-appointment">
-            <span>Usulan dari admin</span>
+            <span>
+              {pending ? 'Jadwal lama dari admin' : 'Usulan dari admin'}
+            </span>
             <h3>{displayDate(appointment.date)}</h3>
             <p>{appointment.slot}</p>
             <p>
@@ -213,80 +250,105 @@ function Schedule({
                 ? `Pesurvei: ${surveyor.name}`
                 : 'Pesurvei belum ditentukan'}
             </p>
-            <strong>
-              {appointment.response === 'confirmed'
-                ? 'Kamu sudah menyetujui jadwal ini.'
-                : appointment.response === 'change-requested'
-                  ? 'Perubahan jadwal diminta. Menunggu usulan baru.'
-                  : 'Periksa jadwal sebelum mengonfirmasi.'}
-            </strong>
-            {appointment.response === 'proposed' &&
-              report.status === 'Ditugaskan' &&
-              appointment.date >= today() && (
-                <div className="owner-actions">
+            <Notice
+              tone={confirmed ? 'success' : pending ? 'warning' : 'info'}
+              title={
+                confirmed
+                  ? 'Jadwal dikonfirmasi'
+                  : pending
+                    ? 'Jadwal perlu diatur ulang'
+                    : 'Konfirmasi jadwal kunjungan'
+              }
+            >
+              <p>
+                {confirmed
+                  ? appointment.confirmedBy === 'admin'
+                    ? 'Admin mencatat persetujuanmu untuk jadwal ini dari telepon atau pesan. Jika keliru, minta jadwal lain.'
+                    : 'Kamu sudah menyetujui jadwal ini.'
+                  : pending
+                    ? 'Kamu meminta jadwal lain. Jadwal ini tidak berlaku sampai admin mengusulkan jadwal baru.'
+                    : 'Periksa jadwal ini, lalu konfirmasi atau minta jadwal lain.'}
+              </p>
+            </Notice>
+            {pending && available && (
+              <div className="owner-saved-note">
+                <strong>Waktu yang kamu minta</strong>
+                <p>
+                  {displayDate(available.date)} · {available.slot}
+                </p>
+                {available.note && <p>{available.note}</p>}
+              </div>
+            )}
+            {!changing && (canConfirm || canRequest) && (
+              <div className="owner-actions">
+                {canConfirm && (
                   <button
                     className="ws-primary"
                     type="button"
                     onClick={() => {
-                      setMessage(
-                        save({ type: 'appointment', response: 'confirmed' })
-                          ? 'Jadwal dikonfirmasi.'
-                          : 'Jadwal belum dapat dikonfirmasi.',
-                      );
+                      if (save({ type: 'appointment', response: 'confirmed' }))
+                        setMessage(
+                          'Jadwal dikonfirmasi. Pesurvei dan admin melihat konfirmasimu.',
+                        );
+                      else
+                        setMessage('Jadwal belum dapat dikonfirmasi.', 'error');
                     }}
                   >
                     Jadwal ini cocok
                   </button>
+                )}
+                {canRequest && (
                   <button
                     type="button"
                     className="ws-secondary"
-                    onClick={() =>
-                      setMessage(
-                        save({
-                          type: 'appointment',
-                          response: 'change-requested',
-                        })
-                          ? 'Permintaan perubahan dicatat. Isi waktu alternatif di bawah.'
-                          : 'Jadwal belum dapat diubah.',
-                      )
-                    }
+                    onClick={openForm}
+                    aria-expanded={changing}
                   >
-                    Minta jadwal lain
+                    {pending ? 'Ubah waktu yang diminta' : 'Minta jadwal lain'}
                   </button>
-                </div>
-              )}
+                )}
+              </div>
+            )}
           </div>
         ) : (
           <EmptyNotice
             title={
               report.status === 'Draf'
                 ? 'Kirim laporan terlebih dahulu'
-                : 'Belum ada usulan jadwal'
+                : available
+                  ? 'Waktu pilihanmu sudah tercatat'
+                  : 'Pilih waktu kunjungan'
             }
           >
-            Admin mengatur penugasan dan jadwal survei. Waktu yang kamu isi
-            merupakan preferensi, bukan janji kunjungan.
+            {available
+              ? 'Saat menugaskan pesurvei, admin memakai waktu ini. Jika waktunya dipakai, jadwal langsung disepakati tanpa konfirmasi ulang.'
+              : 'Pilih kapan ada orang di lokasi. Admin memakainya saat menugaskan pesurvei; jika dipakai, jadwal langsung disepakati.'}
           </EmptyNotice>
         )}
-        {canRequest && (
+        {!showForm && status}
+        {showForm && (
           <form className="owner-form" onSubmit={submit}>
             <h3>
-              {confirmed
-                ? 'Perlu waktu lain?'
+              {appointment
+                ? 'Waktu lain yang cocok untukmu'
                 : available
-                  ? 'Ubah waktu yang tersedia'
-                  : 'Kapan kamu tersedia?'}
+                  ? 'Ubah waktu kunjungan'
+                  : 'Kapan pesurvei bisa datang?'}
             </h3>
-            {confirmed && (
+            {appointment && (
               <p>
-                Jadwal di atas sudah kamu setujui. Mengirim waktu baru
-                membatalkan persetujuan itu, lalu admin mengusulkan jadwal baru.
+                {confirmed
+                  ? 'Jadwal yang sudah kamu setujui akan dibatalkan. '
+                  : ''}
+                Admin akan mengusulkan jadwal baru berdasarkan waktu ini, lalu
+                kamu mengonfirmasinya lagi di halaman ini.
               </p>
             )}
             <div className="owner-form-grid">
               <label htmlFor={`${id}-date`}>
                 Tanggal
                 <input
+                  ref={dateRef}
                   id={`${id}-date`}
                   name="date"
                   type="date"
@@ -313,34 +375,52 @@ function Schedule({
               </label>
             </div>
             <label htmlFor={`${id}-note`}>
-              Catatan akses (opsional)
+              {appointment
+                ? 'Alasan atau catatan akses (opsional)'
+                : 'Catatan akses (opsional)'}
               <textarea
                 id={`${id}-note`}
                 name="note"
                 maxLength={1000}
                 rows={3}
                 defaultValue={available?.note}
-                placeholder="Contoh: pengelola ada di lokasi setelah pukul 09.00."
+                placeholder={
+                  appointment
+                    ? 'Contoh: tanggal itu rumah kosong; pengelola ada setelah pukul 09.00.'
+                    : 'Contoh: pengelola ada di lokasi setelah pukul 09.00.'
+                }
               />
             </label>
-            <button className={confirmed ? 'ws-secondary' : 'ws-primary'}>
-              {confirmed ? 'Minta jadwal lain' : 'Simpan waktu tersedia'}
-            </button>
+            {status}
+            <div className="owner-actions">
+              <button className="ws-primary">
+                {appointment
+                  ? 'Kirim permintaan jadwal'
+                  : 'Simpan waktu kunjungan'}
+              </button>
+              {appointment && (
+                <button
+                  type="button"
+                  className="ws-secondary"
+                  onClick={() => {
+                    setChanging(false);
+                    setMessage('');
+                  }}
+                >
+                  Batal
+                </button>
+              )}
+            </div>
           </form>
         )}
-        {available && (
+        {!appointment && available && (
           <div className="owner-saved-note">
-            <strong>Preferensi yang dicatat</strong>
+            <strong>Waktu kunjungan pilihanmu</strong>
             <p>
               {displayDate(available.date)} · {available.slot}
             </p>
-            <p>{available.note}</p>
+            {available.note && <p>{available.note}</p>}
           </div>
-        )}
-        {message && (
-          <p role="status" className="owner-inline-message">
-            {message}
-          </p>
         )}
         <p className="owner-footnote owner-schedule-note">
           Jangan memasuki bagian bangunan yang membahayakan. Tidak ada
@@ -363,6 +443,7 @@ function Closed({
   save: (action: OwnerAction) => boolean;
 }) {
   const [message, setMessage] = useState('');
+  const [savedOk, setSavedOk] = useState(false);
   const id = useId();
   const saved = report.ownerProgress?.followUp;
   function submit(event: FormEvent<HTMLFormElement>) {
@@ -378,6 +459,7 @@ function Closed({
         ? 'Catatan tersimpan. Ini belum menjadi keputusan atau rujukan ahli.'
         : 'Catatan belum dapat disimpan. Periksa isian.',
     );
+    setSavedOk(ok);
   }
   return (
     <div className="owner-detail-grid is-pair">
@@ -442,191 +524,36 @@ function Closed({
           <button className="ws-primary">Simpan catatan</button>
         </form>
         {message && (
-          <p role="status" className="owner-inline-message">
-            {message}
-          </p>
+          <Notice tone={savedOk ? 'success' : 'error'} role="status">
+            <p>{message}</p>
+          </Notice>
         )}
       </section>
     </div>
   );
 }
 
-function osmLink(latitude: number, longitude: number) {
-  return `https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=17/${latitude}/${longitude}`;
-}
-
-type PreviewRow = {
-  label: string;
-  value?: React.ReactNode;
-  // Field key checked by validateReportRegistration, for "Wajib diisi".
-  field?: string;
-  empty?: string;
-};
-
 // Read-only view of what the owner entered, in the same three steps and
 // field order as the Buat laporan form. As the page's main content it gets a
 // heading; folded under "Lihat isi laporan" it shows only the steps.
 function SentReport({
   report,
-  account,
   onEdit,
   onSubmit,
   folded = false,
 }: {
   report: Report;
-  account: DemoAccount;
   onEdit: () => void;
   onSubmit: () => void;
   folded?: boolean;
 }) {
-  const point = report.ownerProgress?.point;
   const editable = ['Draf', 'Perlu dilengkapi'].includes(report.status);
   // Missing required fields are flagged only while the owner can still fix
   // them; a sent report already passed validation.
   const missing = editable ? validateReportRegistration(report) : {};
   const missingCount = Object.keys(missing).length;
-  const steps: [string, PreviewRow[]][] = [
-    [
-      'Data bangunan',
-      [
-        { label: 'Nama bangunan', value: report.title, field: 'title' },
-        { label: 'Kawasan', value: report.location, field: 'location' },
-        { label: 'Fungsi bangunan', value: report.function, field: 'function' },
-        {
-          label: 'Tahun pembangunan',
-          value: report.year,
-          empty: 'Belum diketahui',
-        },
-        {
-          label: 'Jumlah lantai',
-          value: report.floors && `${report.floors} lantai`,
-          field: 'floors',
-        },
-        { label: 'Material utama', value: report.material, field: 'material' },
-        {
-          label: 'Sistem struktur',
-          value: report.structure,
-          field: 'structure',
-        },
-      ],
-    ],
-    [
-      'Lokasi & akses',
-      [
-        { label: 'Alamat lengkap', value: report.address, field: 'address' },
-        { label: 'Patokan', value: report.landmark, empty: 'Tidak diisi' },
-        {
-          label: 'Nomor kontak',
-          value: report.contactPhone,
-          empty: 'Tidak diisi',
-        },
-        {
-          label: 'Titik peta',
-          value: point ? (
-            <a
-              href={osmLink(point.latitude, point.longitude)}
-              target="_blank"
-              rel="noreferrer"
-            >
-              {point.latitude.toFixed(5)}, {point.longitude.toFixed(5)}{' '}
-              <span aria-hidden="true">↗</span>
-            </a>
-          ) : undefined,
-          empty: 'Tidak ditandai',
-        },
-      ],
-    ],
-  ];
-  const consents: [string, boolean | undefined, string][] = [
-    [
-      'Data boleh dipakai untuk pencatatan dan penugasan survei',
-      report.demoConsent,
-      'demoConsent',
-    ],
-    [
-      'Memahami bahwa RVS penyaringan awal, bukan sertifikat aman',
-      report.understandsRvs,
-      'understandsRvs',
-    ],
-  ];
-  const row = ({ label, value, field, empty }: PreviewRow) => {
-    const required = !!field && !!missing[field];
-    return (
-      <div key={label} className={required ? 'is-missing' : undefined}>
-        <dt>{label}</dt>
-        <dd>
-          {value ||
-            (required ? (
-              <span className="owner-missing">Wajib diisi</span>
-            ) : (
-              <span className="owner-empty-value">
-                {empty ?? 'Belum diisi'}
-              </span>
-            ))}
-        </dd>
-      </div>
-    );
-  };
   const body = (
-    <ol className="owner-preview-steps">
-      {steps.map(([title, rows], index) => (
-        <li className="owner-preview-step" key={title}>
-          <h3>
-            <span aria-hidden="true">{index + 1}</span>
-            {title}
-          </h3>
-          <dl className="owner-sent-facts">{rows.map(row)}</dl>
-          {title === 'Lokasi & akses' && (
-            <>
-              {point && <PointPreviewMap point={point} />}
-              <p className="owner-preview-note">
-                Alamat, patokan, dan nomor hanya terlihat oleh admin dan
-                pesurvei yang ditugaskan. Data ini tidak tampil di profil
-                bangunan maupun QR.
-              </p>
-            </>
-          )}
-        </li>
-      ))}
-      <li className="owner-preview-step is-wide">
-        <h3>
-          <span aria-hidden="true">3</span>
-          Periksa & kirim
-        </h3>
-        <dl className="owner-sent-facts">
-          {row({
-            label: 'Catatan laporan',
-            value: report.description,
-            field: 'description',
-          })}
-          <div>
-            <dt>Persetujuan</dt>
-            <dd>
-              <ul className="owner-consents">
-                {consents.map(([text, given, field]) => (
-                  <li
-                    key={field}
-                    className={
-                      given ? 'is-given' : missing[field] ? 'is-missing' : ''
-                    }
-                  >
-                    <span aria-hidden="true">{given ? '✓' : '–'}</span>
-                    {text}
-                    {!given && (
-                      <span className="owner-visually-hidden">
-                        {' '}
-                        (belum dicentang)
-                      </span>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </dd>
-          </div>
-        </dl>
-        <BuildingPhotos reportId={report.id} ownerId={account.id} readOnly />
-      </li>
-    </ol>
+    <ReportSubmissionDetails report={report} markMissing={editable} />
   );
   if (folded) return <div className="owner-sent-report is-folded">{body}</div>;
   return (
@@ -676,8 +603,10 @@ function ReportNotes({ report }: { report: Report }) {
   return (
     <div className="owner-notes">
       {report.reviewNote && (
-        <div className="owner-saved-note">
-          <strong>{reviewNoteLabel(report.status).title}</strong>
+        <Notice
+          tone={report.status === 'Perlu dilengkapi' ? 'warning' : 'info'}
+          title={reviewNoteLabel(report.status).title}
+        >
           <p>{report.reviewNote}</p>
           {/* The banner above already says what to do when the report is
               returned to the owner; repeat the hint only when it adds
@@ -688,7 +617,7 @@ function ReportNotes({ report }: { report: Report }) {
                 {reviewNoteLabel(report.status).hint}
               </p>
             )}
-        </div>
+        </Notice>
       )}
       {report.visitNote && (
         <div className="owner-saved-note">
@@ -702,7 +631,6 @@ function ReportNotes({ report }: { report: Report }) {
 
 function Detail({
   report,
-  account,
   accounts,
   onBack,
   onEdit,
@@ -710,7 +638,6 @@ function Detail({
   onSubmit,
 }: {
   report: Report;
-  account: DemoAccount;
   accounts: DemoAccount[];
   onBack: () => void;
   onEdit: () => void;
@@ -719,7 +646,7 @@ function Detail({
 }) {
   const focus = ownerDetailFocus(report.status);
   const id = useId();
-  const step = ownerStep(report.status);
+  const step = ownerStepFor(report);
   const fold = (
     <details className="owner-report-fold">
       <summary>
@@ -731,20 +658,21 @@ function Detail({
           ›
         </span>
       </summary>
-      <SentReport
-        report={report}
-        account={account}
-        onEdit={onEdit}
-        onSubmit={onSubmit}
-        folded
-      />
+      <SentReport report={report} onEdit={onEdit} onSubmit={onSubmit} folded />
     </details>
   );
   return (
     <div className="owner-detail">
-      <button type="button" className="owner-back" onClick={onBack}>
-        <span aria-hidden="true">←</span> Semua bangunan
-      </button>
+      <div className="report-detail-heading">
+        <button type="button" className="owner-back" onClick={onBack}>
+          <span aria-hidden="true">←</span> Semua bangunan
+        </button>
+        <ReportTimeline
+          activity={report.activity}
+          accounts={accounts}
+          reportTitle={report.title}
+        />
+      </div>
       <section className="owner-detail-heading">
         <BuildingMark small />
         <div>
@@ -760,10 +688,8 @@ function Detail({
             </p>
           )}
         </div>
-        <span
-          className={`owner-chip ${statusToneClass(report.status, 'owner')}`}
-        >
-          {ownerStageLabel(report.status)}
+        <span className={`owner-chip ${ownerChipClass(report)}`}>
+          {ownerStageLabelFor(report)}
         </span>
       </section>
       <div className="owner-next-banner">
@@ -783,12 +709,7 @@ function Detail({
             stage's main content, so the content keeps the full width. */}
         {focus !== 'closed' && <ReportNotes report={report} />}
         {focus === 'report' && (
-          <SentReport
-            report={report}
-            account={account}
-            onEdit={onEdit}
-            onSubmit={onSubmit}
-          />
+          <SentReport report={report} onEdit={onEdit} onSubmit={onSubmit} />
         )}
         {focus === 'schedule' && (
           <>
@@ -803,12 +724,6 @@ function Detail({
           </>
         )}
       </div>
-      <ReportTimeline
-        activity={report.activity}
-        accounts={accounts}
-        heading="Perjalanan laporan"
-        defaultOpen={report.status !== 'Draf'}
-      />
       <p className="owner-footnote" id={`${id}-limit`}>
         Catatan dan perubahan mengikuti penyimpanan sesi browser. Belum ada
         pengiriman ke layanan operasional.
@@ -819,20 +734,46 @@ function Detail({
 
 export default function OwnerWorkspace({
   reports,
-  account,
   accounts,
   onEdit,
   onSave,
   onSubmit,
+  selectedId = null,
+  onSelect,
 }: {
   reports: Report[];
-  account: DemoAccount;
   accounts: DemoAccount[];
   onEdit: (report: Report) => void;
   onSave: (report: Report, action: OwnerAction) => boolean;
   onSubmit: (report: Report) => void;
+  /** The report open in detail, taken from the URL (#/dashboard/reports/<id>). */
+  selectedId?: string | null;
+  /** Opens a report (or the list, with null) by changing the URL. */
+  onSelect: (id: string | null) => void;
 }) {
-  const [selected, setSelected] = useState<string | null>(null);
+  const selected = selectedId;
+  const lastOpened = useRef<string | null>(null);
+  // Moving between list and detail is a navigation: focus the new view's
+  // heading and start it at the top. The first render keeps the browser's
+  // own position.
+  const shownBefore = useRef<string | null | undefined>(undefined);
+  useEffect(() => {
+    if (shownBefore.current === undefined) {
+      shownBefore.current = selected;
+      if (!selected) return;
+    }
+    if (shownBefore.current === selected && selected === null) return;
+    shownBefore.current = selected;
+    const target = selected
+      ? document.getElementById('owner-detail-heading')
+      : (document.getElementById(`owner-open-${lastOpened.current}`) ??
+        heading.current);
+    target?.focus({ preventScroll: true });
+    target?.scrollIntoView({
+      block: selected ? 'start' : 'center',
+      behavior: 'instant',
+    });
+  }, [selected]);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<string[]>([]);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -860,20 +801,18 @@ export default function OwnerWorkspace({
     ]);
   const visible = sortByOwnerTurn(reports).filter(
     (item) =>
-      (!activeFilter.length || activeFilter.includes(item.status)) &&
+      (!activeFilter.length || activeFilter.includes(ownerStageKey(item))) &&
       `${item.title} ${item.location} ${item.id}`
         .toLowerCase()
         .includes(search.toLowerCase().trim()),
   );
+  const pager = usePagination(
+    visible,
+    `${search.trim()}|${activeFilter.join(',')}`,
+  );
   function select(id: string | null) {
-    setSelected(id);
-    requestAnimationFrame(() => {
-      const target = id
-        ? document.getElementById('owner-detail-heading')
-        : heading.current;
-      target?.focus();
-      target?.scrollIntoView({ block: 'start', behavior: 'instant' });
-    });
+    if (id) lastOpened.current = id;
+    onSelect(id);
   }
   return (
     <div className="owner-journey">
@@ -881,7 +820,6 @@ export default function OwnerWorkspace({
         <Detail
           key={report.id}
           report={report}
-          account={account}
           accounts={accounts}
           onBack={() => select(null)}
           onEdit={() => onEdit(report)}
@@ -989,17 +927,15 @@ export default function OwnerWorkspace({
                 </div>
               </div>
             )}
-            <div className="owner-building-grid">
-              {visible.map((item) => (
+            <div className="owner-building-grid" id={pager.listId}>
+              {pager.items.map((item) => (
                 <article className="owner-building-card" key={item.id}>
                   <div className="owner-building-card-top">
                     <span className="owner-house-icon" aria-hidden="true">
                       ⌂
                     </span>
-                    <span
-                      className={`owner-chip ${statusToneClass(item.status, 'owner')}`}
-                    >
-                      {ownerStageLabel(item.status)}
+                    <span className={`owner-chip ${ownerChipClass(item)}`}>
+                      {ownerStageLabelFor(item)}
                     </span>
                   </div>
                   <h3>{item.title}</h3>
@@ -1014,9 +950,10 @@ export default function OwnerWorkspace({
                   </div>
                   <div className="owner-card-next">
                     <span>Langkah berikutnya</span>
-                    <strong>{ownerStep(item.status).title}</strong>
+                    <strong>{ownerStepFor(item).title}</strong>
                   </div>
                   <button
+                    id={`owner-open-${item.id}`}
                     type="button"
                     className="owner-open-button"
                     onClick={() => select(item.id)}
@@ -1026,6 +963,7 @@ export default function OwnerWorkspace({
                 </article>
               ))}
             </div>
+            <Pagination pager={pager} label="bangunan" unit="bangunan" />
             {!visible.length && (
               <div className="owner-list-empty">
                 <BuildingMark small />

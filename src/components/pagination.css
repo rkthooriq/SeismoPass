@@ -1,0 +1,87 @@
+/* Pagination below a list. Tiers from docs/ui-design-system.md:
+   page buttons and the size select are controls (radius 8, 44px touch target),
+   borderless like the filter chips; the current page uses the action fill.
+   Summary left, size and pages right; on phones everything wraps. */
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+  margin-top: var(--space-4);
+}
+.pagination-summary {
+  margin: 0;
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 13px;
+}
+.pagination-size {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--muted);
+  font-size: 13px;
+  white-space: nowrap;
+}
+#root .pagination .pagination-size select {
+  width: auto;
+  min-width: 76px;
+  min-height: 44px;
+  font-size: 14px;
+}
+.pagination-pages {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+#root .pagination-page {
+  display: inline-grid;
+  place-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  border: 0;
+  background: var(--glass-bg-strong);
+  box-shadow: var(--shadow-card);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+}
+#root .pagination-page[aria-current='page'] {
+  background: var(--action);
+  color: var(--on-action, #fffaf4);
+  font-weight: 600;
+}
+#root .pagination-page:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+.pagination-gap {
+  min-width: 24px;
+  text-align: center;
+  color: var(--muted);
+}
+.pagination-position {
+  display: none;
+  color: var(--ink);
+  font-size: 14px;
+  white-space: nowrap;
+}
+/* Phones: "‹ Halaman 2 dari 7 ›" instead of a row of numbers that wraps. */
+@media (max-width: 600px) {
+  .pagination-summary {
+    flex-basis: 100%;
+  }
+  .pagination-number {
+    display: none;
+  }
+  .pagination-position {
+    display: block;
+  }
+}

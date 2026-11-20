@@ -1,0 +1,18 @@
+/* Confirmation dialog: the same dialog as the RVS sections, narrower,
+   since it only holds a question and two actions. */
+.workspace .rvs-saved-dialog.confirm-dialog {
+  width: min(32rem, calc(100% - var(--space-8)));
+}
+#root .workspace .confirm-dialog .rvs-saved-heading h2 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.3;
+  letter-spacing: -0.025em;
+}
+#root .workspace .confirm-dialog .rvs-saved-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}

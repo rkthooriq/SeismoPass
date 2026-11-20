@@ -22,6 +22,15 @@ import {
   restoreDirectory,
 } from '../src/lib/demoDirectory.ts';
 import { resolveWorkflowPage } from '../src/lib/workflowNavigation.ts';
+
+const confirmed = (report) => ({
+  ...report,
+  appointment: {
+    date: '2026-11-12',
+    slot: 'Pagi (08.00–11.00)',
+    response: 'confirmed',
+  },
+});
 const [owner, admin, surveyor] = demoAccounts;
 const applicant = {
   ...surveyor,
@@ -129,8 +138,10 @@ test('admin assigns only active approved surveyors; there is no self claim and n
     }),
     null,
   );
+  // The reporter has not confirmed a visit date yet.
+  assert.equal(advanceReport(assigned, surveyor, 'start'), null);
   assert.equal(
-    advanceReport(assigned, surveyor, 'start').status,
+    advanceReport(confirmed(assigned), surveyor, 'start').status,
     'Dalam survei',
   );
 });
@@ -301,7 +312,7 @@ test('complete three-role workflow survives an account switch and session reload
   const saved = restoreDemoSession(
     serializeDemoSession(
       [...initialDirectory(), reporter, approved],
-      [assigned],
+      [confirmed(assigned)],
     ),
     [],
   );

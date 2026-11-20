@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import LandingPage from './pages/LandingPage';
 import Workspace from './features/workspace/Workspace';
 import { demoBuildings } from './lib/demo';
@@ -36,15 +36,29 @@ import { createSurveyorBatch } from './lib/surveyorImport';
 import { demoId } from './lib/demoId';
 import RvsLab from './features/rvs/RvsLab';
 import AccountPortal from './features/onboarding/AccountPortal';
+import {
+  isProtectedRoute,
+  readActiveSession,
+  writeActiveSession,
+} from './lib/activeSession';
+import { resolveWorkflowPage } from './lib/workflowNavigation';
 import type { ReviewAction } from './features/onboarding/SurveyorManagement';
 
 export default function App() {
   const [hash, setHash] = useState(window.location.hash);
-  const [accountId, setAccountId] = useState<string | null>(null);
+  // A refresh keeps the person signed in for this tab (see activeSession).
+  const [restored] = useState(() =>
+    readActiveSession(() => window.sessionStorage),
+  );
+  const [accountId, setAccountId] = useState<string | null>(
+    restored?.accountId ?? null,
+  );
   const [workflow, setWorkflow] = useState(loadWorkflow);
   const [storageFailed, setStorageFailed] = useState(false);
   // Demo mode: one tap opens the workspace and the header can switch roles.
-  const [demoMode, setDemoMode] = useState(false);
+  const [demoMode, setDemoMode] = useState(restored?.demoMode ?? false);
+  // The workspace page someone opened before signing in; they return to it.
+  const returnTo = useRef<string | null>(null);
   const account =
     workflow.accounts.find((person) => person.id === accountId) ?? null;
   function updateWorkflow(accounts: DemoAccount[], reports: Report[]) {
@@ -74,7 +88,14 @@ export default function App() {
     // Only signing in, registering, or opening the sample shows the loader.
     window.dispatchEvent(new Event(signInEvent));
     setAccountId(person.id);
-    window.location.hash = '/dashboard';
+    const wanted = returnTo.current;
+    const target =
+      wanted && resolveWorkflowPage(person.role, wanted) ? wanted : 'dashboard';
+    returnTo.current = null;
+    // Update the route state now, so the "signed in on the sign-in page"
+    // guard does not fire before the hashchange event arrives.
+    setHash(`#/${target}`);
+    window.location.hash = `/${target}`;
   }
   function startDemo() {
     const owner = workflow.accounts.find(
@@ -95,6 +116,7 @@ export default function App() {
   function leave() {
     setDemoMode(false);
     setAccountId(null);
+    returnTo.current = null;
     window.location.hash = '/login';
   }
   function signIn(data: AccountForm) {
@@ -239,6 +261,25 @@ export default function App() {
     setSession({ buildings, status: persisted ? 'restored' : 'unavailable' });
   }
   useEffect(() => {
+    writeActiveSession(
+      () => window.sessionStorage,
+      account ? { accountId: account.id, demoMode } : null,
+    );
+  }, [account, demoMode]);
+  // Workspace URLs need an account: show the sign-in page at its own address
+  // and come back afterwards. A signed-in person never sees the sign-in form.
+  const currentPath = hash.startsWith('#/') ? hash.slice(2) : '';
+  useEffect(() => {
+    if (!account && isProtectedRoute(currentPath)) {
+      returnTo.current = currentPath === 'dashboard' ? null : currentPath;
+      window.location.replace('#/login');
+    } else if (
+      account &&
+      (currentPath === 'login' || currentPath === 'register')
+    )
+      window.location.replace('#/dashboard');
+  }, [account, currentPath]);
+  useEffect(() => {
     const change = () => {
       const nextHash = window.location.hash;
       setHash(nextHash);
@@ -251,7 +292,7 @@ export default function App() {
     window.addEventListener('hashchange', change);
     return () => window.removeEventListener('hashchange', change);
   }, []);
-  if (!hash.startsWith('#/')) return <LandingPage />;
+  if (!hash.startsWith('#/')) return <LandingPage signedIn={!!account} />;
   const path = hash.slice(2);
   if (path === 'rvs-lab' || path === 'rvs-demo' || path.startsWith('rvs-demo?'))
     return <RvsLab key={path} path={path} />;
