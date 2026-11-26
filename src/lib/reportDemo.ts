@@ -5,6 +5,7 @@ import type { RvsRecord } from './rvs';
 import type { ActorRole } from './actorAccess';
 import type { OwnerProgress, SurveyAppointment } from './ownerProgress';
 import { formatDate } from './dateFormat.ts';
+import { validateSurveyVisit } from './surveyVisit.ts';
 
 export interface DemoAccount {
   id: string;
@@ -482,7 +483,8 @@ export function advanceReport(
     report.assignee === account.id &&
     ['Dalam survei', 'Perlu revisi'].includes(report.status) &&
     values.date &&
-    isVisitDate(values.date) &&
+    Object.keys(validateSurveyVisit(values.date, values.note ?? '')).length ===
+      0 &&
     note
   ) {
     return withActivity(
@@ -588,15 +590,6 @@ export function validateReportRegistration(
   return errors;
 }
 
-function isVisitDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const parsed = new Date(`${value}T00:00:00Z`);
-  return (
-    Number.isFinite(parsed.getTime()) &&
-    parsed.toISOString().slice(0, 10) === value
-  );
-}
-
 export function saveReportRvs(
   report: Report,
   account: AccountIdentity,
@@ -629,26 +622,21 @@ export function assignReport(
     note.length > 1000
   )
     return null;
-  return {
-    ...report,
-    assignee: target.id,
-    assignedBy: admin.id,
-    assignmentNote: note.trim(),
-    ...(report.appointment && report.assignee !== target.id
-      ? { appointment: undefined }
-      : {}),
-    status: 'Ditugaskan',
-    activity: [
-      ...(report.activity ?? []),
-      {
-        by: admin.name,
-        role: 'admin' as const,
-        action: `Admin meneruskan ke ${target.name}`,
-        note: note.trim(),
-        at: new Date().toISOString(),
-      },
-    ],
-  };
+  return withActivity(
+    {
+      ...report,
+      assignee: target.id,
+      assignedBy: admin.id,
+      assignmentNote: note.trim(),
+      ...(report.appointment && report.assignee !== target.id
+        ? { appointment: undefined }
+        : {}),
+      status: 'Ditugaskan',
+    },
+    admin,
+    `Admin meneruskan ke ${target.name}`,
+    note.trim(),
+  );
 }
 export function releaseSurveyorAssignments(
   reports: Report[],
@@ -659,22 +647,17 @@ export function releaseSurveyorAssignments(
   return reports.map((report) =>
     report.assignee === surveyorId &&
     ['Ditugaskan', 'Dalam survei', 'Perlu revisi'].includes(report.status)
-      ? {
-          ...report,
-          assignee: undefined,
-          appointment: undefined,
-          status: 'Siap disurvei',
-          activity: [
-            ...(report.activity ?? []),
-            {
-              by: admin.name,
-              role: 'admin' as const,
-              action: 'Penugasan dikembalikan',
-              note: 'Akses pesurvei dinonaktifkan. Menunggu penugasan ulang; catatan sebelumnya dipertahankan.',
-              at: new Date().toISOString(),
-            },
-          ],
-        }
+      ? withActivity(
+          {
+            ...report,
+            assignee: undefined,
+            appointment: undefined,
+            status: 'Siap disurvei',
+          },
+          admin,
+          'Penugasan dikembalikan',
+          'Akses pesurvei dinonaktifkan. Menunggu penugasan ulang; catatan sebelumnya dipertahankan.',
+        )
       : report,
   );
 }

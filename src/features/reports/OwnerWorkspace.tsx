@@ -208,7 +208,7 @@ function Schedule({
     setChanging(false);
     setMessage(
       appointment
-        ? 'Permintaan jadwal lain terkirim. Admin akan mengusulkan jadwal baru di halaman ini.'
+        ? 'Permintaan jadwal lain terkirim. Tunggu admin menetapkan jadwal di halaman ini.'
         : 'Waktu kunjungan disimpan. Admin memakainya saat menugaskan pesurvei.',
     );
   }
@@ -266,7 +266,7 @@ function Schedule({
                     ? 'Admin mencatat persetujuanmu untuk jadwal ini dari telepon atau pesan. Jika keliru, minta jadwal lain.'
                     : 'Kamu sudah menyetujui jadwal ini.'
                   : pending
-                    ? 'Kamu meminta jadwal lain. Jadwal ini tidak berlaku sampai admin mengusulkan jadwal baru.'
+                    ? 'Kamu meminta jadwal lain. Jadwal ini tidak berlaku sampai admin menetapkan jadwal baru.'
                     : 'Periksa jadwal ini, lalu konfirmasi atau minta jadwal lain.'}
               </p>
             </Notice>
@@ -340,8 +340,9 @@ function Schedule({
                 {confirmed
                   ? 'Jadwal yang sudah kamu setujui akan dibatalkan. '
                   : ''}
-                Admin akan mengusulkan jadwal baru berdasarkan waktu ini, lalu
-                kamu mengonfirmasinya lagi di halaman ini.
+                Jika admin memakai waktu yang kamu minta, jadwal langsung
+                disepakati. Jika admin memilih waktu berbeda, kamu perlu
+                mengonfirmasinya di halaman ini.
               </p>
             )}
             <div className="owner-form-grid">

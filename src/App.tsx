@@ -47,16 +47,15 @@ import type { ReviewAction } from './features/onboarding/SurveyorManagement';
 export default function App() {
   const [hash, setHash] = useState(window.location.hash);
   // A refresh keeps the person signed in for this tab (see activeSession).
-  const [restored] = useState(() =>
-    readActiveSession(() => window.sessionStorage),
-  );
+  const [restored] = useState(() => {
+    const saved = readActiveSession(() => window.sessionStorage);
+    return saved?.demoMode ? null : saved;
+  });
   const [accountId, setAccountId] = useState<string | null>(
     restored?.accountId ?? null,
   );
   const [workflow, setWorkflow] = useState(loadWorkflow);
   const [storageFailed, setStorageFailed] = useState(false);
-  // Demo mode: one tap opens the workspace and the header can switch roles.
-  const [demoMode, setDemoMode] = useState(restored?.demoMode ?? false);
   // The workspace page someone opened before signing in; they return to it.
   const returnTo = useRef<string | null>(null);
   const account =
@@ -97,24 +96,7 @@ export default function App() {
     setHash(`#/${target}`);
     window.location.hash = `/${target}`;
   }
-  function startDemo() {
-    const owner = workflow.accounts.find(
-      (person) => person.id === 'owner-demo',
-    );
-    if (!owner) return;
-    setDemoMode(true);
-    enter(owner);
-  }
-  // Same data, another role: no sign-out, so one report can be followed
-  // from reporter to admin to surveyor and back.
-  function switchRole(id: string) {
-    const target = workflow.accounts.find((person) => person.id === id);
-    if (!target || target.status !== 'active') return;
-    setAccountId(target.id);
-    window.location.hash = '/dashboard';
-  }
   function leave() {
-    setDemoMode(false);
     setAccountId(null);
     returnTo.current = null;
     window.location.hash = '/login';
@@ -263,9 +245,9 @@ export default function App() {
   useEffect(() => {
     writeActiveSession(
       () => window.sessionStorage,
-      account ? { accountId: account.id, demoMode } : null,
+      account ? { accountId: account.id, demoMode: false } : null,
     );
-  }, [account, demoMode]);
+  }, [account]);
   // Workspace URLs need an account: show the sign-in page at its own address
   // and come back afterwards. A signed-in person never sees the sign-in form.
   const currentPath = hash.startsWith('#/') ? hash.slice(2) : '';
@@ -314,7 +296,6 @@ export default function App() {
         page={page}
         onSignIn={signIn}
         onRegister={registerOwner}
-        onDemo={startDemo}
       />
     );
   }
@@ -367,7 +348,6 @@ export default function App() {
         onImportSurveyors={importSurveyors}
         onReissuePassword={reissuePassword}
         onLeave={leave}
-        onSwitchRole={demoMode ? switchRole : undefined}
         storageFailed={storageFailed}
         invalidSession={workflow.invalid}
       />

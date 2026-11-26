@@ -383,29 +383,6 @@
   color: var(--muted);
 }
 
-/* Demo only: switch between the three roles without signing out. */
-.workspace .demo-role-switch {
-  display: inline-flex;
-  gap: var(--space-1);
-  padding: var(--space-1);
-  border-radius: var(--radius-control);
-  background: var(--surface);
-}
-.workspace .demo-role-switch button {
-  min-height: 44px;
-  padding: 0 var(--space-4);
-  border: 0;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--ink);
-  font: inherit;
-  font-weight: 600;
-  cursor: pointer;
-}
-.workspace .demo-role-switch button[aria-pressed='true'] {
-  background: var(--paper);
-  box-shadow: var(--shadow-card);
-}
 @media (max-width: 720px) {
   .workspace .workspace-account {
     flex-wrap: wrap;

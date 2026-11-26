@@ -113,10 +113,14 @@ export function restoreReports(
             (event) =>
               event &&
               typeof event === 'object' &&
-              ['by', 'action', 'note', 'at'].every(
+              ['by', 'action', 'at'].every(
                 (key) =>
                   typeof event[key] === 'string' && event[key].length <= 1000,
-              ),
+              ) &&
+              // A history note includes date/schedule context around the
+              // user's note, whose own field limit remains 1000 characters.
+              typeof event.note === 'string' &&
+              event.note.length <= 2000,
           )
         )
           return fallback;

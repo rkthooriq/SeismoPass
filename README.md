@@ -27,7 +27,7 @@ Setiap serah-terima tercatat dalam riwayat yang sama dan terlihat oleh ketiga pe
 ## Fitur utama
 
 - **Beranda publik** dengan informasi gempa terkini dari BMKG, peta kawasan, riwayat kejadian di Sesar Lembang, dan data dampak gempa.
-- **Mode demo**: satu tombol membuka ruang kerja dan peran bisa berpindah-pindah, sehingga satu laporan dapat diikuti dari awal sampai akhir.
+- **Akun tiga peran**: satu halaman masuk untuk Pelapor, Admin, dan Pesurvei; peran ditentukan oleh akun yang digunakan. Pelapor dapat mendaftar, sedangkan akun pesurvei disiapkan admin.
 - **Simulasi RVS** dengan tabel FEMA P-154 Level 1, dilengkapi hasil perhitungan dan QR berisi data minimum.
 - **Pelacakan status** dengan warna yang menunjukkan siapa yang sedang memegang laporan.
 - **Antarmuka responsif** untuk HP, tablet, dan laptop, dengan paginasi, filter, dan pencarian di setiap daftar.

@@ -35,6 +35,7 @@ import type { NoticeTone } from '../../components/Notice';
 import usePagination from '../../components/usePagination';
 import ReportRegistrationForm from './ReportRegistrationForm';
 import OwnerWorkspace from './OwnerWorkspace';
+import UsageGuide from '../help/UsageGuide';
 import { planAssignment, verifyAndAssign } from '../../lib/assignmentFlow';
 import {
   updateOwnerProgress,
@@ -87,7 +88,6 @@ function ReportWorkspaceContent({
     inputs: NewSurveyorInput[],
   ) => { issued: IssuedPassword[] } | { error: string };
   onLeave: () => void;
-  onSwitchRole?: (id: string) => void;
   storageFailed: boolean;
   invalidSession?: boolean;
 }) {
@@ -516,6 +516,7 @@ function ReportWorkspaceContent({
           storageFailed={storageFailed}
         />
       )}
+      {page === 'help' && <UsageGuide role={account.role} />}
       {!page && (
         <section className="ws-panel">
           <h2>Halaman tidak tersedia untuk akun ini.</h2>
@@ -815,13 +816,7 @@ export default function ReportWorkspace(
     'notice' | 'onNotice'
   >,
 ) {
-  const {
-    account,
-    reports,
-    route = 'dashboard',
-    onLeave,
-    onSwitchRole,
-  } = props;
+  const { account, reports, route = 'dashboard', onLeave } = props;
   // A notice is shown on the route it was sent to, then dropped as soon as
   // the user moves on, so it never reappears on a later visit.
   const [notice, setNotice] = useState<{
@@ -856,7 +851,6 @@ export default function ReportWorkspace(
       page={page}
       counts={counts}
       onLeave={onLeave}
-      onSwitchRole={onSwitchRole}
     >
       <ReportWorkspaceContent
         key={parseSurveyRoute(route) || !page ? route : `dashboard/${page}`}

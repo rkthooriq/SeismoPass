@@ -16,14 +16,10 @@ import SavedRvsResult from '../rvs/SavedRvsResult';
 import ReportTimeline from './ReportTimeline';
 import './owner-workspace.css';
 import { formatDate } from '../../lib/dateFormat';
+import { localToday, validDate } from '../../lib/ownerProgress';
+import { validateSurveyVisit } from '../../lib/surveyVisit';
 
 const steps = ['Kunjungan', 'Input RVS', 'Periksa & kirim'] as const;
-
-function today(): string {
-  const now = new Date();
-  const pad = (value: number) => String(value).padStart(2, '0');
-  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
-}
 
 function BackLink() {
   return (
@@ -60,25 +56,39 @@ export default function SurveyForm({
   const [initialDraft] = useState(() =>
     readVisitDraft(() => window.sessionStorage, draftKey),
   );
+  const [draftState, setDraftState] = useState<
+    'idle' | 'restored' | 'saved' | 'unavailable'
+  >(initialDraft ? 'restored' : 'idle');
   const [date, setDateValue] = useState(
-    initialDraft?.date || report?.visitDate || today(),
+    initialDraft?.date ?? report?.visitDate ?? localToday(),
   );
   const [note, setNoteValue] = useState(
     initialDraft?.note ?? report?.visitNote ?? '',
   );
-  function setDate(value: string) {
-    setDateValue(value);
-    writeVisitDraft(() => window.sessionStorage, draftKey, {
-      date: value,
+  function saveVisitDraft(date: string, note: string) {
+    const saved = writeVisitDraft(() => window.sessionStorage, draftKey, {
+      date,
       note,
     });
+    setDraftState(
+      !saved ? 'unavailable' : date || note.trim() ? 'saved' : 'idle',
+    );
+  }
+  function setDate(value: string) {
+    setDateValue(value);
+    saveVisitDraft(value, note);
+    if (validDate(value) && value <= localToday())
+      setErrors((previous) =>
+        previous.date ? { ...previous, date: undefined } : previous,
+      );
   }
   function setNote(value: string) {
     setNoteValue(value);
-    writeVisitDraft(() => window.sessionStorage, draftKey, {
-      date,
-      note: value,
-    });
+    saveVisitDraft(date, value);
+    if (value.trim() && value.length <= 1000)
+      setErrors((previous) =>
+        previous.note ? { ...previous, note: undefined } : previous,
+      );
   }
   const [errors, setErrors] = useState<{ date?: string; note?: string }>({});
   const [message, setMessage] = useState('');
@@ -173,13 +183,20 @@ export default function SurveyForm({
   }
 
   function checkVisit(): boolean {
-    const next: typeof errors = {};
-    if (!date) next.date = 'Isi tanggal kunjungan.';
-    else if (date > today())
-      next.date = 'Tanggal kunjungan tidak boleh setelah hari ini.';
-    if (!note.trim()) next.note = 'Tulis catatan kunjungan.';
+    const next = validateSurveyVisit(date, note);
     setErrors(next);
-    return !next.date && !next.note;
+    if (next.date || next.note) {
+      setStep(0);
+      setMessage('');
+      requestAnimationFrame(() =>
+        focusAndReveal(
+          document.getElementById(next.date ? 'survey-date' : 'survey-note'),
+          'center',
+        ),
+      );
+      return false;
+    }
+    return true;
   }
 
   function submitVisit(event: FormEvent<HTMLFormElement>) {
@@ -190,10 +207,7 @@ export default function SurveyForm({
   function send(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!report) return;
-    if (!checkVisit()) {
-      moveTo(0);
-      return;
-    }
+    if (!checkVisit()) return;
     if (onSubmit(report, date, note.trim()))
       writeVisitDraft(() => window.sessionStorage, draftKey, null);
     else
@@ -256,6 +270,30 @@ export default function SurveyForm({
           ))}
         </ol>
 
+        {draftState === 'unavailable' ? (
+          <Notice tone="warning" title="Draf belum tersimpan" role="status">
+            <p>
+              Perubahan terakhir belum tersimpan di browser. Catatan tetap ada
+              di halaman ini; salin catatanmu sebelum keluar atau memuat ulang.
+            </p>
+            <button
+              type="button"
+              className="ws-secondary"
+              onClick={() => saveVisitDraft(date, note)}
+            >
+              Coba simpan draf
+            </button>
+          </Notice>
+        ) : (
+          <p className="ws-muted" role="status">
+            {draftState === 'saved'
+              ? 'Draf tanggal dan catatan kunjungan tersimpan di tab ini. Belum dikirim ke admin.'
+              : draftState === 'restored'
+                ? 'Draf tanggal dan catatan kunjungan dipulihkan. Belum dikirim ke admin.'
+                : 'Tanggal dan catatan kunjungan disimpan sebagai draf saat diubah. Kirim ke admin pada langkah terakhir.'}
+          </p>
+        )}
+
         <div hidden={step !== 0} className="owner-form-section">
           {report.reviewNote && revision && (
             <Notice tone="warning" title={reviewNoteLabel(report.status).title}>
@@ -294,7 +332,7 @@ export default function SurveyForm({
                 id="survey-date"
                 type="date"
                 value={date}
-                max={today()}
+                max={localToday()}
                 onChange={(event) => setDate(event.target.value)}
                 aria-invalid={!!errors.date}
                 aria-describedby={errors.date ? 'survey-error-date' : undefined}

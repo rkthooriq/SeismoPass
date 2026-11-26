@@ -86,7 +86,6 @@
     .directory-file,
     .directory-result,
     .account-explore,
-    .account-samples,
     .account-result,
     .account-errors,
     .owner-card-next,
@@ -174,6 +173,7 @@
     .role-mobile-menu,
     .directory-action,
     .report-history-trigger,
+    .guide-question > summary,
     input:not([type='checkbox']):not([type='radio']):not([type='range']):not(
         [type='file']
       ):not(.ws-search input),

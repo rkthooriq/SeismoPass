@@ -3,6 +3,7 @@ import test from 'node:test';
 import { planAssignment, verifyAndAssign } from '../src/lib/assignmentFlow.ts';
 import { scheduleChoice } from '../src/lib/scheduleChoice.ts';
 import { sampleReports } from '../src/lib/reportDemo.ts';
+import { updateOwnerProgress } from '../src/lib/ownerProgress.ts';
 
 const admin = {
   id: 'admin-demo',
@@ -57,6 +58,33 @@ test('another time becomes a proposal the reporter confirms', () => {
   });
   assert.equal(plan.report.appointment.response, 'proposed');
   assert.equal(plan.agreed, false);
+});
+
+test('the reporter replacement time is agreed only after the admin accepts it', () => {
+  const assigned = verifyAndAssign(complete, admin, surveyor, {
+    ...input,
+    slot: 'Siang (11.00–14.00)',
+  }).report;
+  const owner = {
+    id: assigned.reporterId,
+    role: 'owner',
+    status: 'active',
+    name: 'Pelapor',
+  };
+  const replacement = { ...input, slot: 'Sore (14.00–17.00)' };
+  const requested = updateOwnerProgress(assigned, owner, {
+    type: 'availability',
+    ...replacement,
+  });
+  assert.equal(requested.appointment.response, 'change-requested');
+  assert.equal(requested.appointment.slot, 'Siang (11.00–14.00)');
+  const accepted = planAssignment(requested, admin, surveyor, replacement);
+  assert.equal(accepted.agreed, true);
+  assert.equal(accepted.report.appointment.response, 'confirmed');
+  assert.equal(accepted.report.appointment.slot, replacement.slot);
+  const otherTime = planAssignment(requested, admin, surveyor, input);
+  assert.equal(otherTime.agreed, false);
+  assert.equal(otherTime.report.appointment.response, 'proposed');
 });
 
 test('it is all or nothing: a missing surveyor or time leaves the report untouched', () => {

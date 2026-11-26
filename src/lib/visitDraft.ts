@@ -38,12 +38,13 @@ export function writeVisitDraft(
   storage: () => DraftStore,
   key: string,
   draft: VisitDraft | null,
-): void {
+): boolean {
   try {
     if (draft && (draft.note.trim() || draft.date))
       storage().setItem(key, JSON.stringify(draft));
     else storage().removeItem(key);
+    return true;
   } catch {
-    // Without storage the note lasts while the page stays open.
+    return false;
   }
 }

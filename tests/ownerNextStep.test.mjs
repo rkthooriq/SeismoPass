@@ -93,7 +93,7 @@ test('reports waiting on the owner are listed first, order otherwise kept', () =
 test('owner has no overview page and lands on "Laporan saya"', () => {
   assert.deepEqual(
     workflowMenus.owner.map(([id]) => id),
-    ['reports'],
+    ['reports', 'help'],
   );
   // "Buat laporan" is an action button, but its page still resolves.
   assert.equal(resolveWorkflowPage('owner', 'dashboard/new'), 'new');

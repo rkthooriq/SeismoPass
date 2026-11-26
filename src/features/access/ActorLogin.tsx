@@ -44,12 +44,10 @@ export default function ActorLogin({
   page = 'login',
   onSignIn,
   onRegister,
-  onDemo,
 }: {
   page?: AccountPage;
   onSignIn: (data: AccountForm) => string;
   onRegister: (data: AccountForm) => string;
-  onDemo: () => void;
 }) {
   const [data, setData] = useState<AccountForm>(empty);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -324,19 +322,6 @@ export default function ActorLogin({
             </a>
           ))}
         </nav>
-        {page === 'login' && (
-          <section className="account-samples" aria-labelledby="samples-title">
-            <h2 id="samples-title">Coba demo</h2>
-            <p>
-              Lihat alur lengkap sebagai Pelapor, Admin, dan Pesurvei tanpa
-              mengisi apa pun. Pindah peran kapan saja dari bagian atas halaman.
-            </p>
-            <button type="button" onClick={onDemo}>
-              <strong>Mulai demo</strong>
-              <span aria-hidden="true">→</span>
-            </button>
-          </section>
-        )}
       </section>
     </main>
   );

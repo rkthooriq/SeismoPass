@@ -20,7 +20,12 @@ function NavigationIcon({ page }: { page: WorkflowPage }) {
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      {page === 'new' ? (
+      {page === 'help' ? (
+        <>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 2-2.5 2-2.5 4m0 3h.01" />
+        </>
+      ) : page === 'new' ? (
         <path d="M12 5v14M5 12h14" />
       ) : page === 'overview' ? (
         <>
@@ -50,14 +55,12 @@ export default function WorkspaceShell({
   account,
   page,
   onLeave,
-  onSwitchRole,
   children,
   counts,
 }: {
   account: AccountIdentity;
   page: WorkflowPage | null;
   onLeave: () => void;
-  onSwitchRole?: (id: string) => void;
   children: ReactNode;
   counts: Partial<Record<WorkflowPage, number>>;
 }) {
@@ -68,13 +71,15 @@ export default function WorkspaceShell({
   const isAdmin = account.role === 'admin';
   const title = workflowPageTitle(account.role, page);
   const intro =
-    page === 'profile'
-      ? 'Lihat informasi akun dan perbarui identitasmu.'
-      : isAdmin
-        ? 'Kelola akses pesurvei, atur penugasan, dan pantau tindak lanjut bangunan.'
-        : account.role === 'surveyor'
-          ? 'Kerjakan penugasan dari admin dan catat hasil kunjungan secara tertata.'
-          : 'Catat bangunanmu dan ikuti setiap langkah tindak lanjutnya.';
+    page === 'help'
+      ? `Petunjuk untuk ${role.shortName}, sesuai akun yang sedang kamu gunakan.`
+      : page === 'profile'
+        ? 'Lihat informasi akun dan perbarui identitasmu.'
+        : isAdmin
+          ? 'Kelola akses pesurvei, atur penugasan, dan pantau tindak lanjut bangunan.'
+          : account.role === 'surveyor'
+            ? 'Kerjakan penugasan dari admin dan catat hasil kunjungan secara tertata.'
+            : 'Catat bangunanmu dan ikuti setiap langkah tindak lanjutnya.';
   const heading = (
     <>
       <div className="role-page-heading">
@@ -110,7 +115,6 @@ export default function WorkspaceShell({
         account={account}
         profileActive={page === 'profile'}
         onLeave={onLeave}
-        onSwitchRole={onSwitchRole}
       />
       {isAdmin ? (
         <div className="role-layout">

@@ -8,14 +8,19 @@ export const workflowMenus = {
     ['assignments', 'Penugasan survei', '↗'],
     ['review', 'Tinjauan catatan', '✓'],
     ['reports', 'Semua laporan', '▤'],
+    ['help', 'Panduan', '?'],
   ],
   // Pelapor hanya mencatat lalu menunggu, jadi tanpa halaman Ringkasan.
   // Halaman awalnya "Laporan saya" yang memuat langkah berikutnya.
-  owner: [['reports', 'Laporan saya', '▤']],
+  owner: [
+    ['reports', 'Laporan saya', '▤'],
+    ['help', 'Panduan', '?'],
+  ],
   surveyor: [
     ['overview', 'Ringkasan', '◫'],
     ['tasks', 'Penugasan saya', '◎'],
     ['history', 'Riwayat survei', '✓'],
+    ['help', 'Panduan', '?'],
   ],
 } as const;
 // Pages reached from an action button at the right of the menu bar, not
@@ -35,6 +40,7 @@ export function workflowPageTitle(
   page: WorkflowPage | null,
 ): string {
   if (page === 'profile') return 'Profil saya';
+  if (page === 'help') return 'Panduan penggunaan';
   const entries: readonly (readonly [string, string, string])[] = [
     ...workflowMenus[role],
     ...workflowActions[role],
