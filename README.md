@@ -41,7 +41,13 @@ Setiap serah-terima tercatat dalam riwayat yang sama dan terlihat oleh ketiga pe
 
 ## Teknologi
 
-React, TypeScript (mode ketat), Vite, Leaflet dan OpenStreetMap untuk peta, data terbuka BMKG untuk informasi gempa, dan pengujian dengan Node.js test runner. Dipublikasikan melalui Vercel.
+React, TypeScript (mode ketat), Vite, Leaflet dan OpenStreetMap untuk peta, data terbuka BMKG untuk informasi gempa, dan pengujian dengan Node.js test runner serta Playwright untuk alur di browser. Dipublikasikan melalui Vercel.
+
+## Menjalankan pengujian
+
+- `npm test`: tes logika dengan Node.js test runner.
+- `npm run test:e2e`: tes alur di browser (pelapor, admin, pesurvei, akses, aksesibilitas, dan lebar layar). Server pengembangan dijalankan otomatis. Pasang browser sekali dengan `npx playwright install chromium`, atau pakai Google Chrome yang sudah terpasang dengan `PW_CHANNEL=chrome npm run test:e2e`.
+- Tes ini memakai data fiktif dan akun bawaan; tidak menggantikan uji bersama pengguna.
 
 ## Status dan rencana
 

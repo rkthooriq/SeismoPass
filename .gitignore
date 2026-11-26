@@ -18,4 +18,6 @@ Thumbs.db
 # Berkas kerja sementara
 tmp/
 output/
+test-results/
+playwright-report/
 
