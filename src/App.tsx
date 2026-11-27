@@ -24,8 +24,7 @@ import {
 } from './lib/demoDirectory';
 import {
   verifyDemoEmail,
-  reviewSurveyor,
-  resubmitSurveyor,
+  changeSurveyorAccess,
   createManagedSurveyor,
   issueTemporaryPassword,
   changeInitialPassword,
@@ -42,7 +41,7 @@ import {
   writeActiveSession,
 } from './lib/activeSession';
 import { resolveWorkflowPage } from './lib/workflowNavigation';
-import type { ReviewAction } from './features/onboarding/SurveyorManagement';
+import type { AccessChange } from './lib/surveyorAccess';
 
 export default function App() {
   const [hash, setHash] = useState(window.location.hash);
@@ -134,7 +133,7 @@ export default function App() {
       history: [
         {
           action: 'submitted',
-          by: 'pemohon',
+          by: 'pendaftar',
           note: 'Pendaftaran pelapor dibuat.',
           at: new Date().toISOString(),
         },
@@ -211,14 +210,14 @@ export default function App() {
   }
   function review(
     id: string,
-    action: ReviewAction,
+    action: AccessChange,
     note: string,
     checked: boolean,
   ) {
     if (!account) return false;
     const person = workflow.accounts.find((candidate) => candidate.id === id);
     if (!person) return false;
-    const next = reviewSurveyor(account, person, action, note, checked);
+    const next = changeSurveyorAccess(account, person, action, note, checked);
     if (!next) return false;
     const reports =
       action === 'suspend'
@@ -315,17 +314,6 @@ export default function App() {
               ),
               workflow.reports,
             );
-        }}
-        onResubmit={(organization, qualification) => {
-          const next = resubmitSurveyor(account, organization, qualification);
-          if (!next) return false;
-          updateWorkflow(
-            workflow.accounts.map((person) =>
-              person.id === next.id ? next : person,
-            ),
-            workflow.reports,
-          );
-          return true;
         }}
       />
     );

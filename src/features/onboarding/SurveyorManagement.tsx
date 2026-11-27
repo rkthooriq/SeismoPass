@@ -4,7 +4,7 @@ import Pagination from '../../components/Pagination';
 import Notice from '../../components/Notice';
 import usePagination from '../../components/usePagination';
 import { accountStatusLabels } from '../../lib/surveyorAccess';
-import type { NewSurveyorInput } from '../../lib/surveyorAccess';
+import type { AccessChange, NewSurveyorInput } from '../../lib/surveyorAccess';
 import type { DemoAccount, Report } from '../../lib/reportDemo';
 import {
   accountDirectory,
@@ -15,12 +15,6 @@ import ImportSurveyors from './ImportSurveyors';
 import type { ImportAccounts } from './ImportSurveyors';
 import { credentialsCsv } from '../../lib/surveyorImport';
 
-export type ReviewAction =
-  | 'approve'
-  | 'request-changes'
-  | 'reject'
-  | 'suspend'
-  | 'reactivate';
 export interface IssuedPassword {
   name: string;
   email: string;
@@ -41,7 +35,6 @@ const emptyFilters: DirectoryFilters = {
 export default function SurveyorManagement({
   accounts,
   reports,
-  mode,
   onReview,
   onAdd,
   onImport,
@@ -49,10 +42,9 @@ export default function SurveyorManagement({
 }: {
   accounts: DemoAccount[];
   reports: Report[];
-  mode: 'applications' | 'surveyors';
   onReview: (
     id: string,
-    action: ReviewAction,
+    action: AccessChange,
     note: string,
     checked: boolean,
   ) => boolean;
@@ -73,10 +65,10 @@ export default function SurveyorManagement({
   const nameRef = useRef<HTMLInputElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
   const triggerRef = useRef<HTMLButtonElement | null>(null);
-  const candidates = accountDirectory(accounts, filters, mode);
+  const candidates = accountDirectory(accounts, filters);
   const pager = usePagination(candidates, JSON.stringify(filters));
-  const total = accountDirectory(accounts, emptyFilters, mode).length;
-  const filterOptions = directoryFilterOptions(accounts, mode);
+  const total = accountDirectory(accounts, emptyFilters).length;
+  const filterOptions = directoryFilterOptions(accounts);
   const selected =
     view?.type === 'detail'
       ? accounts.find(
@@ -145,7 +137,7 @@ export default function SurveyorManagement({
     if (!(button instanceof HTMLButtonElement)) return;
     const success = onReview(
       candidate.id,
-      button.value as ReviewAction,
+      button.value as AccessChange,
       String(form.get('note') ?? ''),
       form.get('checked') === 'on',
     );
@@ -161,40 +153,34 @@ export default function SurveyorManagement({
     <section className="account-directory" aria-labelledby={`${id}-title`}>
       <div className="directory-heading">
         <div>
-          <h2 id={`${id}-title`}>
-            {mode === 'applications'
-              ? 'Pengajuan pesurvei'
-              : 'Daftar pesurvei dan admin'}
-          </h2>
+          <h2 id={`${id}-title`}>Daftar pesurvei dan admin</h2>
           <p>
             Lihat akun, organisasi, dan status akses. Penugasan bangunan
             dikelola secara terpisah.
           </p>
         </div>
-        {mode === 'surveyors' && (
-          <div className="directory-heading-actions">
-            <button
-              type="button"
-              className="ws-secondary"
-              aria-haspopup="dialog"
-              onClick={(event) =>
-                openDialog({ type: 'import' }, event.currentTarget)
-              }
-            >
-              Impor Excel/CSV
-            </button>
-            <button
-              type="button"
-              className="ws-primary"
-              aria-haspopup="dialog"
-              onClick={(event) =>
-                openDialog({ type: 'add' }, event.currentTarget)
-              }
-            >
-              <span aria-hidden="true">＋</span> Tambah akun
-            </button>
-          </div>
-        )}
+        <div className="directory-heading-actions">
+          <button
+            type="button"
+            className="ws-secondary"
+            aria-haspopup="dialog"
+            onClick={(event) =>
+              openDialog({ type: 'import' }, event.currentTarget)
+            }
+          >
+            Impor Excel/CSV
+          </button>
+          <button
+            type="button"
+            className="ws-primary"
+            aria-haspopup="dialog"
+            onClick={(event) =>
+              openDialog({ type: 'add' }, event.currentTarget)
+            }
+          >
+            <span aria-hidden="true">＋</span> Tambah akun
+          </button>
+        </div>
       </div>
       <div className="ws-panel directory-filters">
         <label className="directory-search">
@@ -593,15 +579,6 @@ function SurveyorDetails({
             </button>
           </div>
         </>
-      ) : candidate.status === 'pending-email' ? (
-        <p className="ws-disclaimer">
-          Pemohon perlu memverifikasi email sebelum admin dapat menyetujui.
-        </p>
-      ) : candidate.status === 'rejected' ? (
-        <p>
-          Pengajuan ditolak. Pemohon dapat memperbaiki dan mengirim ulang
-          sebelum admin meninjaunya lagi.
-        </p>
       ) : (
         <form
           key={`${candidate.id}-${candidate.status}`}
@@ -614,17 +591,15 @@ function SurveyorDetails({
               name="note"
               maxLength={1000}
               required
-              placeholder="Alasan keputusan dan tindak lanjut untuk pemohon"
+              placeholder="Alasan keputusan dan tindak lanjut untuk pesurvei"
             />
           </label>
-          {['pending', 'changes-requested', 'suspended'].includes(
-            candidate.status,
-          ) && (
+          {candidate.status === 'suspended' && (
             <label className="report-checkbox">
               <input type="checkbox" name="checked" />
               <span>
-                Saya telah meninjau informasi organisasi, pelatihan, dan
-                kebutuhan supervisi pada contoh pengajuan ini.
+                Saya telah meninjau ulang informasi organisasi, pelatihan, dan
+                kebutuhan supervisi pesurvei ini.
               </span>
             </label>
           )}
@@ -636,19 +611,6 @@ function SurveyorDetails({
             </p>
           )}
           <div className="report-actions">
-            {['pending', 'changes-requested'].includes(candidate.status) && (
-              <>
-                <button className="ws-primary" value="approve">
-                  Setujui akses pesurvei
-                </button>
-                <button className="ws-secondary" value="request-changes">
-                  Minta perbaikan
-                </button>
-                <button className="ws-secondary" value="reject">
-                  Tolak pengajuan
-                </button>
-              </>
-            )}
             {candidate.status === 'active' && (
               <button className="ws-secondary" value="suspend">
                 Nonaktifkan akses

@@ -19,11 +19,8 @@ import {
   workflowPageTitle,
 } from '../../lib/workflowNavigation';
 import type { WorkflowPage } from '../../lib/workflowNavigation';
-import type {
-  IssuedPassword,
-  ReviewAction,
-} from '../onboarding/SurveyorManagement';
-import type { NewSurveyorInput } from '../../lib/surveyorAccess';
+import type { IssuedPassword } from '../onboarding/SurveyorManagement';
+import type { AccessChange, NewSurveyorInput } from '../../lib/surveyorAccess';
 import SurveyorManagement from '../onboarding/SurveyorManagement';
 import WorkspaceShell from './WorkspaceShell';
 import ReportCard from './ReportCard';
@@ -76,7 +73,7 @@ function ReportWorkspaceContent({
   onProfileSave: (input: ProfileInput) => string;
   onReview: (
     id: string,
-    action: ReviewAction,
+    action: AccessChange,
     note: string,
     checked: boolean,
   ) => boolean;
@@ -632,7 +629,6 @@ function ReportWorkspaceContent({
         <SurveyorManagement
           accounts={accounts}
           reports={reports}
-          mode="surveyors"
           onReview={onReview}
           onAdd={onAddSurveyor}
           onImport={onImportSurveyors}

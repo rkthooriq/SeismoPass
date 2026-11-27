@@ -28,7 +28,7 @@ export const actorRoles = [
     name: 'Admin',
     shortName: 'Admin',
     symbol: '◫',
-    description: 'Setujui akses pesurvei, atur penugasan, dan tinjau catatan.',
+    description: 'Kelola akun pesurvei, atur penugasan, dan tinjau catatan.',
     focus: 'Kelola tindak lanjut',
     pages: ['dashboard'],
     actions: [],

@@ -1,19 +1,15 @@
 import type { AccountIdentity, DemoAccount } from './reportDemo';
 
+// Pesurvei hanya dibuat admin, jadi tidak ada lagi status pengajuan.
+// 'pending-email' khusus pelapor yang baru mendaftar.
 export type AccountStatus =
   | 'pending-email'
   | 'must-change-password'
-  | 'pending'
-  | 'changes-requested'
-  | 'rejected'
   | 'active'
   | 'suspended';
 export const accountStatusLabels: Record<AccountStatus, string> = {
   'pending-email': 'Menunggu verifikasi email',
   'must-change-password': 'Wajib membuat kata sandi baru',
-  pending: 'Menunggu tinjauan admin',
-  'changes-requested': 'Perlu perbaikan',
-  rejected: 'Ditolak',
   active: 'Aktif',
   suspended: 'Dinonaktifkan',
 };
@@ -24,9 +20,6 @@ export interface AccessDecision {
     | 'temp-password-issued'
     | 'password-changed'
     | 'email-demo'
-    | 'approved'
-    | 'changes-requested'
-    | 'rejected'
     | 'suspended'
     | 'reactivated';
   by: string;
@@ -39,12 +32,14 @@ export function canSurvey(account: AccountIdentity): boolean {
 export function isActiveAdmin(account: AccountIdentity): boolean {
   return account.role === 'admin' && account.status === 'active';
 }
+// Hanya pelapor yang memverifikasi email sendiri.
 export function verifyDemoEmail(account: DemoAccount): DemoAccount | null {
-  if (account.status !== 'pending-email') return null;
+  if (account.role !== 'owner' || account.status !== 'pending-email')
+    return null;
   return {
     ...account,
     emailVerified: true,
-    status: account.role === 'surveyor' ? 'pending' : 'active',
+    status: 'active',
     history: [
       ...(account.history ?? []),
       {
@@ -56,10 +51,13 @@ export function verifyDemoEmail(account: DemoAccount): DemoAccount | null {
     ],
   };
 }
-export function reviewSurveyor(
+export type AccessChange = 'suspend' | 'reactivate';
+// Admin menonaktifkan atau mengaktifkan kembali akses pesurvei. Mengaktifkan
+// kembali mensyaratkan pemeriksaan kompetensi ulang.
+export function changeSurveyorAccess(
   admin: AccountIdentity,
   candidate: DemoAccount,
-  action: 'approve' | 'request-changes' | 'reject' | 'suspend' | 'reactivate',
+  action: AccessChange,
   note: string,
   competencyChecked = false,
 ): DemoAccount | null {
@@ -73,26 +71,7 @@ export function reviewSurveyor(
     return null;
   let status: AccountStatus;
   let event: AccessDecision['action'];
-  if (
-    ['pending', 'changes-requested'].includes(candidate.status) &&
-    candidate.emailVerified
-  ) {
-    if (
-      action === 'approve' &&
-      competencyChecked &&
-      candidate.organization?.trim() &&
-      candidate.qualification?.trim()
-    ) {
-      status = 'active';
-      event = 'approved';
-    } else if (action === 'request-changes') {
-      status = 'changes-requested';
-      event = 'changes-requested';
-    } else if (action === 'reject') {
-      status = 'rejected';
-      event = 'rejected';
-    } else return null;
-  } else if (action === 'suspend' && candidate.status === 'active') {
+  if (action === 'suspend' && candidate.status === 'active') {
     status = 'suspended';
     event = 'suspended';
   } else if (
@@ -114,37 +93,6 @@ export function reviewSurveyor(
         action: event,
         by: admin.id,
         note: note.trim(),
-        at: new Date().toISOString(),
-      },
-    ],
-  };
-}
-export function resubmitSurveyor(
-  account: DemoAccount,
-  organization: string,
-  qualification: string,
-): DemoAccount | null {
-  if (
-    account.role !== 'surveyor' ||
-    !['changes-requested', 'rejected'].includes(account.status) ||
-    !organization.trim() ||
-    !qualification.trim() ||
-    organization.length > 200 ||
-    qualification.length > 1000
-  )
-    return null;
-  return {
-    ...account,
-    organization: organization.trim(),
-    qualification: qualification.trim(),
-    status: account.emailVerified ? 'pending' : 'pending-email',
-    reviewNote: undefined,
-    history: [
-      ...(account.history ?? []),
-      {
-        action: 'submitted',
-        by: account.id,
-        note: 'Pengajuan diperbaiki dan dikirim ulang.',
         at: new Date().toISOString(),
       },
     ],

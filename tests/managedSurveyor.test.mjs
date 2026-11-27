@@ -6,7 +6,7 @@ import {
   generateTemporaryPassword,
   issueTemporaryPassword,
   canSurvey,
-  reviewSurveyor,
+  changeSurveyorAccess,
 } from '../src/lib/surveyorAccess.ts';
 import {
   initialDirectory,
@@ -146,10 +146,13 @@ test('admin can issue a new temporary password, which locks the account again', 
   assert.equal(issueTemporaryPassword(admin, seeded, 'Zyxwvutsrq9876'), null);
 });
 
-test('a locked surveyor cannot be reviewed into an active account by skipping the password step', () => {
+test('a locked surveyor cannot be switched to an active account by skipping the password step', () => {
   const account = make().account;
-  for (const action of ['approve', 'reactivate', 'suspend'])
-    assert.equal(reviewSurveyor(admin, account, action, 'Catatan', true), null);
+  for (const action of ['reactivate', 'suspend'])
+    assert.equal(
+      changeSurveyorAccess(admin, account, action, 'Catatan', true),
+      null,
+    );
 });
 
 test('passwords are never written to the session and managed accounts need a new temporary password after reload', () => {

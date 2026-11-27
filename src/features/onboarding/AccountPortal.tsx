@@ -8,17 +8,14 @@ import '../reports/reports.css';
 export default function AccountPortal({
   account,
   onVerify,
-  onResubmit,
   onChangePassword,
   onLeave,
 }: {
   account: DemoAccount;
   onChangePassword: (current: string, next: string, confirm: string) => string;
   onVerify: () => void;
-  onResubmit: (organization: string, qualification: string) => boolean;
   onLeave: () => void;
 }) {
-  const [message, setMessage] = useState('');
   const [passwordError, setPasswordError] = useState('');
   function changePassword(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -30,18 +27,6 @@ export default function AccountPortal({
         String(form.get('next') ?? ''),
         String(form.get('confirm') ?? ''),
       ),
-    );
-  }
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    setMessage(
-      onResubmit(
-        String(form.get('organization') ?? ''),
-        String(form.get('qualification') ?? ''),
-      )
-        ? 'Perbaikan dikirim untuk ditinjau admin.'
-        : 'Lengkapi organisasi dan ringkasan kompetensi.',
     );
   }
   return (
@@ -72,7 +57,6 @@ export default function AccountPortal({
               <>
                 <li>Daftar akun</li>
                 <li>Verifikasi email</li>
-                {account.role === 'surveyor' && <li>Tinjauan admin</li>}
                 <li>Akses diaktifkan</li>
               </>
             )}
@@ -138,13 +122,6 @@ export default function AccountPortal({
               </button>
             </>
           )}
-          {account.status === 'pending' && (
-            <p>
-              Pengajuan sudah masuk ke admin. Kamu belum dapat melihat laporan
-              bangunan atau mengisi survei. Keluar, lalu masuk dengan akun admin
-              untuk mencoba peninjauan di tab yang sama.
-            </p>
-          )}
           {account.status === 'suspended' && (
             <p>
               Akses pesurvei dinonaktifkan. Hubungi admin untuk meninjau
@@ -158,33 +135,8 @@ export default function AccountPortal({
               {account.reviewNote}
             </p>
           )}
-          {['changes-requested', 'rejected'].includes(account.status) && (
-            <form className="report-form" onSubmit={submit}>
-              <h2>Perbaiki pengajuan</h2>
-              <label>
-                Organisasi contoh
-                <input
-                  name="organization"
-                  defaultValue={account.organization}
-                  maxLength={200}
-                  required
-                />
-              </label>
-              <label>
-                Ringkasan pelatihan / kompetensi contoh
-                <textarea
-                  name="qualification"
-                  defaultValue={account.qualification}
-                  maxLength={1000}
-                  required
-                />
-              </label>
-              <button className="ws-primary">Kirim ulang ke admin</button>
-            </form>
-          )}
-          {message && <p role="status">{message}</p>}
           <details className="access-history">
-            <summary>Riwayat pengajuan</summary>
+            <summary>Riwayat akun</summary>
             <ol>
               {account.history?.map((event, index) => (
                 <li key={index}>

@@ -58,14 +58,7 @@ test('profile updates change only the active account display fields', () => {
 test('inactive and missing sessions cannot update profile metadata', () => {
   const current = initialDirectory()[0];
   assert.ok(updateOwnProfile(null, input).error);
-  for (const status of [
-    'pending',
-    'pending-email',
-    'suspended',
-    'rejected',
-    'changes-requested',
-    'must-change-password',
-  ]) {
+  for (const status of ['pending-email', 'suspended', 'must-change-password']) {
     assert.ok(updateOwnProfile({ ...current, status }, input).error);
   }
   assert.ok(
@@ -98,7 +91,7 @@ test('profile view excludes secrets and administration history', () => {
     reviewNote: 'Internal note',
     history: [
       {
-        action: 'approved',
+        action: 'created-by-admin',
         by: 'admin-demo',
         at: '2026-11-12',
         note: 'Internal',

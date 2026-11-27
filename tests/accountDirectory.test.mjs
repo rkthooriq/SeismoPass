@@ -24,11 +24,11 @@ const accounts = [
   },
   {
     ...initialDirectory()[2],
-    id: 'survey-pending',
-    name: 'Pesurvei Pengajuan',
-    email: 'pengajuan@example.com',
+    id: 'survey-cisarua',
+    name: 'Pesurvei Cisarua',
+    email: 'cisarua@example.com',
     organization: 'Tim Cisarua',
-    status: 'pending',
+    status: 'active',
   },
 ];
 
@@ -65,9 +65,9 @@ test('directory combines case-insensitive name, email or organization search wit
     accountDirectory(accounts, {
       query: 'CISARUA',
       role: 'surveyor',
-      status: 'pending',
+      status: 'active',
     }).map((account) => account.id),
-    ['survey-pending'],
+    ['survey-cisarua'],
   );
   assert.deepEqual(
     accountDirectory(accounts, { ...defaults, role: 'admin' }).map(
@@ -86,13 +86,5 @@ test('directory combines case-insensitive name, email or organization search wit
   assert.deepEqual(
     accountDirectory(accounts, { ...defaults, query: 'tidak ditemukan' }),
     [],
-  );
-});
-
-test('legacy applications view remains limited to surveyors awaiting review', () => {
-  const result = accountDirectory(accounts, defaults, 'applications');
-  assert.deepEqual(
-    result.map((account) => account.id),
-    ['survey-pending'],
   );
 });

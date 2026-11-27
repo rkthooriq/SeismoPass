@@ -10,17 +10,10 @@ export interface DirectoryFilters {
 export function accountDirectory(
   accounts: DemoAccount[],
   filters: DirectoryFilters,
-  mode: 'surveyors' | 'applications' = 'surveyors',
 ): DemoAccount[] {
   const query = filters.query.trim().toLocaleLowerCase('id-ID');
   return accounts.filter((account) => {
-    const listed =
-      mode === 'applications'
-        ? account.role === 'surveyor' &&
-          !['active', 'suspended', 'must-change-password'].includes(
-            account.status,
-          )
-        : account.role === 'surveyor' || account.role === 'admin';
+    const listed = account.role === 'surveyor' || account.role === 'admin';
     return (
       listed &&
       (filters.role === 'all' || account.role === filters.role) &&
@@ -41,18 +34,15 @@ export interface FilterOption<T extends string> {
 // Role and status choices for the directory: only values that the listed
 // accounts actually have, with counts. A filter with fewer than two choices
 // cannot narrow the list, so it is left out.
-export function directoryFilterOptions(
-  accounts: DemoAccount[],
-  mode: 'surveyors' | 'applications' = 'surveyors',
-): {
+export function directoryFilterOptions(accounts: DemoAccount[]): {
   roles: FilterOption<'admin' | 'surveyor'>[];
   statuses: FilterOption<AccountStatus>[];
 } {
-  const listed = accountDirectory(
-    accounts,
-    { query: '', role: 'all', status: 'all' },
-    mode,
-  );
+  const listed = accountDirectory(accounts, {
+    query: '',
+    role: 'all',
+    status: 'all',
+  });
   const tally = <T extends string>(values: T[]): FilterOption<T>[] => {
     const counts = new Map<T, number>();
     for (const value of values) counts.set(value, (counts.get(value) ?? 0) + 1);

@@ -16,9 +16,6 @@ export function initialDirectory(): DemoAccount[] {
 const statuses: AccountStatus[] = [
   'pending-email',
   'must-change-password',
-  'pending',
-  'changes-requested',
-  'rejected',
   'active',
   'suspended',
 ];
@@ -28,9 +25,6 @@ const actions: AccessDecision['action'][] = [
   'temp-password-issued',
   'password-changed',
   'email-demo',
-  'approved',
-  'changes-requested',
-  'rejected',
   'suspended',
   'reactivated',
 ];
@@ -59,6 +53,7 @@ export function restoreDirectory(value: unknown): DemoAccount[] | null {
     if (r.managed !== undefined && typeof r.managed !== 'boolean') return null;
     if (r.managed && r.role !== 'surveyor') return null;
     if (r.status === 'must-change-password' && !r.managed) return null;
+    if (r.status === 'pending-email' && r.role !== 'owner') return null;
     const seed = demoAccounts.find((account) => account.id === r.id);
     if (seed && (r.role !== seed.role || r.email !== seed.email)) return null;
     if (r.role === 'admin' && (r.status !== 'active' || !r.emailVerified))
